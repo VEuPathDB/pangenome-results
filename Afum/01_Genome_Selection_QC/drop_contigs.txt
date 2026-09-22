@@ -1,0 +1,66 @@
+# Cumulative manifest of every contig removed from this dataset before step 02.
+# Safe to re-run (drop_contigs_slurm.sh): drop_contigs.py skips, with a note, any
+# contig already gone from both the FASTA and the GFF. Add new lines as you find
+# more; don't remove old ones.
+#
+# genome            contig to drop
+#
+# ── Organelle contigs (removed) ──────────────────────────────────────────────
+# Source: 01_Genome_Selection_QC/organelle_screen/organelle_screen.tsv
+#         (see Afum/README.md -> 01.5 Organelle screen).
+# All 12 below are pure mitochondrial contigs (mito DNA spans ~100 % of the contig).
+# NOT listed on purpose - keep: eAF1436 CM180077.1 (a ~5.4 kb NUMT on a 3.8 Mb
+# nuclear chromosome) and all other sub-kb NUMT hits.
+
+AF293               mito_A_fumigatus_Af293
+
+GCA_040126065.1     CP146368.1
+
+GCA_040142845.1     JBBFMX010000010.1
+GCA_040142845.1     JBBFMX010000011.1
+GCA_040142845.1     JBBFMX010000012.1
+GCA_040142845.1     JBBFMX010000013.1
+GCA_040142845.1     JBBFMX010000014.1
+GCA_040142845.1     JBBFMX010000015.1
+
+GCA_040142865.1     JBBFMV010000017.1
+GCA_040142865.1     JBBFMV010000018.1
+GCA_040142865.1     JBBFMV010000020.1
+GCA_040142865.1     JBBFMV010000021.1
+
+# ── Redundant contigs ────────────────────────────────────────────────────────
+# Source: 01_Genome_Selection_QC/contig_redundancy/ (see Afum/README.md -> 01.7).
+# Each is >= 90 % duplicated in a longer contig of the same assembly. For the
+# gene-carrying ones, check_redundant_genes confirmed the genes are present
+# elsewhere on an annotated gene (DROP-OK), or the REVIEW rows were inspected by
+# hand. A1163's 7 rows carry no genes. 08-19-02-30 JBBFMU010000016.1 is
+# small-unplaced (85 % duplicated, 39 % to AF293) - included as duplicated;
+# verify its 11 genes with  check_redundant_genes --contigs  before applying.
+
+# B5233
+GCA_040142945.1     JBBFMZ010000012.1
+GCA_040142945.1     JBBFMZ010000013.1
+
+# H237
+GCA_040142975.1     JBBFNB010000013.1
+GCA_040142975.1     JBBFNB010000014.1
+GCA_040142975.1     JBBFNB010000015.1
+GCA_040142975.1     JBBFNB010000017.1
+GCA_040142975.1     JBBFNB010000021.1
+
+# 08-19-02-30
+GCA_040142875.1     JBBFMU010000012.1
+GCA_040142875.1     JBBFMU010000014.1
+GCA_040142875.1     JBBFMU010000016.1
+
+# eAF1090
+GCA_058972525.1     JBVBAJ010000012.1
+
+# A1163 (gene-free)
+A1163               scf_000016_A_fumigatus_A1163
+A1163               scf_000020_A_fumigatus_A1163
+A1163               scf_000032_A_fumigatus_A1163
+A1163               scf_000041_A_fumigatus_A1163
+A1163               scf_000049_A_fumigatus_A1163
+A1163               scf_000050_A_fumigatus_A1163
+A1163               scf_000053_A_fumigatus_A1163

@@ -1,0 +1,15 @@
+strain	ref	n_aln	n_query_pieces	clean_pieces	ref_covered_Mb	ref_covered_pct	aln_identity_pct	raw_reverse_pct	internal_inv_Mb	internal_inv_pct	transloc_bp	verdict
+ARI	ME49	141	123	121	62.272	94.88	91.89	50.25	0.000	0.000	140294	Collinear — 1:1, no rearrangements
+CAST	ME49	142	120	116	62.169	94.73	83.08	54.41	0.069	0.111	83833	Collinear — 1:1, no rearrangements
+COUG	ME49	144	130	127	62.269	94.88	87.05	51.73	0.000	0.000	103490	Collinear — 1:1, no rearrangements
+FOU	ME49	221	197	186	61.736	94.07	82.37	57.79	0.000	0.000	0	Collinear — 1:1, no rearrangements
+GAB2-2007-GAL-DOM2	ME49	144	127	119	62.149	94.70	86.82	43.31	0.000	0.000	0	Collinear — 1:1, no rearrangements
+GT1	ME49	532	518	512	62.630	95.43	85.15	1.67	0.000	0.000	0	Collinear — 1:1, no rearrangements
+MAS	ME49	270	256	250	61.285	93.38	83.66	47.83	0.000	0.000	221149	1 scaffold(s) joining ≥2 ref chroms end-to-end
+RH88	ME49	542	169	78	62.860	95.78	83.30	26.95	0.515	0.787	5559432	1 inversion block(s) ≥20kb (0.51 Mb); 1 scaffold(s) joining ≥2 ref chroms end-to-end
+RUB	ME49	192	154	139	62.100	94.62	82.08	53.22	0.069	0.111	45105	Collinear — 1:1, no rearrangements
+TgCATBr9	ME49	195	164	153	61.903	94.32	82.51	46.48	0.000	0.000	0	Collinear — 1:1, no rearrangements
+TgCatPRC2	ME49	192	165	155	62.061	94.56	88.73	37.99	0.072	0.116	110424	Collinear — 1:1, no rearrangements
+VAND	ME49	188	158	150	62.032	94.52	83.10	59.55	0.069	0.111	78628	Collinear — 1:1, no rearrangements
+VEG	ME49	273	249	241	62.631	95.43	88.55	0.99	0.000	0.000	50146	Collinear — 1:1, no rearrangements
+p89	ME49	194	171	164	61.939	94.38	82.83	51.35	0.000	0.000	146496	Collinear — 1:1, no rearrangements

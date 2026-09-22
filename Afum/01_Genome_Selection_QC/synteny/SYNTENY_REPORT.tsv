@@ -1,0 +1,17 @@
+strain	ref	n_aln	n_query_pieces	clean_pieces	ref_covered_Mb	ref_covered_pct	aln_identity_pct	raw_reverse_pct	internal_inv_Mb	internal_inv_pct	transloc_bp	verdict
+A1160	AF293	53	10	9	28.369	96.56	89.40	59.72	0.033	0.115	970562	2 scaffold(s) joining ≥2 ref chroms end-to-end
+A1163	AF293	75	28	23	28.172	95.89	89.89	30.54	0.033	0.115	971652	3 scaffold(s) joining ≥2 ref chroms end-to-end
+GCA_040126065.1	AF293	36	9	9	28.149	95.81	90.24	58.03	0.000	0.000	0	Collinear — 1:1, no rearrangements
+GCA_040142845.1	AF293	65	15	14	28.194	95.96	90.26	30.52	0.032	0.110	1906161	3 scaffold(s) joining ≥2 ref chroms end-to-end
+GCA_040142855.1	AF293	56	12	10	28.394	96.64	90.10	67.78	0.000	0.000	298316	Collinear — 1:1, no rearrangements
+GCA_040142865.1	AF293	108	26	20	28.380	96.60	90.30	69.79	0.000	0.000	529322	Collinear — 1:1, no rearrangements
+GCA_040142875.1	AF293	101	16	15	28.397	96.66	89.48	31.64	0.022	0.075	250895	Collinear — 1:1, no rearrangements
+GCA_040142885.1	AF293	37	9	9	28.018	95.36	88.07	33.65	0.000	0.000	41155	Collinear — 1:1, no rearrangements
+GCA_040142945.1	AF293	57	13	13	28.057	95.50	88.07	33.47	0.000	0.000	33370	Collinear — 1:1, no rearrangements
+GCA_040142955.1	AF293	137	20	15	28.230	96.09	86.74	67.58	1.396	4.806	704275	3 inversion block(s) ≥20kb (1.40 Mb); 2 scaffold(s) joining ≥2 ref chroms end-to-end
+GCA_040142975.1	AF293	77	22	20	28.286	96.28	89.33	43.39	0.453	1.565	316663	1 inversion block(s) ≥20kb (0.45 Mb)
+GCA_040167795.1	AF293	64	10	9	28.137	95.77	85.76	51.39	0.733	2.571	338287	2 inversion block(s) ≥20kb (0.73 Mb)
+GCA_040167805.1	AF293	102	25	20	27.682	94.22	88.80	59.76	0.000	0.000	129932	Collinear — 1:1, no rearrangements
+GCA_058970245.1	AF293	41	8	7	28.217	96.04	85.42	65.42	0.733	2.588	164030	2 inversion block(s) ≥20kb (0.73 Mb)
+GCA_058972525.1	AF293	42	12	10	28.275	96.24	84.96	20.42	0.707	2.461	579226	1 inversion block(s) ≥20kb (0.71 Mb)
+GCA_058972625.1	AF293	46	10	9	27.915	95.01	88.00	35.31	0.707	2.499	160967	1 inversion block(s) ≥20kb (0.71 Mb)
