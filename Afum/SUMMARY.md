@@ -17,14 +17,14 @@ and New Zealand. The goal is to identify core genes (present in all strains), ac
 
 | Step | Description | Status |
 | :--- | :--- | :---: |
-| [01 – Genome Selection & QC](#01--genome-selection--qc) | Strain selection, species check, organelle removal, synteny | ✅ Complete |
-| [02 – TE Annotation & Clean Up](#02--te-annotation--clean-up) | Transposable element annotation, TE-gene overlap filtering | ✅ Complete |
-| [03 – *de novo* Genome Annotation](#0308--in-progress) | Gene prediction on cleaned assemblies | 🔄 In progress |
-| [04 – InterProScan](#0308--in-progress) | Functional domain annotation | 🔄 In progress |
-| [05 – Cross-genome Annotation Integration](#0308--in-progress) | Merging and standardising annotations across strains | 🔄 In progress |
-| [06 – GET_PANGENES](#0308--in-progress) | Synteny-based ortholog clustering (core / accessory) | 🔄 In progress |
-| [07 – Post-GET_PANGENES Adjusting](#0308--in-progress) | Manual review and refinement of pangene calls | 🔄 In progress |
-| [08 – Pangenome Visualisation](#0308--in-progress) | Figures, presence/absence matrix, summary stats | 🔄 In progress |
+| [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, organelle removal, synteny | ✅ Complete |
+| [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, TE-gene overlap filtering | ✅ Complete |
+| [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed (all strains already annotated) |
+| [04 – InterProScan](README.md#04--interproscan) | Functional domain annotation | ✅ Complete |
+| [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | 🔄 In progress |
+| [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | 🔄 In progress |
+| [07 – Post-GET_PANGENES Adjusting](README.md#07--post-get_pangenes-adjusting) | Manual review and refinement of pangene calls | 🔄 In progress |
+| [08 – Pangenome Visualisation](README.md#08--pangenome-visualisation) | Figures, presence/absence matrix, summary stats | 🔄 In progress |
 
 ---
 
