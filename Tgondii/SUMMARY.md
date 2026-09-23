@@ -6,13 +6,6 @@
 
 ---
 
-A pangenome analysis of **15 *Toxoplasma gondii* genomes** spanning the three dominant
-clonal lineages (Type I, II and III) plus diverse atypical South American, African, and
-Asian isolates. The goal is to identify core and accessory genes and understand how gene
-content varies across lineages differing in virulence and geographic origin. The analysis
-follows the same 8-step pipeline used for *A. fumigatus*.
-
----
 
 ## Analysis progress
 
@@ -20,7 +13,7 @@ follows the same 8-step pipeline used for *A. fumigatus*.
 | :--- | :--- | :---: |
 | [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, contig profiling, synteny | ✅ Complete |
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, candidate validation | ✅ Complete |
-| [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed (all strains already annotated) |
+| [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed |
 | [04 – InterProScan](README.md#04--interproscan) | Functional domain annotation | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | 🔄 In progress |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | 🔄 In progress |
@@ -33,48 +26,29 @@ follows the same 8-step pipeline used for *A. fumigatus*.
 
 ### 01 – Genome Selection & QC
 
-- **15 strains selected** from ToxoDB, including the three chromosome-level references
-  (ME49 Type II, GT1 Type I, VEG Type III), one PacBio-assembled strain (RH-88 Type I),
-  and 11 scaffold-level assemblies covering diverse lineages and geographic origins.
-  4 additional strains were excluded due to absence of gene annotation (GFF) in ToxoDB.
-- **All 15 confirmed as *T. gondii*** by whole-genome ANI against ME49 (98.7–99.7%).
-  No contamination or wrong-species assemblies detected.
-- **Small contigs are numerous but gene-bearing.** The panel contains **34,066 sub-10kb
-  contigs** — 93–99% of each genome's contig count — except RH-88, which is a notably
-  cleaner assembly (only 62 small contigs, 32% of its total). These small contigs carry
+- **15 strains selected** from ToxoDB. 4 additional strains were excluded due to absence of gene annotation. As expected, all 15 have high whole-genome ANI against ME49 (98.7–99.7%).
+- **Small contigs are numerous and gene-bearing.** The panel contains **34,066 sub-10kb contigs** — 93–99% of each genome's contig count — except RH-88, which is a notably
+  cleaner assembly (only 62 small contigs). These small contigs carry
   **2,388 protein-coding genes** across the panel, including 289 known SRS/ROP/GRA/RON/AP2/MIC
-  virulence-family genes and ~636 organelle-genome genes — not gene-free junk.
-- **Decision: drop every contig <10kb, panel-wide, as an arbitrary blanket cutoff** — not a
-  per-contig evidence check. Knowingly discards the 2,388 genes above (virulence-family genes
-  included) as the accepted cost of a simple, panel-wide rule. Script
-(`01_Genome_Selection_QC/scripts/drop_short_contigs.slurm.sh`) **already run** — see
-[README.md](README.md#short-contig-removal--arbitrary-10kb-cutoff-done).
-- **Chromosome structure is highly conserved across all lineages.** All 14 dot-plots show
-  a clean 1:1 staircase to ME49's 14 chromosomes — no translocations or arm-scale
-  rearrangements in any lineage (Type I/II/III, African, Amazonian, Asian).
+  virulence-family genes and ~636 organelle-genome genes.
+- **Organelle and redundant-contig screening were not run for this panel.** The protocol calls for removing organellar and redundant contigs. For *T. gondii*, these could not be identified reliably: organellar sequences occur across multiple contigs that are not consistently labeled, and nuclear contigs may contain organellar fragments (NUMTs/NUPTs). The origin of many small contigs also remains uncertain: they may be assembly artifacts, fragments of the unusual organellar genomes. As a panel-wide rule, **all contigs shorter than 10 kb were therefore excluded** instead of being classified individually. It removed 2,388 annotated genes.
+- **Chromosome structure and macro-synteny are highly conserved across all lineages.** 93.4–95.8% of the ME49 reference is covered in 1:1 collinear blocks, with no inter-chromosomal translocations or arm-scale rearrangements across any lineage. While scaffold-level dot-plots visually show frequent reverse alignments (~40–60% red), this reflects arbitrary scaffold deposition orientation. 
 - **One recurrent inversion polymorphism identified:** a ~70 kb inverted block at the end
   of chromosome IX is shared by 4 strains (CAST, RUB, VAND, TgCatPRC2) — a real
   segregating variant, absent from the remaining 10 strains.
-- **RH-88** has a unique ~515 kb inversion on chromosome IV and is assembled as 13
-  chromosomes (one scaffold joins ME49 chrVIIb + chrVIII) — an assembly/nomenclature
-  difference to confirm.
-- **A recurrent segmental duplication** in ME49 itself (~80–85 kb shared between chrIII
-  and chrX) is detected in 5 strains — this is a reference feature, not per-strain events.
+- **RH-88** carries a unique ~515 kb inversion on chromosome IV (prominently visible in the dot-plot) and is assembled as 13 chromosomes (one scaffold joins ME49 chrVIIb + chrVIII end-to-end), along with 4 chromosomes deposited in reverse orientation (chrX, chrVI, chrIII, chrIb).
+- **Cross-chromosomal alignment at chrIII ↔ chrX (~80–85 kb):** In 5 independent strains (ARI, CAST, COUG, MAS, RH-88), the scaffold covering chromosome X carries a terminal segment that also aligns to the end of ME49 chromosome III. Because this identical pattern recurs across phylogenetically distant lineages, it is unlikely to reflect independent translocations or assembly chimeras in each strain; rather, it appears to indicate shared sequence homology (consistent with a subtelomeric segmental duplication) between chromosomes III and X within the ME49 reference itself.
+- **Literature review pending on chromosomal observations:** A dedicated literature review is planned to further clarify these chromosome-level questions.
 
 ### 02 – TE Annotation & Clean Up
 
-- ***T. gondii* has no bona fide transposable elements.** The TE candidate discovery
-  pipeline was run on all 15 genomes and the candidates manually inspected with TE-Aid.
-  No genuine *T. gondii* TE families were found — candidates were low-complexity /
-  tandem satellite repeats or conserved sequences, not mobile elements.
-- **Human L1 LINE elements were recovered as apparent TE candidates in multiple strains,
-  including the reference genome ME49.** These are human host-cell DNA contamination
-  (cell-culture origin), not *T. gondii* sequences — confirms the panel carries contigs of
-  contamination origin. Handled via step 01's blanket <10kb contig cutoff (see above), not a
-  targeted BLASTn removal.
-- **No GFF filtering was applied** — because there are no *T. gondii* TEs, no
-  TE-derived gene models need to be removed from the annotations.
-- **Final curated TE library:** empty. No species-specific TE masking will be used.
+- ***T. gondii* has no bona fide transposable elements.** We know this from the literature,
+  but we ran the TE candidate discovery pipeline anyway. As expected, no genuine *T. gondii*
+  TE families were found — candidates were low-complexity / tandem satellite repeats or
+  conserved sequences, not mobile elements.
+- **Contaminant contigs**. Human L1 LINE elements were recovered as apparent TE candidates in multiple strains,
+  including the reference genome ME49. They were recovered from short contigs that are clear contaminants and should be removed in the future.
+- **No GFF filtering was applied** — it is expected that the contaminants contigs were removed with the <10kb filter.
 
 ### 03–08 — In progress
 

@@ -611,6 +611,139 @@ Results: `expanded_annotation/<genome>_final_annotation.gff`, job logs in `expan
 
 ---
 
+### Gene analysis (before filtering)
+
+QC on the raw build output, before [step 7](../../05_Cross-genome_annotation_integration/README.md#step-7-extra-copies-and-overlapping-genes)'s
+filter runs. Output folder: `final_annotation_qc_plots/`.
+```bash
+mkdir -p final_annotation_qc_plots/logs
+sbatch 05_Cross-genome_annotation_integration/scripts/plot_final_annotation_qc_job.sh
+```
+(Full description of every output file:
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-6-gene-analysis-before-filtering).)
+
+**Gene counts** - each genome's final build has 9,249-9,933 protein-coding genes, well above
+its own original annotation (8,000-10,000), since genes are being pulled in from every other
+genome too.
+
+![Protein-coding genes: own original annotation vs. this pipeline's build](05_Cross-genome_annotation_integration/final_annotation_qc_plots/01_gene_counts.png)
+
+**Valid-ORF rate.** ME49 sits at only 9.4%, far below every other genome (77-89%) - expected,
+not a quality problem: ME49 is the reference, so its `main` genes are used as-is and never go
+through Liftoff, meaning they never get the `valid_ORF=` flag Liftoff computes for a transfer.
+This metric just doesn't apply to genes that were never transferred.
+
+![% of genes with a valid ORF, per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/02_valid_orf_rate.png)
+
+**Extra copies** - RH88 (179) and ME49 (61) stand out; every other genome has 14 or fewer.
+
+![Extra-copy genes, split by valid ORF](05_Cross-genome_annotation_integration/final_annotation_qc_plots/03_extra_copies.png)
+
+**CDS-overlap severity** - 8,222 CDS-overlapping pairs across the panel, split minor/substantial/contained.
+
+![CDS-overlap severity per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/04_overlap_severity.png)
+
+**Source composition** - where each genome's final genes came from (`main`/original/`good_*`/`rescued_*`).
+
+![Source composition per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/05_source_composition.png)
+
+**Overlap strand** - the same 8,222 pairs, split by strand instead of severity: only **13 are
+same-strand** (the ones that "shouldn't normally happen"), the other **8,209 are
+opposite-strand**. Same-strand pairs are rare enough on this panel to review by hand, one by one.
+
+![CDS-overlapping pairs per genome, by strand](05_Cross-genome_annotation_integration/final_annotation_qc_plots/06_overlap_strand.png)
+
+**Overlap domain support** - of the 8,222 pairs, only **29 have InterPro/PFAM domain evidence on
+both genes**, **5,008 on exactly one**, and **3,185 on neither**. Domain evidence resolves most
+of the panel outright (see the refined overlap-resolution rule in the
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-7-extra-copies-and-overlapping-genes));
+1,166 pairs (954 distinct genes) are left with no domain evidence on either side and still need
+a resolution criterion.
+
+![CDS-overlapping pairs per genome, by domain support](05_Cross-genome_annotation_integration/final_annotation_qc_plots/07_overlap_domain_support.png)
+
+**Putting severity and domain support together** - every one of the 8,222 pairs falls into
+exactly one of six cases, decided by whether each gene is `main` and whether it carries domain
+evidence (full rationale in the
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-7-extra-copies-and-overlapping-genes)):
+
+| # | Case | Rule | Pairs |
+|---|---|---|---:|
+| 1 | `main` × `main` | keep both | 237 |
+| 2 | `main` × other, other **has** a domain | keep both | 18 |
+| 3 | `main` × other, other has **no** domain | keep only `main` | 6,368 |
+| 4 | other × other, **one** has a domain | keep only the one with a domain | 420 |
+| 5 | other × other, **both** have a domain | keep both | 13 |
+| 6 | other × other, **neither** has a domain | **not yet decided** | 1,166 |
+
+Cases 1-5 (7,056 pairs, 86%) are unambiguous. Case 6 - 1,166 pairs, 954 distinct genes - is the
+open problem: 99.6% opposite-strand, 113 `minor` severity, 63.5% "hypothetical protein" on both
+sides.
+
+Also in that folder: `summary.tsv` (the numbers behind every plot above), `extra_copy_genes.tsv`
+(every extra-copy gene, with description/location/domain/valid-ORF), `cds_overlapping_pairs.tsv`
+(every pair above, one row each) and `overlap_domain_summary.tsv` (the domain-support numbers
+above, per genome).
+
+[↑ Back to top](#analysis-steps)
+
+### Filtering — 7a pre-filter (done)
+
+Ran [`filter_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/filter_final_annotation.py)
+on all 15 genomes (rule details in the
+[general README](../../05_Cross-genome_annotation_integration/README.md#7a-pre-filter-drop-unsupported-genes-before-get_pangenes)).
+Output: `filtered_annotation/<genome>_final_annotation_filtered.gff` - `gene`-typed, IDs
+renumbered `Tg<strain-index>g<00001, ...>`, original ID kept in `original_ID=`.
+
+| Genome | n_original | n_kept | n_removed | % removed |
+|---|---:|---:|---:|---:|
+| ME49 | 9,425 | 8,880 | 545 | 5.8% |
+| ARI | 9,583 | 9,064 | 519 | 5.4% |
+| CAST | 9,530 | 8,983 | 547 | 5.7% |
+| COUG | 9,728 | 9,186 | 542 | 5.6% |
+| FOU | 9,933 | 9,372 | 561 | 5.6% |
+| GAB2 | 9,478 | 8,967 | 511 | 5.4% |
+| GT1 | 9,249 | 8,731 | 518 | 5.6% |
+| MAS | 9,744 | 9,198 | 546 | 5.6% |
+| p89 | 9,686 | 9,110 | 576 | 5.9% |
+| RH88 | 9,724 | 9,105 | 619 | 6.4% |
+| RUB | 9,763 | 9,216 | 547 | 5.6% |
+| TgCATBr9 | 9,911 | 9,366 | 545 | 5.5% |
+| TgCatPRC2 | 9,747 | 9,234 | 513 | 5.3% |
+| VAND | 9,478 | 8,913 | 565 | 6.0% |
+| VEG | 9,380 | 8,860 | 520 | 5.5% |
+
+### Filtering — 7b no pre-filter / tag (done)
+
+Ran [`tag_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/tag_final_annotation.py)
+on all 15 genomes (rule details in the
+[general README](../../05_Cross-genome_annotation_integration/README.md#7b-no-pre-filtering-tag-decide-after-get_pangenes)).
+Nothing removed - same `gene`-typing/ID-renumbering as 7a, plus an `intersect=` tag on every
+gene recording what it overlaps (`NA`/`with_main`/`with_other_with_domain`/`with_other_no_domain`).
+Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_intersect_pairs.tsv`.
+
+| Genome | n_total | NA | with_main | with_other_with_domain | with_other_no_domain |
+|---|---:|---:|---:|---:|---:|
+| ME49 | 9,425 | 8,408 | 546 | 2 | 469 |
+| ARI | 9,583 | 8,621 | 440 | 25 | 497 |
+| CAST | 9,530 | 8,559 | 429 | 24 | 518 |
+| COUG | 9,728 | 8,772 | 400 | 37 | 519 |
+| FOU | 9,933 | 9,034 | 347 | 47 | 505 |
+| GAB2 | 9,478 | 8,519 | 443 | 15 | 501 |
+| GT1 | 9,249 | 8,251 | 470 | 20 | 508 |
+| MAS | 9,744 | 8,812 | 397 | 36 | 499 |
+| p89 | 9,686 | 8,726 | 405 | 40 | 515 |
+| RH88 | 9,724 | 8,699 | 493 | 14 | 518 |
+| RUB | 9,763 | 8,806 | 391 | 45 | 521 |
+| TgCATBr9 | 9,911 | 9,000 | 361 | 43 | 507 |
+| TgCatPRC2 | 9,747 | 8,784 | 425 | 30 | 508 |
+| VAND | 9,478 | 8,484 | 424 | 35 | 535 |
+| VEG | 9,380 | 8,378 | 483 | 15 | 504 |
+
+[↑ Back to top](#analysis-steps)
+
+---
+
 ## 06 – GET_PANGENES
 
 [↑ Back to top](#analysis-steps)
