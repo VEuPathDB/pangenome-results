@@ -716,6 +716,39 @@ a dropped gene leaves every genome.
 | VAND | 9,478 | 8,855 | 623 | 6.6% |
 | VEG | 9,380 | 8,749 | 631 | 6.7% |
 
+**What was removed.** Of the 9,710 genes removed across the 15 genomes:
+- 6,264 (64.5%) overlapped a reference-derived (`main`) gene and had no evidence themselves;
+- 2,597 (26.7%) were `rescued_` genes with Liftoff coverage below 0.5;
+- 380 (3.9%) overlapped another non-`main` gene, neither with evidence (the one with fewer good
+  transfers was dropped);
+- 297 (3.1%) overlapped a gene with evidence and had none;
+- 172 (1.8%) were extra copies with no valid ORF.
+
+Before and after filtering, per genome, from
+[`plot_filter_qc_job.sh`](05_Cross-genome_annotation_integration/scripts/plot_filter_qc_job.sh)
+(`filter_qc_plots/`, numbers in its `summary.tsv`):
+
+![Genes before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/01_gene_counts.png)
+
+![Why each gene was removed](05_Cross-genome_annotation_integration/filter_qc_plots/03_removal_reasons.png)
+
+RH88 has the most genes removed (817) and ME49 the second most (735). The extra copies fall from 179
+to 41 in RH88 and from 61 to 9 in ME49; in the other genomes they were 14 or fewer and are at most 2
+after filtering.
+
+![Extra-copy genes before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/02_extra_copies.png)
+
+CDS-overlapping gene pairs drop from 476-552 per genome to 67-77, and the pairs where one gene is
+contained in the other from 184-234 to 9-15. The ones left are the overlaps the rules keep on
+purpose: small overlaps at a gene's end, and pairs where both genes have evidence.
+
+![CDS-overlap severity before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/04_overlap_severity.png)
+
+Which layer each gene comes from (`main`, the genome's own annotation, `good_` and `rescued_`
+transfers):
+
+![Source composition before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/05_source_composition.png)
+
 ### Filtering — 7b no pre-filter / tag (done)
 
 Ran [`tag_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/tag_final_annotation.py)
@@ -803,53 +836,131 @@ Whether these pairs are tandem copies or one gene split into two is not decided 
 
 ## 08 – Pangenome Visualisation
 
-All figures for the 7b pangenes, generated with
-[`plot_all.sh`](08_Pangenome_Visualisation/scripts/plot_all.sh) (label `Toxo7b`; every file also
-comes as `.svg`):
+> **Preliminary.** Some pangenes hold more than one gene of the same genome (1,501 without
+> filtering, 1,374 with filtering, see [step 07](#07--post-get_pangenes-adjusting)) and are still
+> being investigated. The figures below count them as they are, except the gene-properties figure,
+> which leaves them out. They will be updated once those pangenes are resolved.
+
+The same figures for the two sets of pangenes: **with filtering** (7a, filtered before
+`get_pangenes`) and **no filtering** (7b, tagged, nothing removed). Every figure also comes as
+`.svg`, and files start with the label (`Toxo7a`/`Toxo7b`). The first four figures of each set
+come from [`plot_all.sh`](08_Pangenome_Visualisation/scripts/plot_all.sh), run locally:
 ```bash
 bash 08_Pangenome_Visualisation/scripts/plot_all.sh \
   -i 06_GET_PANGENES/for_get_pangenes_7b_pangenes/pangene_matrix.tr.tab \
   -o 08_Pangenome_Visualisation -l Toxo7b
 ```
+(same with `for_get_pangenes_7a_pangenes` and `-l Toxo7a`). On the cluster, `plot_all_job.sh` runs
+every plot of this step in one job.
+
+### With filtering (7a)
 
 **Pangenome and core genome size** - genomes are added one at a time in 100 random orders. The
-pangenome grows from about 9,200 pangenes (one genome) to 11,031 (all 15) and is still growing,
-by about 100 new pangenes per genome added at the end. The core genome falls from about 9,200 to
-8,733. The fitted curves put the core plateau at about 8,700-8,800 pangenes (Tettelin 8,770,
-Willenbrock 8,716). `Toxo7b_pancore_separate.png` shows the two curves in separate panels.
+pangenome grows from 8,649 pangenes (one genome) to 9,904 (all 15), still growing by about 70 per
+genome at the end. The core falls to 8,281; the fitted curves put its plateau at 8,307 (Tettelin)
+and 8,264 (Willenbrock). `Toxo7a_pancore_separate.png` shows the two curves in separate panels.
 
-![Pangenome and core genome size](08_Pangenome_Visualisation/Toxo7b_pancore.png)
+![Pangenome and core genome size, with filtering](08_Pangenome_Visualisation/Toxo7a_pancore.png)
 
-**Pangene occupancy** - how many genomes each pangene is present in. 8,733 pangenes (79%) are core,
-146 are in 14 genomes (soft-core), and 1,448 (13%) are in one genome only; another 163 are in two.
+**Pangene occupancy** - how many genomes each pangene is present in. 8,281 pangenes (84%) are core,
+111 are in 14 genomes (soft-core), 990 (10%) are in one genome only and 131 in two.
 
-![Pangene occupancy](08_Pangenome_Visualisation/Toxo7b_occupancy.png)
+![Pangene occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy.png)
 
-**Singletons per genome** - the 1,448 pangenes present in one genome only, by genome. RH88 has the
-most (226), GT1 the fewest (18).
+**Singletons per genome** - FOU has the most (128), then RH88 (122); GT1 has the fewest (11).
 
-![Singletons per genome](08_Pangenome_Visualisation/Toxo7b_singletons.png)
+![Singletons per genome, with filtering](08_Pangenome_Visualisation/Toxo7a_singletons.png)
 
-**POCS heatmap** - pairwise percentage of conserved sequences between genomes, clustered
-(complete linkage). Between different genomes it stays between about 95 and 98. RH88 is the most
-distant one (95-97 against the others), and it is also the genome with the most singletons.
+**POCS heatmap** - pairwise percentage of conserved sequences between genomes, clustered (complete
+linkage); darker means more similar, and the colour scale covers the values between different
+genomes only. Between different genomes POCS is 96.7-98.8. RH88 is the most distant genome (mean
+97.4).
 
-![POCS heatmap](08_Pangenome_Visualisation/Toxo7b_POCS_heatmap.png)
+![POCS heatmap, with filtering](08_Pangenome_Visualisation/Toxo7a_POCS_heatmap.png)
+
+**Gene properties by occupancy** - only pangenes with exactly one gene in each genome they are
+present in are used (8,530; 1,374 left out). Top: proportion of genes with an InterPro/PFAM domain,
+averaged over the pangenes of each occupancy. Bottom: protein length, one value per pangene (the
+median of its genes). The line joining cloud and core gives the Tukey HSD p-value, which treats
+genes from different genomes as independent samples, so it is optimistic. The number of pangenes of
+each occupancy is written under the axis and is small between 2 and 13 genomes, so those bars are
+noisy. Core: 56% of genes with a domain, median 449 aa; cloud: 44% and 240 aa. The `_log` file
+shows protein length on a log axis.
+
+![Gene properties by occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy_properties.png)
 
 **InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more
-often than in the remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted).
-Only pangenes with at least one InterPro entry are counted (4,910 core, 653 cloud).
-Cloud pangenes: 64 of 578 entries tested are enriched (adjusted p < 0.05, at least 3 pangenes),
-led by dynein heavy chain (66 pangenes, 10% of the annotated cloud pangenes), polyketide synthase
-domains, cytochrome b/b6 and rhoptry kinase-like. Core pangenes: 7 of 5,472 entries, among them
-methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains. A core pangene
-collects entries from the genes of up to 15 genomes, which may favour the core side, so the core
-hits are the ones to read with care.
+often than in the remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted). Only
+pangenes with at least one InterPro entry are counted (4,889 core, 497 cloud). Cloud: 56 of 501
+entries tested are enriched (adjusted p < 0.05, at least 3 pangenes); core: 2 of 5,454
+(methyltransferase and MFS transporter). A core pangene collects entries from the genes of up to
+15 genomes, which may favour the core side.
+
+The strongest cloud signal, dynein heavy chain (68 of its 78 pangenes are cloud), is most likely an
+annotation artefact: its singleton pangenes have a median protein length of 534 aa, against 4,294 aa
+in the pangenes present in all genomes, and FOU, p89, TgCATBr9 and MAS carry 29 to 43 genes with the
+domain, against about 10 in most other genomes. This fits one very long gene annotated in several
+pieces, but the positions on the chromosome were not checked. The other cloud hits include
+polyketide synthase domains, acetyl-CoA carboxylase and rhoptry kinase-like.
+
+The cytochrome b/b6 entries are also weaker here (12 of 23 pangenes in the cloud, against 28 of 53
+without filtering; see below). Cytochrome b is a mitochondrial gene, and these may be fragments of
+mitochondrial DNA inserted in the nuclear genome (NUMTs) or poor transfers of them; this was not
+tested.
+
+![InterPro term enrichment, with filtering](08_Pangenome_Visualisation/pangenome_plots/Toxo7a_domain_enrichment.png)
+
+### No filtering (7b)
+
+**Pangenome and core genome size** - the pangenome grows from about 9,200 pangenes (one genome) to
+11,031 (all 15), still growing by about 100 per genome at the end. The core falls from about 9,200
+to 8,733; the fitted curves put its plateau at 8,770 (Tettelin) and 8,716 (Willenbrock).
+`Toxo7b_pancore_separate.png` shows the two curves in separate panels.
+
+![Pangenome and core genome size, no filtering](08_Pangenome_Visualisation/Toxo7b_pancore.png)
+
+**Pangene occupancy** - 8,733 pangenes (79%) are core, 146 are in 14 genomes (soft-core), 1,448
+(13%) are in one genome only and 163 in two.
+
+![Pangene occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy.png)
+
+**Singletons per genome** - RH88 has the most (226), GT1 the fewest (18).
+
+![Singletons per genome, no filtering](08_Pangenome_Visualisation/Toxo7b_singletons.png)
+
+**POCS heatmap** - same as above. Between different genomes POCS is 95.4-98.4. RH88 is the most
+distant genome (mean 96.2).
+
+![POCS heatmap, no filtering](08_Pangenome_Visualisation/Toxo7b_POCS_heatmap.png)
+
+**Gene properties by occupancy** - same method as above, on 9,530 pangenes (1,501 left out). Core:
+53% of genes with a domain, median 414 aa; cloud: 40% and 212 aa.
+
+![Gene properties by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy_properties.png)
+
+**InterPro term enrichment** - same test as above, 4,910 core and 653 cloud pangenes with an
+InterPro entry. Cloud: 64 of 578 entries tested are enriched; core: 7 of 5,472, among them
+methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains.
+
+Dynein heavy chain is again the strongest cloud signal (66 pangenes, 10% of the annotated cloud
+pangenes) and shows the same artefact: singleton pangenes have a median of 528 aa against 4,294 aa
+in the pangenes present in all genomes, and FOU has 44 genes with the domain against about 10 in
+most genomes. The other cloud hits include polyketide synthase domains, cytochrome b/b6 and
+rhoptry kinase-like.
+
+The cytochrome b/b6 entries (28 of 53 pangenes in the cloud) are probably an artefact too. There
+are 231 genes with the cytochrome b N-terminal domain, 12 to 21 per genome, against 103 after
+filtering (about 7 per genome). 166 of the 231 (72%) come from the `rescued_` layer, the
+lowest-confidence transfers, and only 25 from a genome's own annotation; only 7 are Liftoff extra
+copies. Their median Liftoff coverage is 0.81, against 0.93 after filtering. Cytochrome b is a
+mitochondrial gene, so several copies per genome fit mitochondrial DNA inserted in the nuclear
+genome (NUMTs) or poor transfers of them, but this was not tested: it would need the sequences
+aligned to the mitochondrial genome.
 ```bash
 sbatch 08_Pangenome_Visualisation/scripts/plot_domain_enrichment_job.sh
 ```
 
-![InterPro term enrichment](08_Pangenome_Visualisation/pangenome_plots/Toxo7b_domain_enrichment.png)
+![InterPro term enrichment, no filtering](08_Pangenome_Visualisation/pangenome_plots/Toxo7b_domain_enrichment.png)
 
 ---
 

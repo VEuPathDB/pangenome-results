@@ -15,8 +15,8 @@
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, candidate validation | ✅ Complete |
 | [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed |
 | [04 – InterProScan](README.md#04--interproscan) | Functional domain annotation | ✅ Complete |
-| [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | 🔄 In progress |
-| [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | 🔄 In progress |
+| [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
+| [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
 | [07 – Post-GET_PANGENES Adjusting](README.md#07--post-get_pangenes-adjusting) | Manual review and refinement of pangene calls | 🔄 In progress |
 | [08 – Pangenome Visualisation](README.md#08--pangenome-visualisation) | Figures, presence/absence matrix, summary stats | 🔄 In progress |
 
@@ -50,13 +50,44 @@
   including the reference genome ME49. They were recovered from short contigs that are clear contaminants and should be removed in the future.
 - **No GFF filtering was applied** — it is expected that the contaminants contigs were removed with the <10kb filter.
 
-### 03–08 — In progress
+### 03 – *de novo* Genome Annotation
 
-**03 – not needed:** all 15 strains already have a genome annotation (GFF, from
-ToxoDB/VEuPathDB) — step 03 exists only for genomes with no annotation at all.
+Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VEuPathDB).
 
-Results for InterProScan, cross-genome integration, pangene clustering, and visualisation
-(04–08) will be added here as each step is completed.
+### 04 – InterProScan
+
+- InterProScan was run on every strain's proteins. 56–62% of the protein-coding genes of each
+  strain carry an InterPro/PFAM domain, so no strain stands out as poorly annotated.
+
+### 05 – Cross-genome Annotation Integration
+
+- Each strain's annotation is rebuilt from the reference's transferred genes, the strain's own genes
+  and genes transferred from the other strains, giving **9,249–9,933 protein-coding genes per
+  strain**. Non-coding RNA genes (tRNA, rRNA, ncRNA) are left out, because they were being typed as
+  ordinary genes on the way.
+- Two versions of the annotation go on to `get_pangenes`: **with filtering** (7a) and **no
+  filtering** (7b, genes only tagged).
+- The filter removed **6.7% of the genes** (9,710 of 144,359; 6.1–8.4% per strain). Two thirds of
+  them overlapped a reference gene and had no evidence themselves; a quarter were low-coverage
+  transfers from other strains.
+- CDS-overlapping gene pairs fall from 476–552 per strain to 67–77.
+
+### 06 – GET_PANGENES
+
+- **11,031 pangenes without filtering** and **9,904 with filtering**, across the 15 strains.
+
+### 07 – Post-GET_PANGENES Adjusting *(in progress)*
+
+- **13.6% of the pangenes (1,501 without filtering, 1,374 with filtering) hold more than one gene of
+  the same strain.** They are not overlapping genes (only 0.1% of the pairs overlap in the CDS):
+  they are same-strand neighbours, 83% within 5 kb. Whether they are tandem copies or one gene
+  split in two is still open.
+
+### 08 – Pangenome Visualisation *(in progress)*
+
+- The figures for both sets of pangenes are in the
+  [full report](README.md#08--pangenome-visualisation). What to show in this summary is still to be
+  decided.
 
 ---
 
@@ -75,6 +106,9 @@ Results for InterProScan, cross-genome integration, pangene clustering, and visu
 - **Lineage-specific copy-number variation at key loci** (e.g. ROP5: 6 copies in Type I/III
   vs. 11 in Type II) will appear as gene gain/loss in the pangenome matrix. These loci
   require manual review rather than relying on the matrix alone.
+- **Pangenes with more than one gene per strain, and fragmented gene models, are not resolved yet.**
+  They can inflate the cloud (singletons and low-occupancy pangenes), so cloud-related figures and
+  enrichments are preliminary.
 - The pangenome matrix captures **gene presence/absence only** — virulence differences
   between lineages are driven largely by allelic variation within shared genes (ROP kinases,
   GRA effectors, SRS surface antigens), which require separate targeted analyses.
