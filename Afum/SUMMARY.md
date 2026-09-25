@@ -6,12 +6,6 @@
 
 ---
 
-A pangenome analysis of **17 *Aspergillus fumigatus* genomes** (16 non-reference strains + the
-reference Af293), spanning clinical and environmental isolates from Europe, North America,
-and New Zealand. The goal is to identify core genes (present in all strains), accessory genes
-(present in some), and understand how gene content variation relates to traits. The analysis follows an 8-step pipeline developed for eukaryotic species.
-
----
 
 ## Analysis progress
 
@@ -32,10 +26,9 @@ and New Zealand. The goal is to identify core genes (present in all strains), ac
 
 ### 01 – Genome Selection & QC
 
-- **17 strains selected**, including chromosome-level long-read assemblies (ONT/PacBio) from
-  the UCR panel alongside the three FungiDB genomes (Af293, A1160, A1163).
+- **17 strains selected**, including chromosome-level long-read assemblies alongside the three FungiDB genomes (Af293, A1160, A1163).
 - **All 17 confirmed as *A. fumigatus* sensu stricto** by whole-genome ANI against Af293
-  (99.2–99.6%). No cryptic sibling species detected.
+  (99.2–99.6%).
 - **30 contigs removed across 9 of the 17 strains** before analysis: 12 organelle
   (mitochondrial) contigs from 4 strains (AF293, AF100-9B, ATCC 42202, 47-4), and 18
   redundant/duplicated contigs from 5 strains (A1163, H237, 08-19-02-30, B5233, eAF1090) —

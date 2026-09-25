@@ -81,20 +81,5 @@ Results for InterProScan, cross-genome integration, pangene clustering, and visu
 
 ---
 
-## Files
-
-| File | Description |
-| :--- | :--- |
-| [README.md](README.md) | Full technical report — all methods, parameters, tables, figures |
-| 01_Genome_Selection_QC/ *(working data, not published here)* | QC outputs: ANI, contig profile, synteny |
-| 02_TE_annotation_Clean_Up/ *(working data, not published here)* | TE candidate pipeline, TE-Aid validation |
-| 03_denovo_Genome_Annotation/ *(working data, not published here)* | *de novo* gene predictions |
-| 04_InterProScan/ *(working data, not published here)* | Domain annotations |
-| 05_Cross-genome_annotation_integration/ *(working data, not published here)* | Merged annotation files |
-| 06_GET_PANGENES/ *(working data, not published here)* | Pangene clusters |
-| 07_Post_GET_PANGENES_adjusting/ *(working data, not published here)* | Reviewed and curated pangene calls |
-| 08_Pangenome_Visualisation/ *(working data, not published here)* | Figures and summary tables |
-
----
 
 [↑ Back to top](#analysis-progress) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)

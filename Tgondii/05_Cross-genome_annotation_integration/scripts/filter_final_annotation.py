@@ -1,95 +1,83 @@
 #!/usr/bin/env python3
 """
-Post-process every strain's <genome>_final_annotation.gff (this pipeline's output) with two
-filters: dropping unsupported extra-copy genes, then resolving overlapping-gene pairs. Unlike
-the rest of this pipeline's per-genome scripts, this one reads ALL genomes in --strains in one
-run, because one of the overlap rules below (case 6) needs to know each gene's status
-panel-wide, not just within its own genome.
+Post-process every strain's <genome>_final_annotation.gff (this pipeline's output) with three
+filters: resolving overlapping-gene pairs, then dropping unsupported extra-copy genes, then the
+rescued-coverage floor. Reads ALL genomes in --strains in one run and decides ONE global verdict
+per gene (by its original ID, shared across every genome that carries it) - a gene dropped
+anywhere in the panel is dropped from every genome's output, even where its own local copy never
+overlapped anything. A gene is never partially removed: all-or-nothing across the whole panel.
 
-1) Extra-copy genes (extra_copy_number > 0) are kept only if they have a valid ORF - dropped
-   otherwise. No contig-size or domain check - a genuine extra copy (real tandem duplication,
-   real gene family expansion, see the general README's own notes on this) can legitimately
-   sit on a short contig or lack a domain hit on its own, so those aren't used as filters here
-   any more; a broken ORF is the one thing that's unambiguous evidence of a bad transfer.
+Execution order matters:
 
-2) Every rescued_<strain> gene below --min-rescued-coverage (default 0.5) Liftoff coverage is
-   dropped outright, whatever else is true about it. rescued_<strain> is this pipeline's
-   lowest-confidence tier (round 2 of the build step - a strain's *entire* transfer, unfiltered,
-   added only as a last resort) - it never had to clear a coverage/identity bar to get into the
-   final annotation in the first place, unlike good_<strain>, so this is the one basic quality
-   floor that tier gets.
+0) Panel-wide stats, from every genome's RAW genes (before any filtering): how many genomes
+   carry each gene (`present_in`), how many of those are good_<genome> transfers, and - from a
+   first CDS-overlap scan of every genome - how many genomes each gene has a *qualifying*
+   overlap in (`collides_in`; a "minor + flank" overlap, auto-kept below, does not count).
 
-3) Overlapping gene pairs (from a fresh CDS-to-CDS overlap scan of the genes that survived
-   steps 1-2 - the same logic as check_overlapping_genes.py/plot_final_annotation_qc.py).
-   Overlaps under --min-overlap-bp (default 20bp) are ignored entirely - boundary-rounding
-   noise, not a real overlap (most of these are 1-2bp touches from Liftoff's coordinate
-   polishing, checked against this project's own real data). Of what's left:
-   - "minor" overlap (< 20% of the smaller gene's own CDS) **and** "flank" (only touches the
-     bigger gene's outermost CDS segment, not an internal one): both genes kept, no action -
-     the two gene models most likely just disagree at the boundary, both genes are probably
-     real. A minor overlap that's "inside" (touches an internal CDS segment - i.e. the smaller
-     gene mostly sits in what's actually an intron) or "single_exon" (bigger gene has only one
-     CDS segment, flank/inside doesn't apply) does NOT get this automatic pass - it's still
-     more likely a spurious call, so it falls through to the same resolution as a
-     substantial/contained overlap below.
-   - "substantial" or "contained" (>= 20%, sized against whichever gene is smaller - sizing
-     against the bigger gene alone can make a real problem look tiny) **or** minor-but-not-flank
-     from above:
-       1) both sides are the reference-derived "main" gene: keep both (a real overlap
-          transferred straight from the reference's own annotation - not this pipeline's
-          call to resolve).
-       2) exactly one side is "main": keep it; drop the other side UNLESS it also has a
-          protein domain, in which case both are kept (uncertain - left for a human to
-          look at, not auto-resolved).
-       3) neither side is "main", exactly one has a domain -> keep that one, drop the other.
-       4) neither side is "main", both have a domain -> keep both, uncertain, left for
-          manual review.
-       5) neither side is "main", neither has a domain -> no trusted anchor and no domain
-          evidence on either side, so this falls back to how well-supported each gene is
-          across the WHOLE panel, not just this one genome:
-            - a gene present in only 1 genome of the whole --strains panel is dropped
-              outright - a single occurrence with no domain and no reference backing is
-              the weakest possible support (checked against this project's real data:
-              this is also exactly the profile of most genuine strain-private gene calls,
-              so this is a soft call, not a certainty - see the general README's overlap
-              rule notes).
-            - between two genes both present in >1 genome, keep whichever has more
-              good_<strain>-sourced occurrences across the whole panel (high-confidence
-              Liftoff transfers are stronger support than raw presence count, which also
-              includes low-confidence rescued_<strain> copies); on a tie, keep the one
-              with the longer CDS.
+1) Overlap resolution, decided globally per gene, using every genome's full raw gene set
+   (including genes that would later fail the extra-copy/rescue-coverage checks in step 2 - an
+   overlap dispute is settled before those checks ever run).
 
-Protein domain = the gene has an InterPro or Pfam hit in its own Dbxref attribute (the
-CDS-level Dbxref=InterPro:...,PFAM:... that NCBI-style annotations carry, which Liftoff
-carries through on any gene transferred from a genome that had it - no external lookup
-file needed, so this works for any species' annotation that uses this convention, not
-just this project's specific strains).
+   A minor overlap (< 20% of the smaller gene's own CDS) that sits on the bigger gene's
+   outermost CDS segment ("flank") is left alone: the two gene models most likely just disagree
+   at the boundary, and both genes are probably real. Keep both, done.
+
+   Everything else - minor-but-not-flank, or "substantial"/"contained" (>= 20%, sized against
+   whichever gene is smaller) - needs a decision. A gene "has evidence" if it has a protein
+   domain (InterPro/PFAM Dbxref hit) or a specific description (anything other than
+   "hypothetical protein", "unspecified product", or empty - see GENERIC_DESCRIPTIONS below;
+   --require-domain-only turns off the description half, domain-only, like this script used to
+   work).
+
+   Whichever gene has more evidence wins:
+     - one gene is main, the other has no evidence -> main wins, the other is a drop candidate,
+       run through the panel check below.
+     - one gene is main, the other also has evidence -> keep both.
+     - neither is main, only one has evidence -> that one wins, the other is a drop candidate,
+       run through the panel check below.
+     - neither is main, both have evidence -> keep both.
+     - neither is main, neither has evidence -> no local evidence to decide by at all; no panel
+       check here either - the two genes are compared directly by panel-wide good_<genome>
+       transfer count instead (more wins, tied -> the longer CDS wins). This also naturally
+       covers a panel-private gene: with nowhere to have transferred well into, it has 0
+       good_<genome> transfers and loses to any better-supported opponent on its own.
+
+   The panel check (cases above where one gene lost to main or to an evidence-haver) - using
+   the panel-wide stats from step 0:
+     - present in <= 2 genomes -> dropped (too little support to weigh against anything else).
+     - present in > 2 genomes but with a qualifying overlap in only 1 of them -> NOT dropped -
+       more likely a Liftoff boundary glitch specific to that one genome than real evidence the
+       gene is spurious.
+     - present in > 2 genomes with a qualifying overlap in >= --min-overlap-genomes (default 2)
+       of them -> dropped, a real recurring conflict.
+
+2) Extra-copy genes (extra_copy_number > 0), among whatever survived step 1, are kept only if
+   they have a valid ORF - dropped otherwise (--extra-copy-require-valid-orf, on by default). No
+   contig-size or domain check: a genuine extra copy (real tandem duplication, real gene family
+   expansion) can legitimately sit on a short contig or lack a domain hit on its own.
+
+3) Every rescued_<genome> gene, among whatever survived steps 1-2, below
+   --min-rescued-coverage (default 0.5) Liftoff coverage is dropped outright. rescued_<genome>
+   is this pipeline's lowest-confidence tier (round 2 of the build step - a genome's *entire*
+   transfer, unfiltered, added only as a last resort) - it never had to clear a coverage/identity
+   bar to get into the final annotation in the first place, unlike good_<genome>, so this is the
+   one basic quality floor that tier gets.
+
+4) Every kept protein-coding gene/pseudogene is relabeled to feature type "gene" (whatever it
+   was called before), and its "pseudogenic_transcript" child (if any) to "transcript" - the one
+   thing get_pangenes' own parser actually requires. Non-coding RNA genes are left exactly as
+   they are.
+
+5) Every kept gene's ID is renumbered to "<id-prefix><strain-index>g<00001, 00002, ...>". The
+   original ID is kept in a new "original_ID=" attribute.
 
 Every removed gene is logged with why, in each genome's own --out-dir/<genome>_filter_report.tsv
 - nothing is silently dropped.
 
-4) Every kept protein-coding gene/pseudogene is relabeled to feature type "gene" (whatever
-   it was called before), and its "pseudogenic_transcript" child (if any) to "transcript" -
-   the one thing get_pangenes' own parser actually requires (it only clusters features
-   literally typed "gene", see the general README's get_pangenes step). Non-coding RNA
-   genes are left exactly as they are, feature type and source both - they were already
-   retyped away from "gene" back in step 3 (prepare_for_liftoff.py), specifically so they'd
-   never be mistaken for a protein-coding candidate here or by get_pangenes later; nothing
-   left to do for them at this point.
-
-5) Every kept gene's ID is renumbered to "<id-prefix><strain-index>g<00001, 00002, ...>"
-   (default prefix "Afu", strain-index = the genome's 1-based position in --strains, same
-   style as this pipeline's reference genome's own native gene IDs, just repurposing the
-   number after the prefix as a strain index instead of a chromosome number). The original
-   ID is kept in a new "original_ID=" attribute (not folded into description=, so it stays
-   its own machine-readable field, consistent with this GFF's other pipeline-added
-   attributes like copy_num_ID=/coverage=).
-
-Known limitation - "protein domain" is only as good as the source annotation: see
-analyze_final_annotation.py / plot_final_annotation_qc.py's own notes on this - a genome
-whose ORIGINAL annotation never recorded InterPro/PFAM hits at all will have every gene
-sourced from it test has_domain=False unconditionally, not because those genes lack real
-domains, but because this annotation source never recorded them.
+Known limitation - "protein domain" is only as good as the source annotation: a genome whose
+ORIGINAL annotation never recorded InterPro/PFAM hits at all will have every gene sourced from
+it test has_domain=False unconditionally, not because those genes lack real domains, but because
+this annotation source never recorded them.
 
 Usage:
     python3 filter_final_annotation.py \\
@@ -103,9 +91,19 @@ import os
 import re
 import sys
 from collections import defaultdict
+from urllib.parse import unquote_plus
 
 ID_RE = re.compile(r"ID=([^;]+)")
 PARENT_RE = re.compile(r"Parent=([^;]+)")
+DESCRIPTION_RE = re.compile(r"(?:^|;)description=([^;]+)")
+PRODUCT_RE = re.compile(r"(?:^|;)product=([^;]+)")
+
+# A description this generic counts as no evidence at all - same as having no description.
+GENERIC_DESCRIPTIONS = {
+    "hypothetical protein", "hypothetical protein, conserved", "conserved hypothetical protein",
+    "unspecified product", "unknown function", "unnamed protein product", "",
+}
+
 # Feature types that only ever appear nested under a level-1 gene feature, never as an
 # independent top-level entity - used to recognize "a new gene-level block just started"
 # in the output-writing pass below, without having to enumerate every naming convention
@@ -146,12 +144,15 @@ def parse_gff(path):
         feat_id = m.group(1) if m else None
 
         if feature == "protein_coding_gene" and feat_id:
+            desc_m = DESCRIPTION_RE.search(attrs) or PRODUCT_RE.search(attrs)
+            description = unquote_plus(desc_m.group(1).strip().lower()) if desc_m else ""
             genes[feat_id] = {
                 "id": feat_id, "seqname": seqname, "source": source,
                 "start": int(start), "end": int(end), "strand": strand,
                 "extra_copy_number": _int_attr(attrs, "extra_copy_number"),
                 "valid_ORF": _valid_orf(attrs),
                 "coverage": _float_attr(attrs, "coverage"),
+                "description": description,
             }
         elif feature == "mRNA" and feat_id:
             parent = PARENT_RE.search(attrs)
@@ -194,21 +195,12 @@ def parse_gff(path):
     return genes
 
 
-def parse_gene_sources_only(path):
-    """Lightweight pass for the panel-wide stats: just gene_id -> source, no CDS/domain
-    parsing - used across all --strains genomes before the real per-genome processing."""
-    sources = {}
-    with open(path) as fh:
-        for line in fh:
-            if line.startswith("#") or not line.strip():
-                continue
-            fields = line.rstrip("\n").split("\t")
-            if len(fields) < 9 or fields[2] != "protein_coding_gene":
-                continue
-            m = ID_RE.search(fields[8])
-            if m:
-                sources[m.group(1)] = fields[1]
-    return sources
+def has_evidence(gene, require_domain_only):
+    if gene["has_domain"]:
+        return True
+    if require_domain_only:
+        return False
+    return gene["description"] not in GENERIC_DESCRIPTIONS
 
 
 def _int_attr(attrs, key):
@@ -268,8 +260,7 @@ def classify_minor_position(bigger_gene, smaller_cds_segments):
     last CDS segment - the two gene models plausibly disagree only at the boundary, both genes
     likely real), "inside" (touches an internal segment - more likely the smaller gene is a
     spurious call sitting in what's actually an intron), or "single_exon" (bigger gene has only
-    one CDS segment total, flank/inside doesn't apply). Same logic as
-    plot_final_annotation_qc.py's version of this check."""
+    one CDS segment total, flank/inside doesn't apply)."""
     segs = bigger_gene["cds_segments"]
     if len(segs) <= 1:
         return "single_exon"
@@ -279,6 +270,21 @@ def classify_minor_position(bigger_gene, smaller_cds_segments):
     if not overlapped:
         return "inside"  # shouldn't happen (ov_bp>0 implies some segment matched) - fall through safely
     return "flank" if overlapped <= outer else "inside"
+
+
+def is_qualifying_overlap(g1, g2, ov_bp):
+    """A "minor + flank" overlap is auto-kept and doesn't count as a real conflict - everything
+    else (minor-but-not-flank, substantial, contained) needs a decision. Returns
+    (qualifies: bool, pct_of_smaller: float)."""
+    smaller_bp = min(g1["cds_bp"], g2["cds_bp"])
+    if smaller_bp == 0:
+        return False, 0.0
+    pct = ov_bp / smaller_bp
+    if pct < 0.2:
+        bigger, smaller = (g1, g2) if g1["cds_bp"] >= g2["cds_bp"] else (g2, g1)
+        if classify_minor_position(bigger, smaller["cds_segments"]) == "flank":
+            return False, pct
+    return True, pct
 
 
 def assign_new_ids(genes, kept_ids, strain_index, id_prefix):
@@ -291,75 +297,86 @@ def add_original_id_attr(attrs, old_id):
     return attrs.rstrip(";") + f";original_ID={old_id}"
 
 
-def resolve_overlaps(genes, overlap_pairs, ref_tag, present_in, n_good_transfers):
-    """Returns {gene_id: reason} for every gene this genome's overlap pairs decide to drop."""
-    removed = {}
-    for gene1_id, gene2_id, ov_bp in overlap_pairs:
-        if gene1_id in removed or gene2_id in removed:
-            continue  # already resolved by an earlier overlap in this genome
-        g1, g2 = genes[gene1_id], genes[gene2_id]
-        smaller_bp = min(g1["cds_bp"], g2["cds_bp"])
-        if smaller_bp == 0:
-            continue
-        pct_of_smaller = ov_bp / smaller_bp
-        if pct_of_smaller < 0.2:
-            # minor overlap - only auto-kept if it's also "flank" (only touches the bigger
-            # gene's outermost CDS segment): the two gene models likely just disagree at the
-            # boundary, both genes are probably real. "inside" (touches an internal segment,
-            # i.e. sits in what's actually an intron) or "single_exon" falls through to the
-            # same case-based resolution as a substantial/contained overlap instead - a minor
-            # overlap buried inside the bigger gene is still more likely a spurious call.
-            bigger, smaller = (g1, g2) if g1["cds_bp"] >= g2["cds_bp"] else (g2, g1)
-            if classify_minor_position(bigger, smaller["cds_segments"]) == "flank":
-                continue  # minor + flank - keep both
+def panel_check(gene_id, opponent_id, pct, present_in, collides_in, min_overlap_genomes, note):
+    """Applied to a gene that locally lost an evidence comparison (or, in the neither-has-
+    evidence case, to each side independently) before actually dropping it. Returns a reason
+    string if it should be dropped, else None (survives - not enough panel-wide evidence either
+    way, or an isolated collision more likely explained by Liftoff boundary noise)."""
+    n_present = len(present_in.get(gene_id, ()))
+    n_collide = len(collides_in.get(gene_id, ()))
+    if n_present <= 2:
+        return f"overlaps {opponent_id} ({round(100*pct,1)}% of its own CDS); {note}present in only {n_present} genome(s) panel-wide"
+    if n_collide <= 1:
+        return None
+    if n_collide >= min_overlap_genomes:
+        return f"overlaps {opponent_id} ({round(100*pct,1)}% of its own CDS); {note}present in {n_present} genomes, overlapping something in {n_collide} of them"
+    return None
 
-        g1_is_ref, g2_is_ref = g1["source"] == ref_tag, g2["source"] == ref_tag
 
-        if g1_is_ref and g2_is_ref:
-            continue  # case 1: both reference-derived - not this pipeline's call, keep both
+def resolve_overlaps_globally(genes_by_strain, args, present_in, n_good_transfers, collides_in, qualifying_by_strain):
+    """One pass over every genome's qualifying overlap pairs, building ONE verdict per gene ID
+    (by original ID, shared across the panel) - {gene_id: reason}. A gene already in verdict is
+    skipped in any later pair it's part of (already decided, and verdicts never reverse)."""
+    verdict = {}
+    for s, genes in genes_by_strain.items():
+        for gid1, gid2, ov_bp, pct in qualifying_by_strain[s]:
+            if gid1 in verdict and gid2 in verdict:
+                continue
+            g1, g2 = genes[gid1], genes[gid2]
+            g1_is_ref = g1["source"] == args.reference_source_tag
+            g2_is_ref = g2["source"] == args.reference_source_tag
 
-        if g1_is_ref or g2_is_ref:
-            ref_gene, other_gene = (g1, g2) if g1_is_ref else (g2, g1)
-            if other_gene["has_domain"]:
-                continue  # case 2: uncertain - keep both, leave for manual review
-            removed[other_gene["id"]] = (
-                f"overlaps the reference ('{ref_tag}') gene {ref_gene['id']} "
-                f"({round(100*pct_of_smaller,1)}% of its own CDS), no protein domain"
+            if g1_is_ref and g2_is_ref:
+                continue  # both reference-derived - not this pipeline's call, keep both
+
+            if g1_is_ref or g2_is_ref:
+                ref_gene, other = (g1, g2) if g1_is_ref else (g2, g1)
+                if has_evidence(other, args.require_domain_only):
+                    continue  # uncertain - keep both
+                if other["id"] in verdict:
+                    continue
+                reason = panel_check(other["id"], ref_gene["id"], pct, present_in, collides_in,
+                                      args.min_overlap_genomes,
+                                      f"no evidence, overlaps the reference ('{args.reference_source_tag}') gene {ref_gene['id']}; ")
+                if reason:
+                    verdict[other["id"]] = reason
+                continue
+
+            g1_ev = has_evidence(g1, args.require_domain_only)
+            g2_ev = has_evidence(g2, args.require_domain_only)
+
+            if g1_ev != g2_ev:
+                winner, loser = (g1, g2) if g1_ev else (g2, g1)
+                if loser["id"] in verdict:
+                    continue
+                reason = panel_check(loser["id"], winner["id"], pct, present_in, collides_in,
+                                      args.min_overlap_genomes,
+                                      f"no evidence, {winner['id']} has evidence; ")
+                if reason:
+                    verdict[loser["id"]] = reason
+                continue
+
+            if g1_ev and g2_ev:
+                continue  # both have evidence - uncertain, keep both
+
+            if gid1 in verdict or gid2 in verdict:
+                continue
+            # neither has evidence, neither is main - no panel-presence/recurrence check here
+            # (that's only for cases 3/4 above); compare the two genes directly by panel-wide
+            # good_<genome> transfer count instead (tie -> longer CDS wins). This also covers
+            # a panel-private gene naturally: with no genome to transfer well into, it has 0
+            # good_<genome> transfers and loses to any better-supported opponent on its own.
+            gt1, gt2 = n_good_transfers.get(gid1, 0), n_good_transfers.get(gid2, 0)
+            if gt1 != gt2:
+                winner, loser, metric = (g1, g2, f"{gt1} vs {gt2}") if gt1 > gt2 else (g2, g1, f"{gt2} vs {gt1}")
+            else:
+                winner, loser = (g1, g2) if g1["cds_bp"] >= g2["cds_bp"] else (g2, g1)
+                metric = f"tied on good_<genome> transfers panel-wide ({gt1}), kept the longer CDS"
+            verdict[loser["id"]] = (
+                f"overlaps {winner['id']} ({round(100*pct,1)}% of its own CDS); neither has evidence, "
+                f"{winner['id']} more supported panel-wide ({metric})"
             )
-            continue
-
-        g1_domain, g2_domain = g1["has_domain"], g2["has_domain"]
-        if g1_domain != g2_domain:
-            # case 3/4: exactly one side has a domain - keep it, drop the other
-            winner, loser = (g1, g2) if g1_domain else (g2, g1)
-            removed[loser["id"]] = f"overlaps {winner['id']} ({round(100*pct_of_smaller,1)}% of its own CDS); {winner['id']} has a protein domain, this one doesn't"
-            continue
-        if g1_domain and g2_domain:
-            continue  # case 5: both have evidence - uncertain, keep both, leave for manual review
-
-        # case 6: neither is reference, neither has a domain - fall back to panel-wide support.
-        g1_n_present = len(present_in.get(g1["id"], ()))
-        g2_n_present = len(present_in.get(g2["id"], ()))
-        if g1_n_present <= 1 and g2_n_present <= 1:
-            removed[g1["id"]] = f"overlaps {g2['id']} ({round(100*pct_of_smaller,1)}% of its own CDS); neither has a protein domain, and both are present in only 1 genome panel-wide"
-            removed[g2["id"]] = f"overlaps {g1['id']} ({round(100*pct_of_smaller,1)}% of its own CDS); neither has a protein domain, and both are present in only 1 genome panel-wide"
-            continue
-        if g1_n_present <= 1:
-            removed[g1["id"]] = f"overlaps {g2['id']} ({round(100*pct_of_smaller,1)}% of its own CDS); no protein domain, and present in only 1 genome panel-wide"
-            continue
-        if g2_n_present <= 1:
-            removed[g2["id"]] = f"overlaps {g1['id']} ({round(100*pct_of_smaller,1)}% of its own CDS); no protein domain, and present in only 1 genome panel-wide"
-            continue
-        # both present in >1 genome panel-wide - keep whichever has more good_<strain>
-        # transfers panel-wide, tie broken by CDS length.
-        gt1, gt2 = n_good_transfers.get(g1["id"], 0), n_good_transfers.get(g2["id"], 0)
-        if gt1 != gt2:
-            winner, loser, metric = (g1, g2, f"{gt1} vs {gt2}") if gt1 > gt2 else (g2, g1, f"{gt2} vs {gt1}")
-        else:
-            winner, loser = (g1, g2) if g1["cds_bp"] >= g2["cds_bp"] else (g2, g1)
-            metric = f"tied on good_<strain> transfers panel-wide ({gt1}), kept the longer CDS"
-        removed[loser["id"]] = f"overlaps {winner['id']} ({round(100*pct_of_smaller,1)}% of its own CDS); neither has a protein domain, both present in >1 genome, {winner['id']} more panel-wide supported ({metric})"
-    return removed
+    return verdict
 
 
 def write_filtered_gff(gff_path, out_path, genes, kept_ids, id_mapping):
@@ -412,68 +429,92 @@ def main():
     parser.add_argument("--out-dir", default="./filtered_annotation", help="Where to write the filtered GFFs + reports")
     parser.add_argument("--min-overlap-bp", type=int, default=20,
                          help="CDS-to-CDS overlaps under this many bp are ignored entirely - boundary-rounding noise, not treated as a real overlap (default: 20)")
+    parser.add_argument("--min-overlap-genomes", type=int, default=2,
+                         help="For a gene present in >2 genomes panel-wide: it needs a qualifying overlap in at least this many of them to count as a real, recurring conflict rather than an isolated Liftoff boundary glitch (default: 2)")
+    parser.add_argument("--require-domain-only", action="store_true",
+                         help="Only a protein domain counts as evidence - ignore description text entirely (default: off, a specific description also counts)")
     parser.add_argument("--reference-source-tag", default="main",
                          help="The source tag marking the reference-derived tier in this pipeline's output (default: 'main')")
+    parser.add_argument("--extra-copy-require-valid-orf", action=argparse.BooleanOptionalAction, default=True,
+                         help="Drop an extra-copy gene (extra_copy_number > 0) unless it has a valid ORF (default: on; use --no-extra-copy-require-valid-orf to keep every extra copy regardless of ORF)")
     parser.add_argument("--min-rescued-coverage", type=float, default=0.5,
-                         help="Every rescued_<genome> gene (this pipeline's lowest-confidence Liftoff tier - it never had to pass a coverage/identity bar to get in) below this Liftoff coverage is dropped outright, regardless of ORF/domain/overlap status (default: 0.5)")
+                         help="Every rescued_<genome> gene (this pipeline's lowest-confidence Liftoff tier - it never had to pass a coverage/identity bar to get in) below this Liftoff coverage is dropped outright, regardless of ORF/evidence/overlap status (default: 0.5)")
     parser.add_argument("--id-prefix", default="Afu", help="Prefix for renamed gene IDs (default: 'Afu', this project's own convention - change for other species)")
     args = parser.parse_args()
 
     strains = read_strains(args.strains)
     os.makedirs(args.out_dir, exist_ok=True)
 
-    # --- Phase 0: panel-wide stats (needed for case 6, computed across ALL strains up front) ---
+    # --- Step 0: parse every genome's raw genes, and panel-wide stats from all of them ---
+    genes_by_strain = {}
     present_in = defaultdict(set)
     n_good_transfers = defaultdict(int)
     for s in strains:
-        sources = parse_gene_sources_only(os.path.join(args.final_dir, f"{s}_final_annotation.gff"))
-        for gene_id, source in sources.items():
-            present_in[gene_id].add(s)
-            if source.startswith("good_"):
-                n_good_transfers[gene_id] += 1
-    print(f"Panel-wide stats built from {len(strains)} genomes: {len(present_in)} distinct gene IDs", file=sys.stderr)
+        genes = parse_gff(os.path.join(args.final_dir, f"{s}_final_annotation.gff"))
+        genes_by_strain[s] = genes
+        for gid, g in genes.items():
+            present_in[gid].add(s)
+            if g["source"].startswith("good_"):
+                n_good_transfers[gid] += 1
+    print(f"Panel-wide presence built from {len(strains)} genomes: {len(present_in)} distinct gene IDs", file=sys.stderr)
 
-    # --- Phase 1: per genome, filter + write ---
+    # First CDS-overlap scan of every genome, to know - panel-wide - how many genomes each gene
+    # has a *qualifying* overlap in (minor+flank doesn't count, see module docstring).
+    collides_in = defaultdict(set)
+    qualifying_by_strain = {}
+    for s, genes in genes_by_strain.items():
+        overlap_pairs = find_cds_overlaps(genes, args.min_overlap_bp)
+        qualifying = []
+        for gid1, gid2, ov_bp in overlap_pairs:
+            qualifies, pct = is_qualifying_overlap(genes[gid1], genes[gid2], ov_bp)
+            if not qualifies:
+                continue
+            qualifying.append((gid1, gid2, ov_bp, pct))
+            collides_in[gid1].add(s)
+            collides_in[gid2].add(s)
+        qualifying_by_strain[s] = qualifying
+    print(f"Overlap scan: {sum(len(v) for v in qualifying_by_strain.values())} qualifying pairs across the panel", file=sys.stderr)
+
+    # --- Step 1: resolve overlaps globally - one verdict per gene ID, panel-wide ---
+    verdict = resolve_overlaps_globally(genes_by_strain, args, present_in, n_good_transfers, collides_in, qualifying_by_strain)
+    print(f"Overlap resolution: {len(verdict)} genes dropped panel-wide", file=sys.stderr)
+
+    # --- Steps 2-3: extra copies, then rescued-coverage floor - only among overlap survivors ---
+    for s, genes in genes_by_strain.items():
+        for gid, g in genes.items():
+            if gid in verdict:
+                continue
+            if g["extra_copy_number"] and args.extra_copy_require_valid_orf and not g["valid_ORF"]:
+                verdict[gid] = "extra copy with no valid ORF"
+    for s, genes in genes_by_strain.items():
+        for gid, g in genes.items():
+            if gid in verdict or not g["source"].startswith("rescued_"):
+                continue
+            if g["coverage"] is not None and g["coverage"] < args.min_rescued_coverage:
+                verdict[gid] = f"rescued transfer, Liftoff coverage {g['coverage']:.2f} < {args.min_rescued_coverage}"
+
+    # --- Steps 4-5: write every genome's output, applying the same verdicts everywhere ---
     summary_rows = []
     for i, s in enumerate(strains, start=1):
+        genes = genes_by_strain[s]
         gff_path = os.path.join(args.final_dir, f"{s}_final_annotation.gff")
         out_path = os.path.join(args.out_dir, f"{s}_final_annotation_filtered.gff")
         report_path = os.path.join(args.out_dir, f"{s}_filter_report.tsv")
 
-        print(f"=== Genome {i}/{len(strains)}: {s} ===", file=sys.stderr)
-        genes = parse_gff(gff_path)
-
-        removed = {}
-        for gene_id, gene in genes.items():
-            if not gene["extra_copy_number"] or gene["extra_copy_number"] == 0:
-                continue
-            if not gene["valid_ORF"]:
-                removed[gene_id] = "extra copy with no valid ORF"
-
-        for gene_id, gene in genes.items():
-            if gene_id in removed or not gene["source"].startswith("rescued_"):
-                continue
-            if gene["coverage"] is not None and gene["coverage"] < args.min_rescued_coverage:
-                removed[gene_id] = f"rescued transfer, Liftoff coverage {gene['coverage']:.2f} < {args.min_rescued_coverage}"
-
-        surviving = {gid: g for gid, g in genes.items() if gid not in removed}
-        overlap_pairs = find_cds_overlaps(surviving, args.min_overlap_bp)
-        removed.update(resolve_overlaps(surviving, overlap_pairs, args.reference_source_tag, present_in, n_good_transfers))
-
-        kept_ids = set(genes) - set(removed)
+        kept_ids = {gid for gid in genes if gid not in verdict}
         id_mapping = assign_new_ids(genes, kept_ids, i, args.id_prefix)
         write_filtered_gff(gff_path, out_path, genes, kept_ids, id_mapping)
 
         with open(report_path, "w") as rep_fh:
             rep_fh.write("gene_id\tsource\tseqname\treason\n")
-            for gene_id, reason in removed.items():
-                g = genes[gene_id]
-                rep_fh.write(f"{gene_id}\t{g['source']}\t{g['seqname']}\t{reason}\n")
+            for gid, g in genes.items():
+                if gid in verdict:
+                    rep_fh.write(f"{gid}\t{g['source']}\t{g['seqname']}\t{verdict[gid]}\n")
 
         n_total = len(genes)
-        n_removed = len(removed)
-        print(f"  {n_total} protein-coding genes -> {n_total - n_removed} kept, "
-              f"{n_removed} removed ({round(100*n_removed/n_total,1)}%) -> {out_path}", file=sys.stderr)
+        n_removed = sum(1 for gid in genes if gid in verdict)
+        print(f"  {s}: {n_total} protein-coding genes -> {n_total - n_removed} kept, "
+              f"{n_removed} removed ({round(100*n_removed/n_total,1) if n_total else 0}%) -> {out_path}", file=sys.stderr)
         summary_rows.append((s, n_total, n_total - n_removed, n_removed))
 
     with open(os.path.join(args.out_dir, "filter_summary.tsv"), "w") as fh:

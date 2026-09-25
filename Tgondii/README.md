@@ -611,74 +611,61 @@ Results: `expanded_annotation/<genome>_final_annotation.gff`, job logs in `expan
 
 ---
 
-### Gene analysis (before filtering)
+### Step 6: Built annotation check
 
-QC on the raw build output, before [step 7](../../05_Cross-genome_annotation_integration/README.md#step-7-extra-copies-and-overlapping-genes)'s
+QC on the raw build output, before [step 7](../../05_Cross-genome_annotation_integration/README.md#step-7-final-annotation-if-using-step-5-pre-get_pangenes)'s
 filter runs. Output folder: `final_annotation_qc_plots/`.
 ```bash
 mkdir -p final_annotation_qc_plots/logs
 sbatch 05_Cross-genome_annotation_integration/scripts/plot_final_annotation_qc_job.sh
 ```
 (Full description of every output file:
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-6-gene-analysis-before-filtering).)
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-6-built-annotation-check-if-using-step-5).)
 
 **Gene counts** - each genome's final build has 9,249-9,933 protein-coding genes, well above
 its own original annotation (8,000-10,000), since genes are being pulled in from every other
 genome too.
 
-![Protein-coding genes: own original annotation vs. this pipeline's build](05_Cross-genome_annotation_integration/final_annotation_qc_plots/01_gene_counts.png)
-
-**Valid-ORF rate.** ME49 sits at only 9.4%, far below every other genome (77-89%) - expected,
-not a quality problem: ME49 is the reference, so its `main` genes are used as-is and never go
-through Liftoff, meaning they never get the `valid_ORF=` flag Liftoff computes for a transfer.
-This metric just doesn't apply to genes that were never transferred.
-
-![% of genes with a valid ORF, per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/02_valid_orf_rate.png)
+![Protein-coding genes: own original annotation vs. this pipeline's build](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/01_gene_counts.png)
 
 **Extra copies** - RH88 (179) and ME49 (61) stand out; every other genome has 14 or fewer.
 
-![Extra-copy genes, split by valid ORF](05_Cross-genome_annotation_integration/final_annotation_qc_plots/03_extra_copies.png)
+![Extra-copy genes, split by valid ORF](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/03_extra_copies.png)
 
 **CDS-overlap severity** - 8,222 CDS-overlapping pairs across the panel, split minor/substantial/contained.
 
-![CDS-overlap severity per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/04_overlap_severity.png)
+![CDS-overlap severity per genome](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/04_overlap_severity.png)
 
 **Source composition** - where each genome's final genes came from (`main`/original/`good_*`/`rescued_*`).
 
-![Source composition per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/05_source_composition.png)
+![Source composition per genome](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/05_source_composition.png)
 
 **Overlap strand** - the same 8,222 pairs, split by strand instead of severity: only **13 are
 same-strand** (the ones that "shouldn't normally happen"), the other **8,209 are
 opposite-strand**. Same-strand pairs are rare enough on this panel to review by hand, one by one.
 
-![CDS-overlapping pairs per genome, by strand](05_Cross-genome_annotation_integration/final_annotation_qc_plots/06_overlap_strand.png)
+![CDS-overlapping pairs per genome, by strand](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/06_overlap_strand.png)
 
 **Overlap domain support** - of the 8,222 pairs, only **29 have InterPro/PFAM domain evidence on
-both genes**, **5,008 on exactly one**, and **3,185 on neither**. Domain evidence resolves most
-of the panel outright (see the refined overlap-resolution rule in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-7-extra-copies-and-overlapping-genes));
-1,166 pairs (954 distinct genes) are left with no domain evidence on either side and still need
-a resolution criterion.
+both genes**, **5,008 on exactly one**, and **3,185 on neither**. These counts use protein
+domains only; the 7a filter also counts a specific description as evidence (see below).
 
-![CDS-overlapping pairs per genome, by domain support](05_Cross-genome_annotation_integration/final_annotation_qc_plots/07_overlap_domain_support.png)
+![CDS-overlapping pairs per genome, by domain support](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/07_overlap_domain_support.png)
 
-**Putting severity and domain support together** - every one of the 8,222 pairs falls into
-exactly one of six cases, decided by whether each gene is `main` and whether it carries domain
-evidence (full rationale in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-7-extra-copies-and-overlapping-genes)):
+**Pairs by case** - the 8,222 pairs of the raw build, by whether each gene is `main` and whether
+it carries a protein domain:
 
-| # | Case | Rule | Pairs |
-|---|---|---|---:|
-| 1 | `main` × `main` | keep both | 237 |
-| 2 | `main` × other, other **has** a domain | keep both | 18 |
-| 3 | `main` × other, other has **no** domain | keep only `main` | 6,368 |
-| 4 | other × other, **one** has a domain | keep only the one with a domain | 420 |
-| 5 | other × other, **both** have a domain | keep both | 13 |
-| 6 | other × other, **neither** has a domain | **not yet decided** | 1,166 |
+| # | Case | Pairs |
+|---|---|---:|
+| 1 | `main` × `main` | 237 |
+| 2 | `main` × other, other **has** a domain | 18 |
+| 3 | `main` × other, other has **no** domain | 6,368 |
+| 4 | other × other, **one** has a domain | 420 |
+| 5 | other × other, **both** have a domain | 13 |
+| 6 | other × other, **neither** has a domain | 1,166 |
 
-Cases 1-5 (7,056 pairs, 86%) are unambiguous. Case 6 - 1,166 pairs, 954 distinct genes - is the
-open problem: 99.6% opposite-strand, 113 `minor` severity, 63.5% "hypothetical protein" on both
-sides.
+Case 6 - 1,166 pairs, 954 distinct genes: 99.6% opposite-strand, 113 `minor` severity, 63.5%
+"hypothetical protein" on both sides.
 
 Also in that folder: `summary.tsv` (the numbers behind every plot above), `extra_copy_genes.tsv`
 (every extra-copy gene, with description/location/domain/valid-ORF), `cds_overlapping_pairs.tsv`
@@ -691,33 +678,49 @@ above, per genome).
 
 Ran [`filter_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/filter_final_annotation.py)
 on all 15 genomes (rule details in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#7a-pre-filter-drop-unsupported-genes-before-get_pangenes)).
+[general README](../../05_Cross-genome_annotation_integration/README.md#7a-filter-drop-unsupported-genes-before-get_pangenes)).
 Output: `filtered_annotation/<genome>_final_annotation_filtered.gff` - `gene`-typed, IDs
 renumbered `Tg<strain-index>g<00001, ...>`, original ID kept in `original_ID=`.
 
+**Overlap rule** - when two genes' CDSs overlap, 7a looks at "has evidence" (a protein domain
+**or** a specific description):
+
+| Gene A | Gene B | Result |
+|---|---|---|
+| `main` | `main` | Keep both |
+| `main` | has evidence | Keep both |
+| `main` | no evidence | Drop B, subject to the panel check |
+| has evidence | no evidence | Drop B, subject to the panel check |
+| has evidence | has evidence | Keep both |
+| no evidence | no evidence | Drop the gene with fewer `good_<genome>` transfers panel-wide (tie: the shorter CDS) |
+
+Panel check: a gene present in 2 genomes or fewer is dropped; a gene present in more genomes is
+dropped only if it has a qualifying overlap in at least 2 of them. The verdict is per gene ID, so
+a dropped gene leaves every genome.
+
 | Genome | n_original | n_kept | n_removed | % removed |
 |---|---:|---:|---:|---:|
-| ME49 | 9,425 | 8,880 | 545 | 5.8% |
-| ARI | 9,583 | 9,064 | 519 | 5.4% |
-| CAST | 9,530 | 8,983 | 547 | 5.7% |
-| COUG | 9,728 | 9,186 | 542 | 5.6% |
-| FOU | 9,933 | 9,372 | 561 | 5.6% |
-| GAB2 | 9,478 | 8,967 | 511 | 5.4% |
-| GT1 | 9,249 | 8,731 | 518 | 5.6% |
-| MAS | 9,744 | 9,198 | 546 | 5.6% |
-| p89 | 9,686 | 9,110 | 576 | 5.9% |
-| RH88 | 9,724 | 9,105 | 619 | 6.4% |
-| RUB | 9,763 | 9,216 | 547 | 5.6% |
-| TgCATBr9 | 9,911 | 9,366 | 545 | 5.5% |
-| TgCatPRC2 | 9,747 | 9,234 | 513 | 5.3% |
-| VAND | 9,478 | 8,913 | 565 | 6.0% |
-| VEG | 9,380 | 8,860 | 520 | 5.5% |
+| ME49 | 9,425 | 8,690 | 735 | 7.8% |
+| ARI | 9,583 | 8,922 | 661 | 6.9% |
+| CAST | 9,530 | 8,867 | 663 | 7.0% |
+| COUG | 9,728 | 9,084 | 644 | 6.6% |
+| FOU | 9,933 | 9,318 | 615 | 6.2% |
+| GAB2 | 9,478 | 8,850 | 628 | 6.6% |
+| GT1 | 9,249 | 8,655 | 594 | 6.4% |
+| MAS | 9,744 | 9,151 | 593 | 6.1% |
+| p89 | 9,686 | 9,063 | 623 | 6.4% |
+| RH88 | 9,724 | 8,907 | 817 | 8.4% |
+| RUB | 9,763 | 9,130 | 633 | 6.5% |
+| TgCATBr9 | 9,911 | 9,277 | 634 | 6.4% |
+| TgCatPRC2 | 9,747 | 9,131 | 616 | 6.3% |
+| VAND | 9,478 | 8,855 | 623 | 6.6% |
+| VEG | 9,380 | 8,749 | 631 | 6.7% |
 
 ### Filtering — 7b no pre-filter / tag (done)
 
 Ran [`tag_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/tag_final_annotation.py)
 on all 15 genomes (rule details in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#7b-no-pre-filtering-tag-decide-after-get_pangenes)).
+[general README](../../05_Cross-genome_annotation_integration/README.md#7b-no-filtering-tag-decide-after-get_pangenes)).
 Nothing removed - same `gene`-typing/ID-renumbering as 7a, plus an `intersect=` tag on every
 gene recording what it overlaps (`NA`/`with_main`/`with_other_with_domain`/`with_other_no_domain`).
 Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_intersect_pairs.tsv`.
@@ -746,11 +749,53 @@ Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_int
 
 ## 06 – GET_PANGENES
 
+Ran `get_pangenes` on the 7b GFFs (`tagged_annotation/`, nothing pre-filtered), 15 genomes:
+```bash
+sbatch 06_GET_PANGENES/scripts/link_for_get_pangenes_7b.slurm.sh
+sbatch 06_GET_PANGENES/scripts/run_get_pangenes_7b_job.sh
+```
+Result: **11,031 pangenes** across the 15 genomes (`for_get_pangenes_7b_pangenes/pangene_matrix*.tab`;
+`pangene_matrix_genes.tr.tab` lists the gene IDs of every genome in every pangene).
+
 [↑ Back to top](#analysis-steps)
 
 ---
 
 ## 07 – Post-GET_PANGENES Adjusting
+
+**Pangenes with more than one gene in the same genome (7b).** `get_pangenes` sometimes puts two or
+more genes of one genome into a single pangene. **1,501 of the 11,031 pangenes (13.6%)** do it in
+at least one genome, adding up to 5,236 genes beyond one per genome.
+
+| Genes in the genome with the most | Pangenes |
+|---|---:|
+| 2 | 1,034 |
+| 3 | 426 |
+| 4 | 32 |
+| 5 | 9 |
+
+- 1,326 of the 1,501 are core pangenes (present in all 15 genomes).
+- In 752 of them only one genome has the extra gene; in 35 all 15 genomes do.
+- Genomes with the most such pangenes: FOU (481), TgCATBr9 (453), COUG (403), MAS (399),
+  RUB (394); the reference ME49 has the fewest (80).
+- 4,826 of the 5,236 extra-gene pairs have consecutive gene numbers (e.g. `Tg15g02056` and
+  `Tg15g02057`), which suggests neighbouring genes on the chromosome.
+
+[`explore_multigene_pangenes.py`](07_Post_GET_PANGENES_adjusting/scripts/explore_multigene_pangenes.py)
+classified the 5,236 neighbouring gene pairs (`multigene_pangenes/Toxo7b_multigene_pairs.tsv`, one
+row per pair). Overlapping genes are not the explanation:
+
+- Only 5 pairs (0.1%) have overlapping CDSs; another 777 (14.8%) overlap only in the gene span
+  (UTR included).
+- 5,230 pairs are same-strand and 6 opposite-strand.
+- The two genes are close neighbours: 2,449 pairs (46.8%) are within 1 kb of each other, 1,909
+  (36.5%) are 1-5 kb apart, 93 (1.8%) are further apart and 3 are on different contigs.
+- 2,695 pairs (51%) are two genes of the genome's own original annotation, so the split is not
+  a Liftoff artefact.
+- Domain evidence: both genes have one in 1,260 pairs, only one gene in 1,831 pairs, neither in
+  2,145 pairs.
+
+Whether these pairs are tandem copies or one gene split into two is not decided yet.
 
 [↑ Back to top](#analysis-steps)
 
@@ -758,6 +803,53 @@ Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_int
 
 ## 08 – Pangenome Visualisation
 
+All figures for the 7b pangenes, generated with
+[`plot_all.sh`](08_Pangenome_Visualisation/scripts/plot_all.sh) (label `Toxo7b`; every file also
+comes as `.svg`):
+```bash
+bash 08_Pangenome_Visualisation/scripts/plot_all.sh \
+  -i 06_GET_PANGENES/for_get_pangenes_7b_pangenes/pangene_matrix.tr.tab \
+  -o 08_Pangenome_Visualisation -l Toxo7b
+```
+
+**Pangenome and core genome size** - genomes are added one at a time in 100 random orders. The
+pangenome grows from about 9,200 pangenes (one genome) to 11,031 (all 15) and is still growing,
+by about 100 new pangenes per genome added at the end. The core genome falls from about 9,200 to
+8,733. The fitted curves put the core plateau at about 8,700-8,800 pangenes (Tettelin 8,770,
+Willenbrock 8,716). `Toxo7b_pancore_separate.png` shows the two curves in separate panels.
+
+![Pangenome and core genome size](08_Pangenome_Visualisation/Toxo7b_pancore.png)
+
+**Pangene occupancy** - how many genomes each pangene is present in. 8,733 pangenes (79%) are core,
+146 are in 14 genomes (soft-core), and 1,448 (13%) are in one genome only; another 163 are in two.
+
+![Pangene occupancy](08_Pangenome_Visualisation/Toxo7b_occupancy.png)
+
+**Singletons per genome** - the 1,448 pangenes present in one genome only, by genome. RH88 has the
+most (226), GT1 the fewest (18).
+
+![Singletons per genome](08_Pangenome_Visualisation/Toxo7b_singletons.png)
+
+**POCS heatmap** - pairwise percentage of conserved sequences between genomes, clustered
+(complete linkage). Between different genomes it stays between about 95 and 98. RH88 is the most
+distant one (95-97 against the others), and it is also the genome with the most singletons.
+
+![POCS heatmap](08_Pangenome_Visualisation/Toxo7b_POCS_heatmap.png)
+
+**InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more
+often than in the remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted).
+Only pangenes with at least one InterPro entry are counted (4,910 core, 653 cloud).
+Cloud pangenes: 64 of 578 entries tested are enriched (adjusted p < 0.05, at least 3 pangenes),
+led by dynein heavy chain (66 pangenes, 10% of the annotated cloud pangenes), polyketide synthase
+domains, cytochrome b/b6 and rhoptry kinase-like. Core pangenes: 7 of 5,472 entries, among them
+methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains. A core pangene
+collects entries from the genes of up to 15 genomes, which may favour the core side, so the core
+hits are the ones to read with care.
+```bash
+sbatch 08_Pangenome_Visualisation/scripts/plot_domain_enrichment_job.sh
+```
+
+![InterPro term enrichment](08_Pangenome_Visualisation/pangenome_plots/Toxo7b_domain_enrichment.png)
 
 ---
 

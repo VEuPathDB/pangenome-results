@@ -712,9 +712,6 @@ as-downloaded figure in [01.1](#011-genomes-selected).
   W72310 + eAF1023 + eAF1090, not "the eAF set".
   A BUSCO-duplication check on eAF1023/eAF1090 would still be worth doing.
 
-**For the pangenome:** the TE-filtering of gene models (02.4) is unaffected — it is
-per-gene overlap, not a whole-genome fraction. Only a cross-strain *quantitative* TE
-comparison needs the assembly-quality caveat (ATCC 46645, D141, and the eAF pair).
 
 ### 02.4 TE overlap with gene models
 
@@ -775,7 +772,7 @@ models, safe to remove. The 20–80% "flagged"/inspect band is not yet reviewed.
 sbatch 02_TE_annotation_Clean_Up/scripts/build_te_kill_lists.slurm.sh
 ```
 
-337 confirmed TE-derived genes removed from every genome's GFF, output in `gff_cleaned/`.
+339 confirmed TE-derived genes removed from every genome's GFF, output in `gff_cleaned/`.
 
 [↑ Back to top](#analysis-steps)
 
@@ -839,6 +836,52 @@ This ran successfully; `gff_with_interpro/` is the input for step 05.
 
 ## 05 – Cross-genome Annotation Integration
 
+### Step 1: Native annotation check
+
+Run **once**, after [step 04](#04--interproscan), on `gff_with_interpro/` (the GFFs with the
+domain evidence written in), so that the domain columns and plots are real. Output folder for
+this run: `annotation_check/`.
+```bash
+sbatch 05_Cross-genome_annotation_integration/scripts/analyze_input_gffs_job.sh
+```
+
+**Genes per genome** - 9,601 to 10,464 protein-coding genes per genome, split by whether the
+gene carries InterPro/PFAM evidence (81-84% do, in every genome, so no genome stands out as
+missing domain annotation).
+
+![Protein-coding genes per genome, with and without domain evidence](05_Cross-genome_annotation_integration/annotation_check/01_gene_counts_protein_coding.png)
+
+**Gene types** - every gene category found. Nearly everything is protein-coding. The
+non-coding genes are reported differently by the two groups of genomes: AF293 (262), A1160 and
+A1163 (180 each) carry them as `ncRNA_other` and have no tRNA category, while the 14 `GCA_`
+genomes carry 160-172 tRNA genes each and no `ncRNA_other`. Pseudogenes are only in A1163 (19),
+AF293 (1) and GCA_058972525.1 (1). No genome has rRNA or unclassified genes.
+
+![Gene categories per genome](05_Cross-genome_annotation_integration/annotation_check/02_gene_biotype_breakdown.png)
+
+**Whole-gene overlaps** - pairs of genes whose annotated spans touch, UTR included. The 14 `GCA_`
+genomes have 579-849 each (mostly opposite-strand), AF293 has 246 and A1160/A1163 have 8-9.
+Almost all of these disappear once the UTRs are left out: the core-span count (CDS/exon extent
+only) is 0-4 per `GCA_` genome. So the CDS-level count below is the one that matters.
+
+**CDS-to-CDS overlaps** - gene pairs whose coding sequences actually overlap, split by strand.
+Most genomes have 0-2 pairs. AF293 has the most (16, all opposite-strand); A1160 and A1163 have
+4 each, and GCA_040126065.1 has 4 (2 same-strand, 2 opposite-strand).
+
+![CDS-overlapping gene pairs per genome, by strand](05_Cross-genome_annotation_integration/annotation_check/05_cds_overlap_counts.png)
+
+**Overlap severity** - the same pairs by how much of the smaller gene's CDS is covered:
+minor (< 20%), substantial (20-80%), contained (>= 80%). AF293 has 6 minor, 5 substantial and 5
+contained pairs; every other genome has at most 2 contained pairs. The pair list with
+descriptions, sizes and `has_domain` is `cds_overlapping_pairs.tsv`.
+
+![CDS overlap severity per genome](05_Cross-genome_annotation_integration/annotation_check/06_cds_overlap_severity.png)
+
+Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR included),
+`04_core_overlap_counts.png` (CDS/exon extent only), and the tables
+(`gene_biotype_counts.tsv`, `overlap_counts.tsv`, `feature_attribute_table.tsv`, one
+`<genome>_gene_classification.tsv` per genome).
+
 ### Prepare the GFFs for Liftoff
 
 No genes are removed by a kill list for this species (no `gff_curated/`), so
@@ -858,7 +901,7 @@ from gene spans:
 
 | Genome | Transcripts | UTR lines deleted | Exons clipped | Exons deleted | Genes resized | bp trimmed |
 |---|---|---|---|---|---|---|
-| AF293 | 9732 | 10633 | 8769 | 1294 | 5789 | 4100549 |
+| AF293 | 10014 | 13075 | 11786 | 973 | 6968 | 4125804 |
 | A1160 | 9887 | 8378 | 7246 | 611 | 4745 | 2473229 |
 | A1163 | 9896 | 8385 | 7253 | 611 | 4749 | 2474427 |
 | GCA_040126065.1 | 10447 | 13120 | 11016 | 1522 | 6197 | 3550275 |
