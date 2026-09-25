@@ -988,6 +988,65 @@ sbatch --array=1-17 05_Cross-genome_annotation_integration/scripts/build_final_a
 ```
 Results: `expanded_annotation/<genome>_final_annotation.gff`, job logs in `expanded_annotation/logs/`.
 
+### Filtering — 7a (with filtering)
+
+Ran [`filter_final_annotation.py`](../../05_Cross-genome_annotation_integration/scripts/filter_final_annotation.py)
+on all 17 genomes (rule details in the
+[general README](../../05_Cross-genome_annotation_integration/README.md#7a-filter-drop-unsupported-genes-before-get_pangenes)).
+Output: `filtered_annotation/<genome>_final_annotation_filtered.gff`, with the genes typed `gene` and
+renumbered `Afu<strain-index>g<00001, ...>`, original ID kept in `original_ID=`. The figures come from
+`plot_filter_qc_job.sh` (`filter_qc_plots/`).
+
+The filter removed **4,307 of 192,136 genes (2.2%)**, between 1.9% and 2.7% per genome:
+
+| Genome | n_original | n_kept | n_removed | % removed |
+|---|---:|---:|---:|---:|
+| AF293 | 11,295 | 11,048 | 247 | 2.2% |
+| A1160 | 11,397 | 11,148 | 249 | 2.2% |
+| A1163 | 11,393 | 11,160 | 233 | 2.0% |
+| GCA_040126065.1 | 11,091 | 10,846 | 245 | 2.2% |
+| GCA_040142845.1 | 11,242 | 10,933 | 309 | 2.7% |
+| GCA_040142855.1 | 11,428 | 11,157 | 271 | 2.4% |
+| GCA_040142865.1 | 11,375 | 11,116 | 259 | 2.3% |
+| GCA_040142875.1 | 11,363 | 11,087 | 276 | 2.4% |
+| GCA_040142885.1 | 11,074 | 10,838 | 236 | 2.1% |
+| GCA_040142945.1 | 11,081 | 10,868 | 213 | 1.9% |
+| GCA_040142955.1 | 11,776 | 11,509 | 267 | 2.3% |
+| GCA_040142975.1 | 11,370 | 11,096 | 274 | 2.4% |
+| GCA_040167795.1 | 11,408 | 11,141 | 267 | 2.3% |
+| GCA_040167805.1 | 11,082 | 10,841 | 241 | 2.2% |
+| GCA_058970245.1 | 11,229 | 11,000 | 229 | 2.0% |
+| GCA_058972525.1 | 11,449 | 11,191 | 258 | 2.3% |
+| GCA_058972625.1 | 11,083 | 10,850 | 233 | 2.1% |
+
+Before and after filtering, per genome:
+
+![Genes before and after filtering](filter_qc_plots/01_gene_counts.png)
+
+Why each gene was removed (read from the figure): about half of the removed genes overlapped a
+reference-derived (`main`) gene and had no evidence themselves. The rest are low-coverage `rescued_`
+transfers, ties between two genes with no evidence, genes that overlapped a gene with evidence, and
+extra copies with no valid ORF.
+
+![Why each gene was removed](filter_qc_plots/03_removal_reasons.png)
+
+Extra-copy genes fall from 11-76 per genome to 0-25; GCA_040142955.1 (25) and GCA_058972525.1 (13)
+keep the most.
+
+![Extra-copy genes before and after filtering](filter_qc_plots/02_extra_copies.png)
+
+CDS-overlapping gene pairs fall from 262-303 per genome to 94-110, and the pairs where one gene is
+contained in the other from 128-149 to 43-48. The rules keep some overlaps on purpose (small overlaps
+at a gene's end, pairs where both genes have evidence); which case the remaining pairs belong to was
+not checked.
+
+![CDS-overlap severity before and after filtering](filter_qc_plots/04_overlap_severity.png)
+
+Which layer each gene comes from (`main`, the genome's own annotation, `good_` and `rescued_`
+transfers):
+
+![Source composition before and after filtering](filter_qc_plots/05_source_composition.png)
+
 [↑ Back to top](#analysis-steps)
 
 ---
