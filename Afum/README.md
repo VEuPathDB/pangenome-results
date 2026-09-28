@@ -157,6 +157,8 @@ variable.
 - [06 – GET_PANGENES](#06--get_pangenes)
 - [07 – Post-GET_PANGENES Adjusting](#07--post-get_pangenes-adjusting)
 - [08 – Pangenome Visualisation](#08--pangenome-visualisation)
+  - [With filtering (7a)](#with-filtering-7a)
+  - [No filtering (7b)](#no-filtering-7b)
 
 ---
 
@@ -1093,7 +1095,11 @@ sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7b --label Afum7
 Genomes are labelled by their accession, except AF293, A1160 and A1163. The strain of each accession is in the
 [genome table of step 01](#01--genome-selection--qc).
 
+---
+
 ### With filtering (7a)
+
+*Pangenes from the GFFs filtered before `get_pangenes`.*
 
 **Pangenome and core genome size** - genomes are added one at a time in 100 random orders. The pangenome
 grows to 12,984 pangenes (all 17 genomes), still growing by about 70 per genome at the end. The core falls
@@ -1130,8 +1136,8 @@ genomes, as independent samples, so it is optimistic. Core: 78% of genes with a 
 (12,984); each gets one value, the median length of the contigs of all its genes. The bars give the share of the
 pangenes of each category in each class. Cloud pangenes are on contigs below 200 kb more often than the others:
 11% of cloud pangenes (6% below 50 kb), against none of the core and shell pangenes; 22% are on contigs below 1 Mb,
-against 1.5% of core. Contigs below 10 kb were removed from every genome in step 01, so the smallest class starts at
-10 kb.
+against 1.5% of core. No pangene has a median contig below 10 kb, so the smallest class starts at 10 kb; the panel still
+has 36 contigs below 10 kb, but they carry only 4 genes (see [step 01](#01--genome-selection--qc)).
 
 ![Contig size by occupancy, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_contig_classes.png)
 
@@ -1162,7 +1168,11 @@ genomes, which may favour the core side.
 
 ![InterPro term enrichment, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_domain_enrichment.png)
 
+---
+
 ### No filtering (7b)
+
+*Pangenes from the tagged GFFs, nothing removed.*
 
 **Pangenome and core genome size** - the pangenome grows to 13,693 pangenes (all 17 genomes), still growing by
 about 97 per genome at the end. The core falls to 10,433; the fitted curves put its plateau at 10,477 (Tettelin) and

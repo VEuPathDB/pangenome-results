@@ -92,8 +92,12 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [06 – GET_PANGENES](#06--get_pangenes)
 - [07 – Post-GET_PANGENES Adjusting](#07--post-get_pangenes-adjusting)
 - [08 – Pangenome Visualisation](#08--pangenome-visualisation)
+  - [With filtering (7a)](#with-filtering-7a)
+  - [No filtering (7b)](#no-filtering-7b)
 - [Redundancy check on the final panel](#redundancy-check-on-the-final-panel)
 - [09 – Redundant Contig Removal](#09--redundant-contig-removal)
+  - [With filtering (7a), redundant contigs removed](#with-filtering-7a-redundant-contigs-removed)
+  - [No filtering (7b), redundant contigs removed](#no-filtering-7b-redundant-contigs-removed)
 
 ---
 
@@ -862,7 +866,11 @@ sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7a --label Toxo7
 `--set` stands for `--pangenes-dir for_get_pangenes_<set>_pangenes --gff-dir for_get_pangenes_<set>`, and turns the
 unsupported-overlap plot on for 7b only. Give the two folders by hand for any other layout (`--help` lists every option).
 
+---
+
 ### With filtering (7a)
+
+*Pangenes from the GFFs filtered before `get_pangenes`.*
 
 **Pangenome and core genome size** - genomes are added one at a time in 100 random orders. The
 pangenome grows from 8,649 pangenes (one genome) to 9,904 (all 15), still growing by about 70 per
@@ -936,7 +944,7 @@ another singleton in 24.
 
 The plot of unsupported overlapping genes (not from the reference layer, overlapping another gene, no
 domain and no specific description) is only made without filtering, see
-[No filtering (7b)](#no-filtering-7b): the 7a filter already removes most of these genes, and the
+[No filtering (7b)](#no-filtering-7b): the 7a filter already removes genes of this kind, and the
 `intersect=` tag it needs exists only in the 7b GFFs.
 
 **InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more
@@ -961,7 +969,11 @@ tested.
 
 ![InterPro term enrichment, with filtering](08_Pangenome_Visualisation/pangenome_plots/Toxo7a_domain_enrichment.png)
 
+---
+
 ### No filtering (7b)
+
+*Pangenes from the tagged GFFs, nothing removed.*
 
 **Pangenome and core genome size** - the pangenome grows from about 9,200 pangenes (one genome) to
 11,031 (all 15), still growing by about 100 per genome at the end. The core falls from about 9,200
@@ -1236,7 +1248,11 @@ with RH88 becomes a singleton of the other genome).
 The figures are the same as in step 08, for the two sets; the numbers in brackets are the ones before the removal.
 Every figure also comes as `.svg`, with the tables of the values.
 
+---
+
 ### With filtering (7a), redundant contigs removed
+
+*The 7a pangenes after the genes of the redundant contigs were removed.*
 
 **Pangenome and core genome size** - the pangenome has 9,847 pangenes (9,904) and still grows by about 67 per genome at
 the end (70). The core is 8,281 (same); the fitted curves put its plateau at 8,306 (Tettelin) and 8,262 (Willenbrock),
@@ -1281,7 +1297,11 @@ pangenes, so removing these contigs does not seem to change the pattern discusse
 
 ![InterPro term enrichment, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_domain_enrichment.png)
 
+---
+
 ### No filtering (7b), redundant contigs removed
+
+*The 7b pangenes after the genes of the redundant contigs were removed.*
 
 **Pangenome and core genome size** - the pangenome has 10,922 pangenes (11,031) and still grows by about 92 per genome at
 the end (98). The core is 8,733 (same); the plateau is 8,768 (Tettelin) and 8,712 (Willenbrock), against 8,770 and
