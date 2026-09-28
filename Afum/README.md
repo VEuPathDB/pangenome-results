@@ -990,7 +990,71 @@ sbatch --array=1-17 05_Cross-genome_annotation_integration/scripts/build_final_a
 ```
 Results: `expanded_annotation/<genome>_final_annotation.gff`, job logs in `expanded_annotation/logs/`.
 
-### Filtering — 7a (with filtering)
+### Step 6: Built annotation check
+
+QC on the raw build output, before [step 7](../../05_Cross-genome_annotation_integration/README.md#step-7-final-annotation-if-using-step-5-pre-get_pangenes)'s
+filter runs. Output folder: `final_annotation_qc_plots/`.
+```bash
+mkdir -p final_annotation_qc_plots/logs
+sbatch 05_Cross-genome_annotation_integration/scripts/plot_final_annotation_qc_job.sh
+```
+(Full description of every output file:
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-6-built-annotation-check-if-using-step-5).)
+
+**Gene counts** - each genome's final build has 11,074-11,776 protein-coding genes, above its own original
+annotation (9,601-10,464), since genes are being pulled in from every other genome too.
+
+![Protein-coding genes: own original annotation vs. this pipeline's build](05_Cross-genome_annotation_integration/final_annotation_qc_plots/01_gene_counts.png)
+
+**Extra copies** - ATCC 42202 (76), ATCC 46645 (60) and 08-19-02-30 (56) stand out; every other genome has
+between 11 and 46.
+
+![Extra-copy genes, split by valid ORF](05_Cross-genome_annotation_integration/final_annotation_qc_plots/03_extra_copies.png)
+
+**CDS-overlap severity** - 4,997 CDS-overlapping pairs across the panel, split minor (669), substantial (1,953)
+and contained (2,375).
+
+![CDS-overlap severity per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/04_overlap_severity.png)
+
+**Source composition** - where each genome's final genes came from (`main`/original/`good_*`/`rescued_*`).
+
+![Source composition per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/05_source_composition.png)
+
+**Overlap strand** - the same 4,997 pairs, split by strand instead of severity: only **13 are same-strand**
+(the ones that "shouldn't normally happen"), the other **4,984 are opposite-strand**.
+
+![CDS-overlapping pairs per genome, by strand](05_Cross-genome_annotation_integration/final_annotation_qc_plots/06_overlap_strand.png)
+
+**Overlap domain support** - of the 4,997 pairs, **129 have InterPro/PFAM domain evidence on both genes**,
+**2,918 on exactly one**, and **1,950 on neither**. These counts use protein domains only; the 7a filter also
+counts a specific description as evidence (see below).
+
+![CDS-overlapping pairs per genome, by domain support](05_Cross-genome_annotation_integration/final_annotation_qc_plots/07_overlap_domain_support.png)
+
+**Pairs by case** - the 4,997 pairs of the raw build, by whether each gene is `main` and whether it carries a
+protein domain:
+
+| # | Case | Pairs |
+|---|---|---:|
+| 1 | `main` × `main` | 190 |
+| 2 | `main` × other, other **has** a domain | 161 |
+| 3 | `main` × other, other has **no** domain | 3,293 |
+| 4 | other × other, **one** has a domain | 369 |
+| 5 | other × other, **both** have a domain | 20 |
+| 6 | other × other, **neither** has a domain | 964 |
+
+Case 6 - 964 pairs, 633 distinct genes: 99.9% opposite-strand, 233 `minor` severity.
+
+Also in that folder: `summary.tsv` (the numbers behind every plot above), `extra_copy_genes.tsv`
+(every extra-copy gene, with description/location/domain/valid-ORF), `cds_overlapping_pairs.tsv`
+(every pair above, one row each) and `overlap_domain_summary.tsv` (the domain-support numbers
+above, per genome).
+
+[↑ Back to top](#analysis-steps)
+
+---
+
+### Filtering — 7a pre-filter (done)
 
 Ran [`filter_final_annotation.py`](../../05_Cross-genome_annotation_integration/scripts/filter_final_annotation.py)
 on all 17 genomes (rule details in the
@@ -1048,6 +1112,39 @@ Which layer each gene comes from (`main`, the genome's own annotation, `good_` a
 transfers):
 
 ![Source composition before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/05_source_composition.png)
+
+### Filtering — 7b no pre-filter / tag (done)
+
+Ran [`tag_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/tag_final_annotation.py)
+on all 17 genomes (rule details in the
+[general README](../../05_Cross-genome_annotation_integration/README.md#7b-no-filtering-tag-decide-after-get_pangenes)).
+Nothing removed - same `gene`-typing/ID-renumbering as 7a, plus an `intersect=` tag on every
+gene recording what it overlaps (`NA`/`with_main`/`with_other_with_domain`/`with_other_no_domain`).
+Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_intersect_pairs.tsv`.
+
+```bash
+sbatch 05_Cross-genome_annotation_integration/scripts/tag_final_annotation_job.sh
+```
+
+| Genome | n_total | NA | with_main | with_other_with_domain | with_other_no_domain |
+|---|---:|---:|---:|---:|---:|
+| AF293 | 11,295 | 10,768 | 250 | 15 | 262 |
+| A1160 | 11,397 | 10,869 | 224 | 30 | 274 |
+| A1163 | 11,393 | 10,867 | 224 | 32 | 270 |
+| GCA_040126065.1 | 11,091 | 10,564 | 220 | 32 | 275 |
+| GCA_040142845.1 | 11,242 | 10,686 | 220 | 30 | 306 |
+| GCA_040142855.1 | 11,428 | 10,880 | 222 | 32 | 294 |
+| GCA_040142865.1 | 11,375 | 10,827 | 223 | 32 | 293 |
+| GCA_040142875.1 | 11,363 | 10,784 | 220 | 34 | 325 |
+| GCA_040142885.1 | 11,074 | 10,553 | 210 | 28 | 283 |
+| GCA_040142945.1 | 11,081 | 10,575 | 210 | 29 | 267 |
+| GCA_040142955.1 | 11,776 | 11,234 | 211 | 35 | 296 |
+| GCA_040142975.1 | 11,370 | 10,810 | 220 | 33 | 307 |
+| GCA_040167795.1 | 11,408 | 10,851 | 196 | 38 | 323 |
+| GCA_040167805.1 | 11,082 | 10,553 | 206 | 33 | 290 |
+| GCA_058970245.1 | 11,229 | 10,705 | 202 | 36 | 286 |
+| GCA_058972525.1 | 11,449 | 10,905 | 199 | 37 | 308 |
+| GCA_058972625.1 | 11,083 | 10,564 | 208 | 30 | 281 |
 
 [↑ Back to top](#analysis-steps)
 
