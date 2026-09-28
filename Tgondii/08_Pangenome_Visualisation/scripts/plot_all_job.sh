@@ -30,7 +30,7 @@
 #   --set 7a|7b          shortcut: --pangenes-dir for_get_pangenes_<set>_pangenes, --gff-dir for_get_pangenes_<set>,
 #                        and --overlap yes for 7b, no for 7a
 #   --overlap yes|no     also plot the unsupported overlapping genes; needs the tagged 7b GFFs (intersect=)  (default no)
-#   --contig-sizes FILE  step-01 table with genome_label, contig, length   (default 01_Genome_Selection_QC/contig_size_profile/contig_sizes.tsv)
+#   --contig-sizes FILE  step-01 table with genome_label, contig, length   (default contig_size_profile/contig_sizes.tsv)
 #   --entry-list FILE    InterPro IPR id -> name, downloaded there if missing (default /home/aludwig/hc-storage/interpro_entry.list)
 #   --out-dir DIR        output folder                                     (default pangenome_plots)
 #   --core-missing A  --softcore-missing B  --cloud-max C   how the categories are cut, in numbers of genomes
@@ -50,7 +50,7 @@ set -uo pipefail
 
 PANGENES_DIR=""; MATRIX_SUBDIR=""; GFF_DIR=""; GFF_SUFFIX="_for_get_pangenes.gff"; LABEL=""; SET=""
 OVERLAP="no"
-CONTIG_SIZES="01_Genome_Selection_QC/contig_size_profile/contig_sizes.tsv"
+CONTIG_SIZES="contig_size_profile/contig_sizes.tsv"
 ENTRY_LIST="/home/aludwig/hc-storage/interpro_entry.list"
 OUT_DIR="pangenome_plots"
 CATEGORIES="Core,Cloud"; ALPHA="0.05"; MIN_TOTAL="5"; MIN_COUNT="3"; TOP="15"

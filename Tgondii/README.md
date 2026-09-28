@@ -840,8 +840,7 @@ Whether these pairs are tandem copies or one gene split into two is not decided 
 
 > **Preliminary.** Some pangenes hold more than one gene of the same genome (1,501 without
 > filtering, 1,374 with filtering, see [step 07](#07--post-get_pangenes-adjusting)) and are still
-> being investigated. The figures below count them as they are, except the gene-properties figure,
-> which leaves them out. They will be updated once those pangenes are resolved.
+> being investigated. The figures below count them as they are. They will be updated once those pangenes are resolved.
 
 The same figures for the two sets of pangenes: **with filtering** (7a, filtered before
 `get_pangenes`) and **no filtering** (7b, tagged, nothing removed). Every figure also comes as
@@ -888,22 +887,21 @@ genomes only. Between different genomes POCS is 96.7-98.8. RH88 is the most dist
 
 ![POCS heatmap, with filtering](08_Pangenome_Visualisation/Toxo7a_POCS_heatmap.png)
 
-**Gene properties by occupancy** - only pangenes with exactly one gene in each genome they are
-present in are used (8,530; 1,374 left out). Top: proportion of genes with an InterPro/PFAM domain,
-averaged over the pangenes of each occupancy. Bottom: protein length, one value per pangene (the
-median of its genes). The line joining cloud and core gives the Tukey HSD p-value, which treats
+**Gene properties by occupancy** - every pangene is used (9,904), including the ones with more than one
+gene in a genome; the occupancy is the number of genomes the pangene is present in. Top: proportion of
+genes with an InterPro/PFAM domain, averaged over the pangenes of each occupancy. Bottom: protein
+length, one value per pangene (the median over all its genes). A Tukey HSD test compares the four categories on the value of each pangene, and the line joining cloud and core gives its p-value for core against cloud, which treats
 genes from different genomes as independent samples, so it is optimistic. The number of pangenes of
 each occupancy is written under the axis and is small between 2 and 13 genomes, so those bars are
-noisy. Core: 56% of genes with a domain, median 449 aa; cloud: 44% and 240 aa. The `_log` file
+noisy. Core: 57% of genes with a domain, median 513 aa; cloud: 44% and 240 aa. The `_log` file
 shows protein length on a log axis.
 
 ![Gene properties by occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy_properties.png)
 
-**Contig size by occupancy** - the contigs that carry the pangenes, split into size classes. Only
-pangenes with exactly one gene in each genome they are present in are used (8,530); each gets one
-value, the median length of the contigs of its genes. The bars give the share of the pangenes of
+**Contig size by occupancy** - the contigs that carry the pangenes, split into size classes. Every
+pangene is used (9,904); each gets one value, the median length of the contigs of all its genes. The bars give the share of the pangenes of
 each category in each class. Cloud pangenes sit on short contigs far more often than core ones:
-16% of cloud pangenes are on contigs below 200 kb (10% below 50 kb), against 0.5% (0.1%) of core.
+16% of cloud pangenes are on contigs below 200 kb (10% below 50 kb), against 0.4% (0.1%) of core.
 Contigs below 10 kb were removed from every genome in step 01, so the smallest class starts at
 10 kb.
 
@@ -917,10 +915,24 @@ ORF result and are only marked by the pseudogene biotype; pangenes with no gene 
 Two figures: the number of mostly invalid pangenes per occupancy, and their share of the pangenes of
 that occupancy (the total per occupancy is in the `.tsv`). Mostly invalid: 50% of cloud pangenes
 (190 of 380), 35% of shell, 22% of soft-core and 2.3% of core (187 of 8,269).
+Even after the 7a filter, a large share of the cloud pangenes is mostly invalid, so additional filtering could be considered.
 
 ![Pangenes with mostly invalid ORFs, with filtering, count](08_Pangenome_Visualisation/Toxo7a_occupancy_invalid_only.png)
 
 ![Pangenes with mostly invalid ORFs, with filtering, percentage](08_Pangenome_Visualisation/Toxo7a_occupancy_invalid_percent.png)
+
+![Share of invalid genes by category, with filtering](08_Pangenome_Visualisation/Toxo7a_invalid_share.png)
+
+**Share of invalid genes by category** - each bar is one category, from cloud to core, split by how many of the genes of a
+pangene are invalid: none, up to half, more than half but not all, or all of them. In the cloud most pangenes have one or
+two genes, so a pangene is either all valid or all invalid, and the segment of "all invalid" is about the same as the
+share of "mostly invalid" pangenes in the two figures above.
+
+**Where the invalid singletons come from** - of the 990 singleton pangenes, 156 have only invalid genes. As in 7b, none is a gene of
+a genome's own annotation: 154 are `rescued_` transfers and 2 are `main`. 152 have no valid ORF and 4 carry the pseudogene
+biotype; none is an extra copy. The donor gene is absent from that genome's final GFF in 71 cases, is in a pangene of two or
+more genomes that the transfer did not join in 61 (in 35 of them the genome already has a gene in that pangene), and is
+another singleton in 24.
 
 The plot of unsupported overlapping genes (not from the reference layer, overlapping another gene, no
 domain and no specific description) is only made without filtering, see
@@ -929,9 +941,10 @@ domain and no specific description) is only made without filtering, see
 
 **InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more
 often than in the remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted). Only
-pangenes with at least one InterPro entry are counted (4,889 core, 497 cloud). Cloud: 56 of 501
-entries tested are enriched (adjusted p < 0.05, at least 3 pangenes); core: 2 of 5,454
-(methyltransferase and MFS transporter). A core pangene collects entries from the genes of up to
+pangenes with at least one InterPro entry are counted (4,889 core, 497 cloud), and only entries carried by at
+least 5 pangenes are tested (680). Cloud: 70 of 310 entries tested are enriched (adjusted p < 0.05, at
+least 3 pangenes); core: 10 of 672, among them methyltransferase, MFS transporter, WD40 repeat,
+tetratricopeptide and zinc finger domains. A core pangene collects entries from the genes of up to
 15 genomes, which may favour the core side.
 
 The strongest cloud signal, dynein heavy chain (68 of its 78 pangenes are cloud), is most likely an
@@ -971,13 +984,13 @@ distant genome (mean 96.2).
 
 ![POCS heatmap, no filtering](08_Pangenome_Visualisation/Toxo7b_POCS_heatmap.png)
 
-**Gene properties by occupancy** - same method as above, on 9,530 pangenes (1,501 left out). Core:
-53% of genes with a domain, median 414 aa; cloud: 40% and 212 aa.
+**Gene properties by occupancy** - same method as above, on 11,031 pangenes. Core:
+55% of genes with a domain, median 477 aa; cloud: 40% and 212 aa.
 
 ![Gene properties by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy_properties.png)
 
-**Contig size by occupancy** - same method as above, on 9,530 pangenes. 19% of cloud pangenes are
-on contigs below 200 kb (14% below 50 kb), against 0.5% (0.1%) of core.
+**Contig size by occupancy** - same method as above, on 11,031 pangenes. 19% of cloud pangenes are
+on contigs below 200 kb (14% below 50 kb), against 0.4% (0.1%) of core.
 
 ![Contig size by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_contig_classes.png)
 
@@ -989,6 +1002,20 @@ Pangenes with no gene that can be judged (903) are left out.
 
 ![Pangenes with mostly invalid ORFs, no filtering, percentage](08_Pangenome_Visualisation/Toxo7b_occupancy_invalid_percent.png)
 
+![Share of invalid genes by category, no filtering](08_Pangenome_Visualisation/Toxo7b_invalid_share.png)
+
+**Share of invalid genes by category** - each bar is one category, from cloud to core, split by how many of the genes of a
+pangene are invalid: none, up to half, more than half but not all, or all of them. In the cloud most pangenes have one or
+two genes, so a pangene is either all valid or all invalid, and the segment of "all invalid" is about the same as the
+share of "mostly invalid" pangenes in the two figures above.
+
+**Where the invalid singletons come from** - of the 1,448 singleton pangenes, 432 have only invalid genes. None is a gene of a
+genome's own annotation: 431 are `rescued_` transfers (the lowest-confidence Liftoff transfers) and 1 is `main`. 427 have no
+valid ORF and 5 carry the pseudogene biotype; 98 are extra copies. The donor gene, the gene of another genome that was
+transferred, is absent from that genome's final GFF in 194 cases, is in a pangene of two or more genomes that the transfer
+did not join in 174 (in 62 of them the genome already has a gene in that pangene), and is another singleton in 64. These
+transfers may land where the genome has no real copy, or be copies that clustered apart; this was not tested further.
+
 **Unsupported overlapping genes by occupancy** - only possible without filtering, because it needs the
 `intersect=` tag. A gene is unsupported when it is not from the reference layer (`main`), overlaps
 another gene, has no InterPro/Pfam domain and has no specific description (same list of generic
@@ -996,7 +1023,7 @@ descriptions as the 7a filter). Main genes and genes with evidence count as good
 overlap. A pangene is "mostly unsupported" when more than 50% of its genes are unsupported. Unlike
 invalid ORFs, these are not concentrated in the cloud: 4.3% of cloud pangenes (70 of 1,611), 8.3% of
 shell, 20% of soft-core and 5.1% of core (443 of 8,733). Leaving out the pangenes with more than one
-gene in a genome gives the same pattern.
+gene in a genome gives a similar pattern.
 
 The many core pangenes here may not mean these genes are real. A real gene is under selection, and
 that constraint also holds the sequence of any gene that overlaps it well. An unsupported gene that
@@ -1008,9 +1035,14 @@ of these genes (the `_intersect_pairs.tsv` files list them) and how much of the 
 
 ![Pangenes with mostly unsupported genes, no filtering, percentage](08_Pangenome_Visualisation/Toxo7b_occupancy_unsupported_percent.png)
 
+![Share of unsupported genes by category, no filtering](08_Pangenome_Visualisation/Toxo7b_unsupported_share.png)
+
+**Share of unsupported genes by category** - same layout as the share figure above, split by how many of the genes of a
+pangene are unsupported.
+
 **InterPro term enrichment** - same test as above, 4,910 core and 653 cloud pangenes with an
-InterPro entry. Cloud: 64 of 578 entries tested are enriched; core: 7 of 5,472, among them
-methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains.
+InterPro entry, and 719 entries tested. Cloud: 84 of 361 entries tested are enriched; core: 15 of 710,
+among them methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains.
 
 Dynein heavy chain is again the strongest cloud signal (66 pangenes, 10% of the annotated cloud
 pangenes) and shows the same artefact: singleton pangenes have a median of 528 aa against 4,294 aa
@@ -1222,28 +1254,30 @@ from 28 to 19.
 
 ![Singletons per genome, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_singletons.png)
 
-**Gene properties by occupancy** - 8,474 pangenes with one gene in each genome they are present in (8,530). Core: 56 % of
-genes with a domain, median 449 aa (same); cloud: 45 % and 241 aa (44 % and 240). The `_log` file shows protein length
+**Gene properties by occupancy** - 9,847 pangenes (9,904). Core: 57 % of genes with a domain, median 513 aa (same);
+cloud: 45 % and 241 aa (44 % and 240). The `_log` file shows protein length
 on a log axis.
 
 ![Gene properties by occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_properties.png)
 
 **Contig size by occupancy** - the share of cloud pangenes on contigs below 200 kb falls to 11 % (16 %), and below 50 kb to
-5.2 % (10 %). Core stays at 0.5 % and 0.1 %. The cloud is still on short contigs more often than the core, but less.
+5.2 % (10 %). Core stays at 0.4 % and 0.1 %. The cloud is still on short contigs more often than the core, but less.
 
 ![Contig size by occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_contig_classes.png)
 
 **Invalid ORFs by occupancy** - mostly invalid: 53 % of cloud pangenes (188 of 354; 50 % before), 35 % of shell, 22 % of
 soft-core and 2.3 % of core (187 of 8,269).
+Additional filtering could still be considered here too.
 
 ![Number of pangenes with mostly invalid ORFs, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_invalid_only.png)
 
 ![Percentage of pangenes with mostly invalid ORFs, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_invalid_percent.png)
 
-**InterPro term enrichment** - 481 cloud and 4,889 core pangenes with an InterPro entry. Cloud: 55 of 495 entries tested are
-enriched (56 of 501); core: 1 of 5,454 (methyltransferase; MFS transporter is no longer enriched). Dynein heavy chain is
-still the strongest cloud signal, with the same 68 pangenes, so the artefact discussed in step 08 does not come from
-these contigs.
+![Share of invalid genes by category, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_invalid_share.png)
+
+**InterPro term enrichment** - 481 cloud and 4,889 core pangenes with an InterPro entry. Cloud: 67 of 309 entries tested are
+enriched (70 of 310); core: 8 of 672 (10 of 672). Dynein heavy chain is still the strongest cloud signal, with the same 68
+pangenes, so removing these contigs does not seem to change the pattern discussed in step 08.
 
 ![InterPro term enrichment, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_domain_enrichment.png)
 
@@ -1265,22 +1299,24 @@ and 155 in two (163).
 
 ![Singletons per genome, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_singletons.png)
 
-**Gene properties by occupancy** - 9,424 pangenes (9,530). Core: 53 % of genes with a domain, median 414 aa; cloud: 40 %
-and 212 aa, all same as before.
+**Gene properties by occupancy** - 10,922 pangenes (11,031). Core: 55 % of genes with a domain, median 477 aa (same); cloud:
+40 % and 211 aa (40 % and 212).
 
 ![Gene properties by occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_properties.png)
 
-**Contig size by occupancy** - cloud pangenes on contigs below 200 kb: 13.6 % (19.4 %); below 50 kb: 8.2 % (14.2 %). Core
-stays at 0.5 % and 0.1 %.
+**Contig size by occupancy** - cloud pangenes on contigs below 200 kb: 13.5 % (19.4 %); below 50 kb: 8.2 % (14.2 %). Core
+stays at 0.4 % and 0.1 %.
 
 ![Contig size by occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_contig_classes.png)
 
 **Invalid ORFs by occupancy** - mostly invalid: 68 % of cloud pangenes (473 of 694; 510 of 754 before), 53 % of shell, 28 %
-of soft-core and 3.8 % of core (335 of 8,722). The share does not change: these contigs were not what drove it.
+of soft-core and 3.8 % of core (335 of 8,722). The share hardly changes, so these contigs do not seem to drive this result.
 
 ![Number of pangenes with mostly invalid ORFs, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_invalid_only.png)
 
 ![Percentage of pangenes with mostly invalid ORFs, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_invalid_percent.png)
+
+![Share of invalid genes by category, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_invalid_share.png)
 
 **Unsupported overlapping genes by occupancy** - 4.6 % of cloud pangenes (69 of 1,508; 4.3 % before), 8.4 % of shell, 20 % of
 soft-core and 5.1 % of core (443 of 8,733), the same core count as before.
@@ -1289,9 +1325,11 @@ soft-core and 5.1 % of core (443 of 8,733), the same core count as before.
 
 ![Percentage of pangenes mostly unsupported, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_unsupported_percent.png)
 
-**InterPro term enrichment** - 611 cloud and 4,910 core pangenes with an InterPro entry. Cloud: 71 of 546 entries tested are
-enriched (64 of 578); core: 4 of 5,472 (7). Dynein heavy chain is still the strongest cloud signal (66 pangenes, same).
-Cytochrome b/b6 (N-terminal domain) falls from 28 to 25 cloud pangenes, so most of them do not come from the removed
+![Share of unsupported genes by category, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_unsupported_share.png)
+
+**InterPro term enrichment** - 611 cloud and 4,910 core pangenes with an InterPro entry. Cloud: 77 of 347 entries tested are
+enriched (84 of 361); core: 13 of 706 (15 of 710). Dynein heavy chain is still the strongest cloud signal (66 pangenes, same).
+Cytochrome b/b6 (N-terminal domain) falls from 28 to 25 cloud pangenes, so most of them do not seem to come from the removed
 contigs either.
 
 ![InterPro term enrichment, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_domain_enrichment.png)
