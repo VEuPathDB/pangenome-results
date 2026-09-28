@@ -6,6 +6,8 @@
 # Example:
 #   plot_all.sh -i for_get_pangenes_7b_pangenes/pangene_matrix.tr.tab -o 08_Pangenome_Visualisation -l Toxo7b
 #
+# The category cuts can be changed with the environment variables CORE_MISSING, SOFTCORE_MISSING and CLOUD_MAX
+# (default 0, 1 and 2 genomes); plot_all_job.sh sets them from its options.
 # Every output file starts with the label, e.g. Toxo7b_pancore.png, Toxo7b_occupancy.svg.
 # Needs python3 with numpy, scipy and matplotlib.
 
@@ -28,7 +30,8 @@ mkdir -p "$OUT_DIR"
 
 python3 "$DIR/plot_pancore.py"   -i "$MATRIX" -o "$OUT_DIR/${LABEL}_pancore"
 python3 "$DIR/plot_pancore.py"   -i "$MATRIX" -o "$OUT_DIR/${LABEL}_pancore_separate" --layout separate
-python3 "$DIR/plot_occupancy.py" -i "$MATRIX" -o "$OUT_DIR/${LABEL}_occupancy"
+python3 "$DIR/plot_occupancy.py" -i "$MATRIX" -o "$OUT_DIR/${LABEL}_occupancy" \
+    --core-missing "${CORE_MISSING:-0}" --softcore-missing "${SOFTCORE_MISSING:-1}" --cloud-max "${CLOUD_MAX:-2}"
 python3 "$DIR/plot_singletons.py" -i "$MATRIX" -o "$OUT_DIR/${LABEL}_singletons"
 
 # POCS.matrix.tab is written by get_pangenes next to pangene_matrix.tr.tab

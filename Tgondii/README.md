@@ -92,6 +92,8 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [06 – GET_PANGENES](#06--get_pangenes)
 - [07 – Post-GET_PANGENES Adjusting](#07--post-get_pangenes-adjusting)
 - [08 – Pangenome Visualisation](#08--pangenome-visualisation)
+- [Redundancy check on the final panel](#redundancy-check-on-the-final-panel)
+- [09 – Redundant Contig Removal](#09--redundant-contig-removal)
 
 ---
 
@@ -850,8 +852,16 @@ bash 08_Pangenome_Visualisation/scripts/plot_all.sh \
   -i 06_GET_PANGENES/for_get_pangenes_7b_pangenes/pangene_matrix.tr.tab \
   -o 08_Pangenome_Visualisation -l Toxo7b
 ```
-(same with `for_get_pangenes_7a_pangenes` and `-l Toxo7a`). On the cluster, `plot_all_job.sh` runs
-every plot of this step in one job.
+(same with `for_get_pangenes_7a_pangenes` and `-l Toxo7a`). On the cluster,
+[`plot_all_job.sh`](08_Pangenome_Visualisation/scripts/plot_all_job.sh) runs every plot of this step in one job.
+The folders are given on the command line, and the matrices are found by name below the `get_pangenes` folder:
+```bash
+mkdir -p pangenome_plots/logs
+sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7b --label Toxo7b
+sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7a --label Toxo7a
+```
+`--set` stands for `--pangenes-dir for_get_pangenes_<set>_pangenes --gff-dir for_get_pangenes_<set>`, and turns the
+unsupported-overlap plot on for 7b only. Give the two folders by hand for any other layout (`--help` lists every option).
 
 ### With filtering (7a)
 
@@ -888,6 +898,34 @@ noisy. Core: 56% of genes with a domain, median 449 aa; cloud: 44% and 240 aa. T
 shows protein length on a log axis.
 
 ![Gene properties by occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy_properties.png)
+
+**Contig size by occupancy** - the contigs that carry the pangenes, split into size classes. Only
+pangenes with exactly one gene in each genome they are present in are used (8,530); each gets one
+value, the median length of the contigs of its genes. The bars give the share of the pangenes of
+each category in each class. Cloud pangenes sit on short contigs far more often than core ones:
+16% of cloud pangenes are on contigs below 200 kb (10% below 50 kb), against 0.5% (0.1%) of core.
+Contigs below 10 kb were removed from every genome in step 01, so the smallest class starts at
+10 kb.
+
+![Contig size by occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_contig_classes.png)
+
+**Invalid ORFs by occupancy** - a gene is invalid when Liftoff found no valid open reading frame
+(`valid_ORFs=0`) or the source annotation calls it a pseudogene. A pangene is "mostly invalid" when
+more than 50% of its genes are invalid. Genes taken straight from a genome's own annotation have no
+ORF result and are only marked by the pseudogene biotype; pangenes with no gene that can be judged
+(821) are left out. Every pangene counts, including the ones with more than one gene in a genome.
+Two figures: the number of mostly invalid pangenes per occupancy, and their share of the pangenes of
+that occupancy (the total per occupancy is in the `.tsv`). Mostly invalid: 50% of cloud pangenes
+(190 of 380), 35% of shell, 22% of soft-core and 2.3% of core (187 of 8,269).
+
+![Pangenes with mostly invalid ORFs, with filtering, count](08_Pangenome_Visualisation/Toxo7a_occupancy_invalid_only.png)
+
+![Pangenes with mostly invalid ORFs, with filtering, percentage](08_Pangenome_Visualisation/Toxo7a_occupancy_invalid_percent.png)
+
+The plot of unsupported overlapping genes (not from the reference layer, overlapping another gene, no
+domain and no specific description) is only made without filtering, see
+[No filtering (7b)](#no-filtering-7b): the 7a filter already removes most of these genes, and the
+`intersect=` tag it needs exists only in the 7b GFFs.
 
 **InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more
 often than in the remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted). Only
@@ -938,6 +976,38 @@ distant genome (mean 96.2).
 
 ![Gene properties by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy_properties.png)
 
+**Contig size by occupancy** - same method as above, on 9,530 pangenes. 19% of cloud pangenes are
+on contigs below 200 kb (14% below 50 kb), against 0.5% (0.1%) of core.
+
+![Contig size by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_contig_classes.png)
+
+**Invalid ORFs by occupancy** - same method as above. Mostly invalid: 68% of cloud pangenes (510 of
+754; 432 of the 623 singletons), 53% of shell, 28% of soft-core and 3.8% of core (335 of 8,722).
+Pangenes with no gene that can be judged (903) are left out.
+
+![Pangenes with mostly invalid ORFs, no filtering, count](08_Pangenome_Visualisation/Toxo7b_occupancy_invalid_only.png)
+
+![Pangenes with mostly invalid ORFs, no filtering, percentage](08_Pangenome_Visualisation/Toxo7b_occupancy_invalid_percent.png)
+
+**Unsupported overlapping genes by occupancy** - only possible without filtering, because it needs the
+`intersect=` tag. A gene is unsupported when it is not from the reference layer (`main`), overlaps
+another gene, has no InterPro/Pfam domain and has no specific description (same list of generic
+descriptions as the 7a filter). Main genes and genes with evidence count as good even when they
+overlap. A pangene is "mostly unsupported" when more than 50% of its genes are unsupported. Unlike
+invalid ORFs, these are not concentrated in the cloud: 4.3% of cloud pangenes (70 of 1,611), 8.3% of
+shell, 20% of soft-core and 5.1% of core (443 of 8,733). Leaving out the pangenes with more than one
+gene in a genome gives the same pattern.
+
+The many core pangenes here may not mean these genes are real. A real gene is under selection, and
+that constraint also holds the sequence of any gene that overlaps it well. An unsupported gene that
+overlaps a conserved real gene would therefore be found in every genome too, and end up in the core,
+only because of the gene it overlaps. This was not tested; it would need the overlap partner of each
+of these genes (the `_intersect_pairs.tsv` files list them) and how much of the gene the overlap covers.
+
+![Pangenes with mostly unsupported genes, no filtering, count](08_Pangenome_Visualisation/Toxo7b_occupancy_unsupported_only.png)
+
+![Pangenes with mostly unsupported genes, no filtering, percentage](08_Pangenome_Visualisation/Toxo7b_occupancy_unsupported_percent.png)
+
 **InterPro term enrichment** - same test as above, 4,910 core and 653 cloud pangenes with an
 InterPro entry. Cloud: 64 of 578 entries tested are enriched; core: 7 of 5,472, among them
 methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains.
@@ -962,7 +1032,270 @@ sbatch 08_Pangenome_Visualisation/scripts/plot_domain_enrichment_job.sh
 
 ![InterPro term enrichment, no filtering](08_Pangenome_Visualisation/pangenome_plots/Toxo7b_domain_enrichment.png)
 
+## Redundancy check on the final panel
+
+Long-read assemblies can leave small contigs that are really a duplicated slice of a larger contig
+(an uncollapsed repeat or a haplotig-style overlap); their genes would be counted twice and inflate the
+pangenome. This is the contig-redundancy screen of [step 01](#01--genome-selection--qc), run at the end
+on the genomes without contigs below 10 kb, with the 7b (no filtering) annotation, so the gene counts are
+those of the final annotation.
+
+```bash
+sbatch 01_Genome_Selection_QC/scripts/contig_redundancy_final.slurm.sh
+```
+
+Each genome is aligned against itself (`minimap2 -xasm5 -DP`, the `purge_dups` call). A contig is
+**flagged** (`small-redundant`) when it is smaller than 1 Mb and at least 90 % of it aligns, at 95 %
+identity or more, to a longer contig of the same assembly. A flag only makes the contig a candidate:
+for the contigs that carry genes, every gene is then searched by BLAST in its own assembly, and the
+contig is **DROP-OK** when each gene has a copy elsewhere (at least 98 % identity over at least 90 % of the
+gene, on an annotated gene) or **REVIEW** when some gene has none. Nothing was removed. Report:
+[`REPORT.md`](01_Genome_Selection_QC/contig_redundancy_final/REPORT.md).
+
+#### Per-genome summary
+
+All contigs in this table are at least 10 kb (the shortest is 10,016 bp), because shorter contigs were
+removed from every genome in step 01. Contigs are split by length:
+
+- **large**: 1 Mb or more. These are chromosomes or big pieces of them and are never flagged. Several genomes
+  have more large contigs than the 14 chromosomes because some chromosomes are split in the assembly.
+- **small**: from 10 kb to 1 Mb. Only small contigs can be flagged.
+
+`total Mb` is the size of the whole assembly and `small Mb` the part of it in small contigs. `redundant` and
+`unplaced` count the small contigs of that class; the `genes` column beside each is how many annotated genes
+sit on them. `small-unplaced` contigs do not map to ME49 and are not duplicated, so they are not candidates.
+
+| Genome | contigs | total Mb | large (≥ 1 Mb) | small (10 kb - 1 Mb) | small Mb | redundant | redundant bp | genes | unplaced | genes |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **ME49** | 47 | 63.1 | 14 | 33 | 0.60 | 6 | 94 kb | 22 | – | – |
+| **ARI** | 47 | 63.0 | 21 | 26 | 8.20 | – | – | – | 9 | 98 |
+| **CAST** | 56 | 63.2 | 23 | 33 | 6.83 | – | – | – | 21 | 253 |
+| **COUG** | 58 | 62.7 | 21 | 37 | 10.23 | – | – | – | 18 | 200 |
+| **FOU** | 105 | 62.6 | 23 | 82 | 20.44 | – | – | – | 36 | 595 |
+| **GAB2** | 84 | 62.0 | 24 | 60 | 13.37 | – | – | – | 31 | 172 |
+| **GT1** | 33 | 60.9 | 14 | 19 | 0.28 | – | – | – | 7 | 9 |
+| **MAS** | 143 | 61.8 | 16 | 127 | 33.16 | – | – | – | 34 | 270 |
+| **p89** | 93 | 62.8 | 22 | 71 | 18.73 | – | – | – | 37 | 390 |
+| **RH88** | 135 | 66.6 | 13 | 122 | 2.67 | 100 | 1724 kb | 89 | 18 | 47 |
+| **RUB** | 89 | 63.4 | 21 | 68 | 13.82 | – | – | – | 40 | 262 |
+| **TgCATBr9** | 93 | 63.0 | 24 | 69 | 15.15 | – | – | – | 37 | 402 |
+| **TgCatPRC2** | 103 | 62.6 | 25 | 78 | 16.60 | – | – | – | 29 | 169 |
+| **VAND** | 83 | 62.9 | 24 | 59 | 14.22 | – | – | – | 26 | 125 |
+| **VEG** | 30 | 63.1 | 14 | 16 | 0.42 | – | – | – | 14 | 25 |
+
+Only ME49 and RH88 have flagged contigs; the other 13 genomes are clean.
+
+#### Flagged contigs that carry genes
+
+`covered by` is the longer contig that holds the copy that would stay. `REVIEW (n)` is the number of genes
+on the contig with no copy elsewhere.
+
+| Genome | Contig | Length | % dup | covered by | Genes | Verdict |
+| :--- | :--- | ---: | ---: | :--- | ---: | :--- |
+| **ME49** | `KE139140` | 20,306 | 99 % | `KE138866`, `TGME49_chrVI` | 9 | DROP-OK |
+| **ME49** | `KE139816` | 17,865 | 98 % | `KE138892`, `KE139822`, `KE139843` | 1 | DROP-OK |
+| **ME49** | `KE138868` | 16,277 | 100 % | `KE138866`, `KE139140`, `TGME49_chrVI` | 6 | DROP-OK |
+| **ME49** | `KE139842` | 15,749 | 99 % | `KE138892`, `KE139822`, `TGME49_chrII` | 2 | DROP-OK |
+| **ME49** | `KE139130` | 12,872 | 100 % | `KE138874`, `TGME49_chrXII` | 3 | REVIEW (1) |
+| **ME49** | `KE139841` | 11,018 | 96 % | `KE138892`, `KE139817`, `KE139819` | 1 | REVIEW (1) |
+| **RH88** | `JAAUHK010000015` | 42,350 | 97 % | `CM023090`, `CM023091`, `CM023092` | 4 | REVIEW (3) |
+| **RH88** | `JAAUHK010000023` | 31,785 | 97 % | `CM023087`, `CM023090`, `CM023092` | 4 | REVIEW (1) |
+| **RH88** | `JAAUHK010000025` | 30,311 | 100 % | `CM023094` | 13 | REVIEW (3) |
+| **RH88** | `JAAUHK010000012` | 28,810 | 92 % | `CM023087`, `CM023091`, `JAAUHK010000002` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000005` | 28,644 | 100 % | `CM023094`, `JAAUHK010000025` | 9 | REVIEW (2) |
+| **RH88** | `JAAUHK010000108` | 27,454 | 100 % | `CM023093`, `JAAUHK010000038`, `JAAUHK010000115` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000010` | 26,922 | 90 % | `CM023087` | 10 | REVIEW (2) |
+| **RH88** | `JAAUHK010000009` | 26,667 | 100 % | `CM023090`, `JAAUHK010000006`, `JAAUHK010000026` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000019` | 23,363 | 100 % | `CM023090`, `JAAUHK010000006`, `JAAUHK010000009` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000018` | 22,487 | 96 % | `CM023090`, `CM023091`, `JAAUHK010000002` | 2 | REVIEW (1) |
+| **RH88** | `JAAUHK010000020` | 22,198 | 100 % | `CM023087`, `CM023090`, `CM023091` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000031` | 19,995 | 100 % | `CM023094`, `JAAUHK010000005`, `JAAUHK010000025` | 9 | REVIEW (1) |
+| **RH88** | `JAAUHK010000028` | 19,262 | 94 % | `CM023082` | 6 | REVIEW (2) |
+| **RH88** | `JAAUHK010000069` | 18,672 | 100 % | `CM023090`, `CM023091`, `JAAUHK010000002` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000071` | 17,563 | 100 % | `CM023093`, `JAAUHK010000038`, `JAAUHK010000108` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000072` | 16,787 | 99 % | `CM023086`, `CM023087`, `CM023090` | 3 | DROP-OK |
+| **RH88** | `JAAUHK010000039` | 16,651 | 100 % | `CM023085` | 3 | DROP-OK |
+| **RH88** | `JAAUHK010000057` | 15,666 | 100 % | `CM023091` | 2 | DROP-OK |
+| **RH88** | `JAAUHK010000058` | 15,460 | 99 % | `CM023090`, `CM023092`, `JAAUHK010000002` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000063` | 15,308 | 100 % | `CM023092`, `JAAUHK010000002`, `JAAUHK010000014` | 1 | DROP-OK |
+| **RH88** | `JAAUHK010000149` | 15,293 | 100 % | `CM023092`, `JAAUHK010000002`, `JAAUHK010000014` | 1 | REVIEW (1) |
+| **RH88** | `JAAUHK010000061` | 15,121 | 100 % | `JAAUHK010000032`, `JAAUHK010000033`, `JAAUHK010000034` | 1 | REVIEW (1) |
+| **RH88** | `JAAUHK010000081` | 14,965 | 100 % | `CM023093` | 2 | DROP-OK |
+| **RH88** | `JAAUHK010000099` | 14,209 | 100 % | `CM023088` | 6 | DROP-OK |
+| **RH88** | `JAAUHK010000030` | 13,384 | 99 % | `JAAUHK010000032`, `JAAUHK010000033`, `JAAUHK010000034` | 3 | REVIEW (3) |
+| **RH88** | `JAAUHK010000114` | 13,239 | 99 % | `CM023093` | 2 | DROP-OK |
+
+RH88 has 74 more flagged contigs with **no gene** (1.17 Mb, the largest 34 kb): pure duplicated sequence. With no
+gene in the final annotation they add nothing to the pangenome, so there is no need to remove them.
+
+Notes:
+- **RH88** REVIEW contigs include genes that look like organelle genes (cytochrome b, cytochrome c oxidase
+  subunit III, RNA polymerase B and C2, ORF C and D). They are repeated, or have no copy at 98 % identity,
+  and belong with the organelle screen more than with this one.
+- **ME49** `KE139130`: one gene (a KRUF family protein) has a 99.9 % identical copy on `KE138874`, but it
+  covers only 67 % of the gene. `KE139841`: its one gene (hypothetical protein) has no copy above 98 %.
+  ME49 is the reference and its genes form the `main` layer.
+- In the no-filtering pangenes, 60 of the 88 RH88 genes on flagged contigs are in single-genome pangenes
+  (RH88 has 226 singleton pangenes).
+
+#### Contigs just under the cut
+
+The 90 % cut is a line drawn on a continuous value, so contigs at 75-89 % duplicated are probably redundant
+too. There are 14 (2 in ME49, 12 in RH88), and 9 of them carry genes (33 in total; the other 5, all in RH88,
+have no gene). Their genes have not been checked by BLAST yet.
+
+| Genome | Contig | Length | % dup | covered by | Genes |
+| :--- | :--- | ---: | ---: | :--- | ---: |
+| **ME49** | `KE138866` | 20,505 | 89 % | `TGME49_chrVI` | 7 |
+| **ME49** | `KE139812` | 12,974 | 86 % | `KE139847`, `TGME49_chrVIIa` | 4 |
+| **RH88** | `JAAUHK010000004` | 79,187 | 80 % | `CM023083` | 3 |
+| **RH88** | `JAAUHK010000011` | 39,556 | 83 % | `CM023086`, `CM023087`, `CM023090` | 4 |
+| **RH88** | `JAAUHK010000007` | 39,225 | 82 % | `CM023086`, `CM023087`, `CM023090` | 3 |
+| **RH88** | `JAAUHK010000026` | 27,933 | 77 % | `CM023090`, `JAAUHK010000006` | 3 |
+| **RH88** | `JAAUHK010000051` | 26,503 | 88 % | `CM023093` | 4 |
+| **RH88** | `JAAUHK010000021` | 22,331 | 85 % | `CM023093`, `JAAUHK010000051` | 4 |
+| **RH88** | `JAAUHK010000073` | 20,079 | 84 % | `CM023092`, `JAAUHK010000002`, `JAAUHK010000014` | 1 |
+
+#### Decision
+
+Contigs with no gene are not removed: with no gene in the final annotation they add nothing to the pangenome.
+All contigs that carry genes are removed, whatever the BLAST verdict: the 32 flagged contigs (DROP-OK and REVIEW)
+and the 9 just under the cut, 41 contigs in total (8 in ME49, 33 in RH88, 0.93 Mb, 144 genes). The removal is
+step 09 below. The original GFFs and matrices are kept, to compare.
+
+## 09 – Redundant Contig Removal
+
+*Tgondii only.* The genes of the contigs listed in [`redundant_contigs_removed.tsv`](09_Redundant_Contig_Removal/redundant_contigs_removed.tsv)
+are taken out of the final GFFs and of the `get_pangenes` matrices, without redoing the annotation. It is done for
+the 7a and the 7b set, into new folders (`annotation_7a`, `annotation_7b`, `pangenes_7a`, `pangenes_7b`); the
+original GFFs and matrices are not changed, so the two versions can be compared.
+
+```bash
+sbatch 09_Redundant_Contig_Removal/scripts/remove_redundant_contig_genes.slurm.sh
+mkdir -p pangenome_plots/logs && sbatch 09_Redundant_Contig_Removal/scripts/plot_nonredundant_job.sh
+```
+
+1. [`make_removal_list.py`](09_Redundant_Contig_Removal/scripts/make_removal_list.py) lists every small contig that
+   carries genes and is flagged (`small-redundant`) or is 75-89 % duplicated.
+2. [`remove_redundant_contig_genes.py`](09_Redundant_Contig_Removal/scripts/remove_redundant_contig_genes.py) drops those
+   contigs from each GFF (the gene with its children) and the gene IDs from `pangene_matrix_genes.tr.tab`; a pangene left
+   with no gene is removed, and `pangene_matrix.tr.tab` is rebuilt from it. The IDs are unique across genomes and each
+   GFF holds its own genes, so only the GFFs of ME49 and RH88 change.
+3. `plot_nonredundant_job.sh` makes the step-08 plots again, with files starting `Toxo7a_nonredundant` and
+   `Toxo7b_nonredundant`, in [`plots/`](09_Redundant_Contig_Removal/plots/). The POCS heatmap is not redone, because
+   `POCS.matrix.tab` comes from `get_pangenes` and is not recomputed. The neighbourhoods `get_pangenes` uses around a
+   removed gene are not recomputed either; rerunning `get_pangenes` on the new GFFs would make the result exact.
+
+Of the 144 genes, 143 were in the 7b matrix (one was not clustered) and 81 in the 7a matrix.
+The 7a filter had already dropped some of the others. What changes:
+
+| | 7a before | 7a after | 7b before | 7b after |
+| :--- | ---: | ---: | ---: | ---: |
+| Pangenes | 9,904 | 9,847 | 11,031 | 10,922 |
+| Singleton pangenes, all genomes | 990 | 941 | 1,448 | 1,353 |
+| Pangenes in all 15 genomes (core) | 8,281 | 8,281 | 8,733 | 8,733 |
+| of them, RH88 | 122 | 78 | 226 | 145 |
+| of them, ME49 | 28 | 19 | 72 | 55 |
+
+A singleton pangene is a pangene present in one genome only; the table counts them for the whole panel and then for RH88 and ME49 alone (the same pangenes, split by genome). The removed pangenes are all cloud: 54 of them in one genome and 3 in two genomes in 7a, 104 and 5 in 7b. The core does not
+change. RH88 loses about a third of its singletons (36 % in both sets); the other genomes change by one or two (a pangene that was shared
+with RH88 becomes a singleton of the other genome).
+
+The figures are the same as in step 08, for the two sets; the numbers in brackets are the ones before the removal.
+Every figure also comes as `.svg`, with the tables of the values.
+
+### With filtering (7a), redundant contigs removed
+
+**Pangenome and core genome size** - the pangenome has 9,847 pangenes (9,904) and still grows by about 67 per genome at
+the end (70). The core is 8,281 (same); the fitted curves put its plateau at 8,306 (Tettelin) and 8,262 (Willenbrock),
+against 8,307 and 8,264. `Toxo7a_nonredundant_pancore_separate.png` shows the two curves in separate panels.
+
+![Pangenome and core genome size, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_pancore.png)
+
+**Pangene occupancy** - 8,281 pangenes are core, 111 are in 14 genomes (both same), 941 are in one genome only (990) and
+126 in two (131).
+
+![Pangene occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy.png)
+
+**Singletons per genome** - FOU has the most (128) and GT1 the fewest (11), as before. RH88 goes from 122 to 78 and ME49
+from 28 to 19.
+
+![Singletons per genome, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_singletons.png)
+
+**Gene properties by occupancy** - 8,474 pangenes with one gene in each genome they are present in (8,530). Core: 56 % of
+genes with a domain, median 449 aa (same); cloud: 45 % and 241 aa (44 % and 240). The `_log` file shows protein length
+on a log axis.
+
+![Gene properties by occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_properties.png)
+
+**Contig size by occupancy** - the share of cloud pangenes on contigs below 200 kb falls to 11 % (16 %), and below 50 kb to
+5.2 % (10 %). Core stays at 0.5 % and 0.1 %. The cloud is still on short contigs more often than the core, but less.
+
+![Contig size by occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_contig_classes.png)
+
+**Invalid ORFs by occupancy** - mostly invalid: 53 % of cloud pangenes (188 of 354; 50 % before), 35 % of shell, 22 % of
+soft-core and 2.3 % of core (187 of 8,269).
+
+![Number of pangenes with mostly invalid ORFs, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_invalid_only.png)
+
+![Percentage of pangenes with mostly invalid ORFs, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_invalid_percent.png)
+
+**InterPro term enrichment** - 481 cloud and 4,889 core pangenes with an InterPro entry. Cloud: 55 of 495 entries tested are
+enriched (56 of 501); core: 1 of 5,454 (methyltransferase; MFS transporter is no longer enriched). Dynein heavy chain is
+still the strongest cloud signal, with the same 68 pangenes, so the artefact discussed in step 08 does not come from
+these contigs.
+
+![InterPro term enrichment, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_domain_enrichment.png)
+
+### No filtering (7b), redundant contigs removed
+
+**Pangenome and core genome size** - the pangenome has 10,922 pangenes (11,031) and still grows by about 92 per genome at
+the end (98). The core is 8,733 (same); the plateau is 8,768 (Tettelin) and 8,712 (Willenbrock), against 8,770 and
+8,716.
+
+![Pangenome and core genome size, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_pancore.png)
+
+**Pangene occupancy** - 8,733 pangenes are core, 146 are in 14 genomes (both same), 1,353 are in one genome only (1,448)
+and 155 in two (163).
+
+![Pangene occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy.png)
+
+**Singletons per genome** - FOU now has the most (164); RH88 had the most before (226) and goes to 145. GT1 has the fewest
+(18). ME49 goes from 72 to 55.
+
+![Singletons per genome, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_singletons.png)
+
+**Gene properties by occupancy** - 9,424 pangenes (9,530). Core: 53 % of genes with a domain, median 414 aa; cloud: 40 %
+and 212 aa, all same as before.
+
+![Gene properties by occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_properties.png)
+
+**Contig size by occupancy** - cloud pangenes on contigs below 200 kb: 13.6 % (19.4 %); below 50 kb: 8.2 % (14.2 %). Core
+stays at 0.5 % and 0.1 %.
+
+![Contig size by occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_contig_classes.png)
+
+**Invalid ORFs by occupancy** - mostly invalid: 68 % of cloud pangenes (473 of 694; 510 of 754 before), 53 % of shell, 28 %
+of soft-core and 3.8 % of core (335 of 8,722). The share does not change: these contigs were not what drove it.
+
+![Number of pangenes with mostly invalid ORFs, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_invalid_only.png)
+
+![Percentage of pangenes with mostly invalid ORFs, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_invalid_percent.png)
+
+**Unsupported overlapping genes by occupancy** - 4.6 % of cloud pangenes (69 of 1,508; 4.3 % before), 8.4 % of shell, 20 % of
+soft-core and 5.1 % of core (443 of 8,733), the same core count as before.
+
+![Number of pangenes mostly unsupported, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_unsupported_only.png)
+
+![Percentage of pangenes mostly unsupported, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_unsupported_percent.png)
+
+**InterPro term enrichment** - 611 cloud and 4,910 core pangenes with an InterPro entry. Cloud: 71 of 546 entries tested are
+enriched (64 of 578); core: 4 of 5,472 (7). Dynein heavy chain is still the strongest cloud signal (66 pangenes, same).
+Cytochrome b/b6 (N-terminal domain) falls from 28 to 25 cloud pangenes, so most of them do not come from the removed
+contigs either.
+
+![InterPro term enrichment, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_domain_enrichment.png)
+
 ---
 
 [↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
-
