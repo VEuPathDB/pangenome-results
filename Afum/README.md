@@ -884,9 +884,17 @@ Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR inclu
 (`gene_biotype_counts.tsv`, `overlap_counts.tsv`, `feature_attribute_table.tsv`, one
 `<genome>_gene_classification.tsv` per genome).
 
-### Prepare the GFFs for Liftoff
+### Step 2: Remove specific genes from the GFFs (skipped, no kill list for this species)
 
-No genes are removed by a kill list for this species (no `gff_curated/`), so
+No genes are removed for this species: there is no manual kill list (`kill_list_manual.tsv`), so no
+`gff_curated/` is produced and no `sbatch` is run for this step (see the
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list)
+for what this step does when a kill list is used, as in the *T. gondii* panel). Every gene from
+`gff_with_interpro/` (step 04's output) goes on to Step 3 unchanged.
+
+### Step 3: Prepare the GFFs for Liftoff (done)
+
+Since Step 2 is skipped,
 [`prepare_for_liftoff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
 reads `gff_with_interpro/` (step 04's output) directly and writes to `gff_for_liftoff/`: genes
 reduced to their coding sequence (no UTRs), protein-coding genes and pseudogenes unified to
@@ -965,7 +973,7 @@ Gene types changed (only where the type had to change):
   their pseudogene status stays visible in the biotype attribute (`ebi_biotype=pseudogene`).
 - One NCBI-style genome (`GCA_058972525.1`) also had 1 pseudogene retyped; it keeps `gene_biotype=pseudogene`.
 
-### Liftoff (all-against-all)
+### Step 4: Liftoff, all-against-all (done)
 
 [`liftoff_all_vs_all.sh`](../../05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
 lifts every genome's prepared annotation (`gff_for_liftoff/`) onto every other genome's
@@ -976,7 +984,7 @@ sbatch --array=1-17 05_Cross-genome_annotation_integration/scripts/liftoff_all_v
 ```
 Results go to `liftoff_output/polished/`, job logs to `liftoff_output/logs/`. Resubmitting skips pairs that are already done.
 
-### Build each genome's final annotation
+### Step 5: Build each genome's final annotation (done)
 
 [`build_final_annotation_basic.sh`](../../05_Cross-genome_annotation_integration/README.md#step-5-build-each-genomes-final-annotation)
 builds one annotation per genome anchored on its own coordinates. The reference is AF293 (first line
@@ -1210,6 +1218,17 @@ to 10,254; the fitted curves put its plateau at 10,295 (Tettelin) and 10,238 (Wi
 
 ![Pangene occupancy, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_occupancy.png)
 
+**Soft-core pangenes missing per genome** - each soft-core pangene (132 total) is missing from
+exactly one genome, so this counts, per genome, how many of those it accounts for. Soft-core
+genes are expected in nearly every genome, so a genome carrying a much larger share than the
+others is a content-QC flag, not just noise. AF293 - the reference genome - stands out (31 of
+132, 23%, over 3x the mean of 7.4), then AF100-9B (23, 17%) and ATCC 42202 (18, 14%); everything
+from eAF1023 down sits at or below the mean. AF293 leading this list is counter-intuitive (it is
+the best-curated genome in the panel), so it likely reflects gaps in AF293's own annotation
+rather than an assembly problem - worth checking case by case before assuming either one.
+
+![Soft-core pangenes missing per genome, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_softcore_missing.png)
+
 **Singletons per genome** - ATCC 46645 has the most (213), then W72310 (121) and H237 (107); eAF1023 (15) and
 B5233 (17) have the fewest.
 
@@ -1281,6 +1300,14 @@ about 97 per genome at the end. The core falls to 10,433; the fitted curves put 
 genome only and 360 in two.
 
 ![Pangene occupancy, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy.png)
+
+**Soft-core pangenes missing per genome** - same logic as the 7a plot, 133 soft-core pangenes
+here. AF293 is again the outlier (31 of 133, 23%, close to 4x the mean of 7.8), AF100-9B second
+(24, 18%) and ATCC 42202 third (20, 15%); the rest sit at or below the mean, down to 47-10
+(AF221), A1163 and B5233 (0 each). Same three genomes lead in both 7a and 7b, so it is not an
+artefact of one filtering choice.
+
+![Soft-core pangenes missing per genome, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_softcore_missing.png)
 
 **Singletons per genome** - ATCC 46645 has the most (230), then ATCC 42202 (178) and 08-19-02-30 (160); eAF1023 (14)
 and B5233 (16) have the fewest. Genomes that have very close relatives in the panel (see the POCS heatmap) tend to have

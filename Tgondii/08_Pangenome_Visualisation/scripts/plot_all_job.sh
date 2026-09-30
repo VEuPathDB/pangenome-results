@@ -40,8 +40,8 @@
 #                        --min-total = entries carried by fewer pangenes in the whole universe are not tested;
 #                        --min-count = only entries carried by at least N pangenes of the category are drawn
 #
-# It runs, in this order: plot_all.sh (pan/core curves joined and separate, occupancy, singletons, POCS
-# heatmap), plot_domain_enrichment.py, plot_occupancy_properties.py (linear and log axis),
+# It runs, in this order: plot_all.sh (pan/core curves joined and separate, occupancy, soft-core genes
+# missing per genome, singletons, POCS heatmap), plot_domain_enrichment.py, plot_occupancy_properties.py (linear and log axis),
 # plot_occupancy_contigs.py (contig size classes), and plot_occupancy_invalid.py (pangenes with mostly
 # invalid ORFs, count, percentage and the share by category, and the same for unsupported overlapping genes with --overlap yes).
 # A plot that fails does not stop the others; the job lists the failed ones at the end and exits with an error.

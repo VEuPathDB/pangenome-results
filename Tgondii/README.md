@@ -511,7 +511,7 @@ Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR inclu
 
 The overlaps are kept (see below); this check is what showed which genes to look at.
 
-### Genes removed before Liftoff (kill-list filter)
+### Step 2: Genes removed before Liftoff (kill-list filter, done)
 
 Genes with overlapping CDS are **kept** (not enough evidence to say which are wrong - most look
 like gene-model errors, not false genes). The only genes removed are 5 *ME49* protein-coding
@@ -537,7 +537,7 @@ sbatch 05_Cross-genome_annotation_integration/scripts/remove_genes_from_gff_job.
 `kill_list_manual.tsv` has no header, one gene per line: `genome<TAB>gene_id`
 (e.g. `ME49	TGME49_242250`). Run this step **before** "Prepare the GFFs for Liftoff" below.
 
-### Prepare the GFFs for Liftoff
+### Step 3: Prepare the GFFs for Liftoff (done)
 
 [`prepare_for_liftoff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
 reads `gff_curated/` and writes to `gff_for_liftoff/`: genes reduced to their coding sequence
@@ -588,7 +588,7 @@ identifiable. All other genomes already used `protein_coding_gene`/`ncRNA_gene`,
 retyped there; their non-coding genes (`ncRNA_gene`, 144-334 per genome) are already outside
 the type list Liftoff transfers.
 
-### Liftoff (all-against-all)
+### Step 4: Liftoff, all-against-all (done)
 
 [`liftoff_all_vs_all.sh`](../../05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
 lifts every genome's prepared annotation (`gff_for_liftoff/`) onto every other genome's
@@ -599,7 +599,7 @@ sbatch --array=1-15 05_Cross-genome_annotation_integration/scripts/liftoff_all_v
 ```
 Results go to `liftoff_output/polished/`, job logs to `liftoff_output/logs/`. Resubmitting skips pairs that are already done.
 
-### Build each genome's final annotation
+### Step 5: Build each genome's final annotation (done)
 
 [`build_final_annotation_basic.sh`](../../05_Cross-genome_annotation_integration/README.md#step-5-build-each-genomes-final-annotation)
 builds one annotation per genome anchored on its own coordinates. The reference is ME49 (first line
@@ -848,7 +848,7 @@ Whether these pairs are tandem copies or one gene split into two is not decided 
 
 The same figures for the two sets of pangenes: **with filtering** (7a, filtered before
 `get_pangenes`) and **no filtering** (7b, tagged, nothing removed). Every figure also comes as
-`.svg`, and files start with the label (`Toxo7a`/`Toxo7b`). The first four figures of each set
+`.svg`, and files start with the label (`Toxo7a`/`Toxo7b`). The first five figures of each set
 come from [`plot_all.sh`](08_Pangenome_Visualisation/scripts/plot_all.sh), run locally:
 ```bash
 bash 08_Pangenome_Visualisation/scripts/plot_all.sh \
@@ -883,6 +883,15 @@ and 8,264 (Willenbrock). `Toxo7a_pancore_separate.png` shows the two curves in s
 111 are in 14 genomes (soft-core), 990 (10%) are in one genome only and 131 in two.
 
 ![Pangene occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy.png)
+
+**Soft-core pangenes missing per genome** - each soft-core pangene (111 total) is missing from
+exactly one genome, so this counts, per genome, how many of those it accounts for. Soft-core genes
+are expected in nearly every genome, so a genome carrying a much larger share than the others is a
+content-QC flag, not just noise. TgCatPRC2 stands out (23 of 111, 21%, over 3x the mean of 7.4) and
+MAS is second (17, 15%); everything from GT1 down sits at or below the mean. Worth checking
+TgCatPRC2's assembly (dropped/short contigs, low-coverage regions) before trusting its occupancy calls.
+
+![Soft-core pangenes missing per genome, with filtering](08_Pangenome_Visualisation/Toxo7a_softcore_missing.png)
 
 **Singletons per genome** - FOU has the most (128), then RH88 (122); GT1 has the fewest (11).
 
@@ -986,6 +995,13 @@ to 8,733; the fitted curves put its plateau at 8,770 (Tettelin) and 8,716 (Wille
 (13%) are in one genome only and 163 in two.
 
 ![Pangene occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy.png)
+
+**Soft-core pangenes missing per genome** - same logic as the 7a plot, 146 soft-core pangenes here.
+TgCatPRC2 is again the outlier (27 of 146, 18%, close to 3x the mean of 9.7), MAS second (20, 14%);
+the rest sit at or below the mean, down to GAB2/CAST/RH88 (2 each). Same genome stands out in both
+7a and 7b, so it is not an artefact of one filtering choice.
+
+![Soft-core pangenes missing per genome, no filtering](08_Pangenome_Visualisation/Toxo7b_softcore_missing.png)
 
 **Singletons per genome** - RH88 has the most (226), GT1 the fewest (18).
 
@@ -1265,6 +1281,12 @@ against 8,307 and 8,264. `Toxo7a_nonredundant_pancore_separate.png` shows the tw
 
 ![Pangene occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy.png)
 
+**Soft-core pangenes missing per genome** - unchanged from the 7a figure above (removing redundant
+contigs does not touch soft-core pangenes here): TgCatPRC2 still the outlier (23 of 111, 21%), MAS
+second (17, 15%).
+
+![Soft-core pangenes missing per genome, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_softcore_missing.png)
+
 **Singletons per genome** - FOU has the most (128) and GT1 the fewest (11), as before. RH88 goes from 122 to 78 and ME49
 from 28 to 19.
 
@@ -1313,6 +1335,11 @@ the end (98). The core is 8,733 (same); the plateau is 8,768 (Tettelin) and 8,71
 and 155 in two (163).
 
 ![Pangene occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy.png)
+
+**Soft-core pangenes missing per genome** - unchanged from the 7b figure above: TgCatPRC2 still the
+outlier (27 of 146, 18%), MAS second (20, 14%).
+
+![Soft-core pangenes missing per genome, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_softcore_missing.png)
 
 **Singletons per genome** - FOU now has the most (164); RH88 had the most before (226) and goes to 145. GT1 has the fewest
 (18). ME49 goes from 72 to 55.

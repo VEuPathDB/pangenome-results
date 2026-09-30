@@ -32,6 +32,8 @@ python3 "$DIR/plot_pancore.py"   -i "$MATRIX" -o "$OUT_DIR/${LABEL}_pancore"
 python3 "$DIR/plot_pancore.py"   -i "$MATRIX" -o "$OUT_DIR/${LABEL}_pancore_separate" --layout separate
 python3 "$DIR/plot_occupancy.py" -i "$MATRIX" -o "$OUT_DIR/${LABEL}_occupancy" \
     --core-missing "${CORE_MISSING:-0}" --softcore-missing "${SOFTCORE_MISSING:-1}" --cloud-max "${CLOUD_MAX:-2}"
+python3 "$DIR/plot_softcore_missing.py" -i "$MATRIX" -o "$OUT_DIR/${LABEL}_softcore_missing" \
+    --core-missing "${CORE_MISSING:-0}" --softcore-missing "${SOFTCORE_MISSING:-1}" --cloud-max "${CLOUD_MAX:-2}"
 python3 "$DIR/plot_singletons.py" -i "$MATRIX" -o "$OUT_DIR/${LABEL}_singletons"
 
 # POCS.matrix.tab is written by get_pangenes next to pangene_matrix.tr.tab
