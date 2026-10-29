@@ -793,8 +793,8 @@ No need as all genomes used have annotation
 ### 04.1 Running InterProScan
 
 ```bash
-sbatch 04_InterProScan/scripts/extract_proteins.slurm.sh          # gff_cleaned/ -> interpro/proteins/*.faa
-sbatch 04_InterProScan/scripts/build_interpro_manifest.slurm.sh   # interpro/interpro_manifest.tsv
+sbatch 04_Protein_evidence/scripts/extract_proteins.slurm.sh          # gff_cleaned/ -> interpro/proteins/*.faa
+sbatch 04_Protein_evidence/scripts/build_interpro_manifest.slurm.sh   # interpro/interpro_manifest.tsv
 ```
 
 `interpro_manifest.tsv` for this panel (17 genomes, `CHUNK_SIZE=1000`): **184 total chunks**.
@@ -802,10 +802,10 @@ Submit the array job with:
 ```bash
 mkdir -p interpro/logs
 N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
-sbatch --array=1-${N}%20 04_InterProScan/scripts/interproscan_array_job.slurm.sh
+sbatch --array=1-${N}%20 04_Protein_evidence/scripts/interproscan_array_job.slurm.sh
 ```
 (currently 184, but always recomputed from the manifest, not hardcoded - see
-[`04_InterProScan/README.md`](../../04_InterProScan/README.md) for why: a bare
+[`04_Protein_evidence/README.md`](../../04_Protein_evidence/README.md) for why: a bare
 `sbatch interproscan_array_job.slurm.sh` with no `--array=...` only runs 1 smoke-test task).
 
 Protein extraction ran on `gff_cleaned/` (step 02's TE-kill-list output — organelle,
@@ -817,7 +817,7 @@ chunks completed (each chunk's `.out` ends with `Finished <genome> chunk <N>`).
 Combines the per-chunk InterProScan output into one lookup table per genome
 (`interpro/interpro_lookup/`) and checks completeness:
 ```bash
-sbatch 04_InterProScan/scripts/merge_interpro_job.slurm.sh
+sbatch 04_Protein_evidence/scripts/merge_interpro_job.slurm.sh
 ```
 A protein reported as absent from the chunk output is a `NOTE`, not an error: InterProScan only
 writes a row when it finds a hit, so it is a protein with no domain hits. Only a missing chunk
@@ -828,7 +828,7 @@ file (`WARNING`) means the results are incomplete.
 Writes the `InterPro:`/`PFAM:` evidence into the `Dbxref=` of each CDS line, reading
 `gff_cleaned/` and writing new GFFs to `gff_with_interpro/` (the input is never modified):
 ```bash
-sbatch 04_InterProScan/scripts/update_interpro_in_gff.slurm.sh
+sbatch 04_Protein_evidence/scripts/update_interpro_in_gff.slurm.sh
 ```
 This ran successfully; `gff_with_interpro/` is the input for step 05.
 

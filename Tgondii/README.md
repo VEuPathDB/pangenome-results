@@ -430,10 +430,10 @@ Submit the array job with:
 ```bash
 mkdir -p interpro/logs
 N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
-sbatch --array=1-${N}%20 04_InterProScan/scripts/interproscan_array_job.slurm.sh
+sbatch --array=1-${N}%20 04_Protein_evidence/scripts/interproscan_array_job.slurm.sh
 ```
 (currently 150, but always recomputed from the manifest, not hardcoded - see
-[`04_InterProScan/README.md`](../../04_InterProScan/README.md) for why).
+[`04_Protein_evidence/README.md`](../../04_Protein_evidence/README.md) for why).
 
 Protein extraction ran on `gff_originals/` (this species has no `gff_cleaned/`). The array job
 **finished**: all 150 chunks completed (each chunk's `.out` ends with
@@ -444,7 +444,7 @@ Protein extraction ran on `gff_originals/` (this species has no `gff_cleaned/`).
 Combines the per-chunk InterProScan output into one lookup table per genome
 (`interpro/interpro_lookup/`) and checks completeness:
 ```bash
-sbatch 04_InterProScan/scripts/merge_interpro_job.slurm.sh
+sbatch 04_Protein_evidence/scripts/merge_interpro_job.slurm.sh
 ```
 A protein reported as absent from the chunk output is a `NOTE`, not an error: InterProScan only
 writes a row when it finds a hit, so it is a protein with no domain hits. Only a missing chunk
@@ -456,7 +456,7 @@ Writes the `InterPro:`/`PFAM:` evidence into the `Dbxref=` of each CDS line, rea
 `gff_originals/` (`GFF_INDIR` is set to that in this species' copy of the script) and writing
 new GFFs to `gff_with_interpro/` (the input is never modified):
 ```bash
-sbatch 04_InterProScan/scripts/update_interpro_in_gff.slurm.sh
+sbatch 04_Protein_evidence/scripts/update_interpro_in_gff.slurm.sh
 ```
 `gff_with_interpro/` is the input for step 05.
 

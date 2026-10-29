@@ -15,10 +15,10 @@
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, TE-gene overlap filtering | ✅ Complete |
 | [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed (all strains already annotated) |
 | [04 – InterProScan](README.md#04--interproscan) | Functional domain annotation | ✅ Complete |
-| [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | 🔄 In progress |
-| [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | 🔄 In progress |
+| [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
+| [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
 | [07 – Post-GET_PANGENES Adjusting](README.md#07--post-get_pangenes-adjusting) | Manual review and refinement of pangene calls | 🔄 In progress |
-| [08 – Pangenome Visualisation](README.md#08--pangenome-visualisation) | Figures, presence/absence matrix, summary stats | 🔄 In progress |
+| [08 – Pangenome Visualisation](README.md#08--pangenome-visualisation) | Figures, presence/absence matrix, summary stats | ✅ Complete |
 
 ---
 
@@ -27,8 +27,8 @@
 ### 01 – Genome Selection & QC
 
 - **17 strains selected**, including chromosome-level long-read assemblies alongside the three FungiDB genomes (Af293, A1160, A1163).
-- **All 17 confirmed as *A. fumigatus* sensu stricto** by whole-genome ANI against Af293
-  (99.2–99.6%).
+- **All 16 strains compared with the reference Af293 are confirmed as *A. fumigatus* sensu stricto** by
+  whole-genome ANI (99.2–99.6%).
 - **30 contigs removed across 9 of the 17 strains** before analysis: 12 organelle
   (mitochondrial) contigs from 4 strains (AF293, AF100-9B, ATCC 42202, 47-4), and 18
   redundant/duplicated contigs from 5 strains (A1163, H237, 08-19-02-30, B5233, eAF1090) —
@@ -51,16 +51,43 @@
 - **TE family composition carries a sub-lineage signal.** The 4 strains sharing the
   chromosome-2 inversion also share a distinct TE profile (depletion of major Gypsy families;
   enrichment of `Gypsy-3_AF`), suggesting this is a genuine genetic sub-group.
-- **337 TE-derived gene models were removed** from the GFF annotations across all genomes
+- **339 TE-derived gene models were removed** from the GFF annotations across all genomes
   before downstream steps — preventing transposon fragments from being counted as real genes.
 - **Only 56 genes across the whole panel fall in the ambiguous zone** (20–80% TE overlap)
   and require manual review. AF293 contributes more of these than any other strain, likely
   reflecting differences in the original annotation era.
 
-### 03–08 — In progress
+### 03–04
 
-Results for *de novo* annotation, InterProScan, pangene clustering, and visualisation will
-be added here as each step is completed.
+Not needed for *de novo* annotation (all strains already annotated); InterProScan was run on every strain (see the [full report](README.md#04--interproscan)).
+
+### 05 – Cross-genome Annotation Integration
+
+- Each strain's annotation is rebuilt from the reference's transferred genes, the strain's own genes and genes transferred from the other strains,
+  as in the *T. gondii* panel. Two versions go on to `get_pangenes`: **with filtering** (7a) and **no filtering** (7b, genes only tagged).
+- The filter removed **2.2% of the genes** (4,307 of 192,136; 1.9-2.7% per strain), leaving 10,838 to 11,509 genes per strain.
+
+### 06 – GET_PANGENES
+
+- **12,984 pangenes with filtering** and **13,693 without**, across the 17 strains.
+
+### 07 – Post-GET_PANGENES Adjusting *(in progress)*
+
+- Not analysed yet. About 3% of the pangenes hold more than one gene of the same strain (443 with filtering, 454 without).
+
+### 08 – Pangenome Visualisation
+
+- **The pangenome is still growing:** adding the 17th strain still adds about 70 pangenes with filtering and about 97 without. The core is
+  10,254 pangenes (79%) with filtering and 10,433 (76%) without; 9% and 12% of the pangenes are in one strain only. ATCC 46645 has the most
+  singletons (213 and 230).
+- **The cloud looks different from the core.** Cloud pangenes have shorter proteins (median 204 aa against 383 aa in the core, no filtering),
+  fewer domains (42% of genes against 77%), and sit more often on contigs below 200 kb (11% against none of the core).
+- **Many cloud pangenes have genes without a valid ORF:** 39% with filtering and 57% without, against about 2% of the core. Without filtering,
+  14% of the cloud pangenes are mostly made of overlapping genes with no domain or specific description, against 1.6% of the core.
+- **InterPro enrichment.** The cloud is enriched in domains of unknown function (DUF3435, DUF3723), acyl transferase and protein kinase-like
+  domains; without filtering also in the orsellinic acid biosynthesis cluster protein D. The DUFs may point to Starship elements, to be confirmed.
+  The core is enriched in the armadillo-type fold, sugar transporter and OB-fold domains.
+- Preliminary: pangenes with more than one gene of the same strain are not resolved yet.
 
 ---
 
@@ -73,6 +100,8 @@ be added here as each step is completed.
 - The synteny-based approach requires chromosome-level assemblies for the most reliable calls.
   Sub-telomeric accessory regions — where most lineage-specific genes live — are the least
   certain part of any pangenome, including this one.
+- **Invalid ORFs in the cloud.** A large share of the cloud is made of transfers with a broken ORF, so cloud-related figures may overstate
+  the strain-specific content; additional filtering could be considered.
 - The pangenome matrix captures **gene presence/absence only**. Azole resistance in
   *A. fumigatus* is driven largely by *sequence variants within* core genes (e.g., *cyp51A*
   promoter repeats + coding substitutions), which require a separate targeted analysis.
@@ -88,7 +117,7 @@ be added here as each step is completed.
 | 01_Genome_Selection_QC/ *(working data, not published here)* | QC outputs: ANI, synteny, organelle and redundancy screens |
 | 02_TE_annotation_Clean_Up/ *(working data, not published here)* | TE library, RepeatMasker results, TE-gene overlap |
 | 03_denovo_Genome_Annotation/ *(working data, not published here)* | *de novo* gene predictions |
-| 04_InterProScan/ *(working data, not published here)* | Domain annotations |
+| 04_Protein_evidence/ *(working data, not published here)* | Domain annotations |
 | 05_Cross-genome_annotation_integration/ *(working data, not published here)* | Merged annotation files |
 | 06_GET_PANGENES/ *(working data, not published here)* | Pangene clusters |
 | 07_Post_GET_PANGENES_adjusting/ *(working data, not published here)* | Reviewed and curated pangene calls |
