@@ -14,11 +14,11 @@
 | [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, contig profiling, synteny | ✅ Complete |
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, candidate validation | ✅ Complete |
 | [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed |
-| [04 – InterProScan](README.md#04--interproscan) | Functional domain annotation | ✅ Complete |
+| [04 – Protein evidence (InterProScan and PSAURON)](README.md#04--protein-evidence-interproscan-and-psauron) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting](README.md#07--post-get_pangenes-adjusting) | Manual review and refinement of pangene calls | 🔄 In progress |
-| [08 – Pangenome Visualisation](README.md#08--pangenome-visualisation) | Figures, presence/absence matrix, summary stats | ✅ Complete |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Manual review and refinement of pangene calls | 🔄 In progress |
+| 08 – Pangenome Visualisation | Figures, presence/absence matrix, summary stats (prototype flow; now part of step 07) | ✅ Complete |
 | [Redundancy check](README.md#redundancy-check-on-the-final-panel) | Duplicated contigs in the final panel | ✅ Complete |
 | [09 – Redundant Contig Removal](README.md#09--redundant-contig-removal) | Genes of the redundant contigs removed from the GFFs and pangene matrices (*T. gondii* only) | ✅ Complete |
 
@@ -56,7 +56,7 @@
 
 Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VEuPathDB).
 
-### 04 – InterProScan
+### 04 – Protein evidence (InterProScan and PSAURON)
 
 - InterProScan was run on every strain's proteins. 56–62% of the protein-coding genes of each
   strain carry an InterPro/PFAM domain, so no strain stands out as poorly annotated.

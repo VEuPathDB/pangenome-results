@@ -152,13 +152,12 @@ variable.
 - [01 – Genome Selection & QC](#01--genome-selection--qc)
 - [02 – TE Annotation & Clean Up](#02--te-annotation--clean-up)
 - [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
-- [04 – InterProScan](#04--interproscan)
+- [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 - [06 – GET_PANGENES](#06--get_pangenes)
-- [07 – Post-GET_PANGENES Adjusting](#07--post-get_pangenes-adjusting)
-- [08 – Pangenome Visualisation](#08--pangenome-visualisation)
-  - [With filtering (7a)](#with-filtering-7a)
-  - [No filtering (7b)](#no-filtering-7b)
+- [07 – Post-GET_PANGENES Adjusting and Visualisation](#07--post-get_pangenes-adjusting-and-visualisation)
+  - With filtering (7a)
+  - No filtering (7b)
 
 ---
 
@@ -577,6 +576,30 @@ scaffolds (already discussed in the contig-redundancy screen above), not evidenc
 
 ![protein_coding/pseudogene genes by contig size bin](01_Genome_Selection_QC/contig_size_profile/plots/pc_pseudogenes_by_contig_size_bin_by_genome.png)
 
+### 01.9 Assembly & annotation assessment
+
+> This check normally runs right after the genomes are obtained, *before* any filtering — for Afum it
+> was added at the end, so the numbers below are for the **already-cleaned** assemblies and GFFs
+> (`gff_originals/` was rewritten when the contigs were dropped), not the raw downloads. Run on the
+> cluster, 2026-10-30.
+
+```bash
+sbatch 01_Genome_Selection_QC/scripts/assess_assemblies.slurm.sh
+```
+
+No NCBI `data_summary.tsv` files were given, so the metadata columns are empty; the proteins were
+translated from the GFFs.
+
+![Assembly and annotation assessment](01_Genome_Selection_QC/assembly_assessment/assembly_assessment.png)
+
+- **GCA_040142955.1 (ATCC 46645)** is the outlier: largest genome (30.5 Mb vs 27.8–29.4 Mb), most
+  genes (10,665) and mRNAs (11,065), and one of the lowest N50s (1.96 Mb).
+- **Two annotation styles:** A1160, A1163, GCA_040167805.1 and AF293 have more genes than mRNAs and fewer
+  exons (30,700–33,700); the other 13 GCA genomes have more mRNAs than genes (isoforms) and
+  33,000–35,000 exons. Proteins are counted per mRNA, so isoforms count as extra proteins.
+- **A1163** still has 48 contigs (8–25 in the others), with a normal N50 (3.8 Mb): the extra contigs are small.
+- GC (49.2–50.0%) and protein length (median 392–413 aa) do not differ.
+
 [↑ Back to top](#analysis-steps)
 
 ---
@@ -788,13 +811,13 @@ No need as all genomes used have annotation
 
 ---
 
-## 04 – InterProScan
+## 04 – Protein evidence (InterProScan and PSAURON)
 
 ### 04.1 Running InterProScan
 
 ```bash
-sbatch 04_Protein_evidence/scripts/extract_proteins.slurm.sh          # gff_cleaned/ -> interpro/proteins/*.faa
-sbatch 04_Protein_evidence/scripts/build_interpro_manifest.slurm.sh   # interpro/interpro_manifest.tsv
+sbatch 04_InterProScan/scripts/extract_proteins.slurm.sh          # gff_cleaned/ -> interpro/proteins/*.faa
+sbatch 04_InterProScan/scripts/build_interpro_manifest.slurm.sh   # interpro/interpro_manifest.tsv
 ```
 
 `interpro_manifest.tsv` for this panel (17 genomes, `CHUNK_SIZE=1000`): **184 total chunks**.
@@ -802,10 +825,10 @@ Submit the array job with:
 ```bash
 mkdir -p interpro/logs
 N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
-sbatch --array=1-${N}%20 04_Protein_evidence/scripts/interproscan_array_job.slurm.sh
+sbatch --array=1-${N}%20 04_InterProScan/scripts/interproscan_array_job.slurm.sh
 ```
 (currently 184, but always recomputed from the manifest, not hardcoded - see
-[`04_Protein_evidence/README.md`](../../04_Protein_evidence/README.md) for why: a bare
+[`04_InterProScan/README.md`](../../04_Protein_evidence/README.md) for why: a bare
 `sbatch interproscan_array_job.slurm.sh` with no `--array=...` only runs 1 smoke-test task).
 
 Protein extraction ran on `gff_cleaned/` (step 02's TE-kill-list output — organelle,
@@ -817,7 +840,7 @@ chunks completed (each chunk's `.out` ends with `Finished <genome> chunk <N>`).
 Combines the per-chunk InterProScan output into one lookup table per genome
 (`interpro/interpro_lookup/`) and checks completeness:
 ```bash
-sbatch 04_Protein_evidence/scripts/merge_interpro_job.slurm.sh
+sbatch 04_InterProScan/scripts/merge_interpro_job.slurm.sh
 ```
 A protein reported as absent from the chunk output is a `NOTE`, not an error: InterProScan only
 writes a row when it finds a hit, so it is a protein with no domain hits. Only a missing chunk
@@ -828,9 +851,23 @@ file (`WARNING`) means the results are incomplete.
 Writes the `InterPro:`/`PFAM:` evidence into the `Dbxref=` of each CDS line, reading
 `gff_cleaned/` and writing new GFFs to `gff_with_interpro/` (the input is never modified):
 ```bash
-sbatch 04_Protein_evidence/scripts/update_interpro_in_gff.slurm.sh
+sbatch 04_InterProScan/scripts/update_interpro_in_gff.slurm.sh
 ```
 This ran successfully; `gff_with_interpro/` is the input for step 05.
+
+### 04.4 PSAURON on every protein
+
+Scores every protein of `interpro/proteins/` (the files extracted for InterProScan, 17 genomes) with PSAURON
+(group container `GAQA_psauron.sif`, PSAURON 1.0.8), one array task per genome, into `psauron/<genome>.csv`.
+Step 05 reads this folder (`PSAURON_DIR="psauron"`) to decide which genes without an AF293 gene can enter the panel,
+and to settle overlaps.
+```bash
+mkdir -p psauron/logs
+N=$(grep -v '^#' genome_order.txt | awk 'NF' | wc -l)
+sbatch --array=1-${N} 04_InterProScan/scripts/psauron_array_job.slurm.sh
+```
+Ran on 2026-10-21: all 17 genomes complete, every protein scored (177,043 proteins; 9,858-11,031 per genome),
+no warnings; about 1 min per genome.
 
 [↑ Back to top](#analysis-steps)
 
@@ -840,7 +877,7 @@ This ran successfully; `gff_with_interpro/` is the input for step 05.
 
 ### Step 1: Native annotation check
 
-Run **once**, after [step 04](#04--interproscan), on `gff_with_interpro/` (the GFFs with the
+Run **once**, after [step 04](#04--protein-evidence-interproscan-and-psauron), on `gff_with_interpro/` (the GFFs with the
 domain evidence written in), so that the domain columns and plots are real. Output folder for
 this run: `annotation_check/`.
 ```bash
@@ -984,175 +1021,103 @@ sbatch --array=1-17 05_Cross-genome_annotation_integration/scripts/liftoff_all_v
 ```
 Results go to `liftoff_output/polished/`, job logs to `liftoff_output/logs/`. Resubmitting skips pairs that are already done.
 
-### Step 5: Build each genome's final annotation (done)
+#### AF293 genes transferred with a valid ORF
 
-[`build_final_annotation_basic.sh`](../../05_Cross-genome_annotation_integration/README.md#step-5-build-each-genomes-final-annotation)
-builds one annotation per genome anchored on its own coordinates. The reference is AF293 (first line
-of `genome_order.txt`). The layers are the reference's confident transfers (`main`), then the
-genome's own annotation from `gff_for_liftoff/` - which is where its non-coding genes come back in -
-then the other genomes' good transfers (`good_<genome>`), then everything left (`rescued_<genome>`).
-Run after all Liftoff jobs have finished, one job per genome:
-```bash
-mkdir -p expanded_annotation/logs
-sbatch --array=1-17 05_Cross-genome_annotation_integration/scripts/build_final_annotation_basic.sh
-```
-Results: `expanded_annotation/<genome>_final_annotation.gff`, job logs in `expanded_annotation/logs/`.
-
-### Step 6: Built annotation check
-
-QC on the raw build output, before [step 7](../../05_Cross-genome_annotation_integration/README.md#step-7-final-annotation-if-using-step-5-pre-get_pangenes)'s
-filter runs. Output folder: `final_annotation_qc_plots/`.
-```bash
-mkdir -p final_annotation_qc_plots/logs
-sbatch 05_Cross-genome_annotation_integration/scripts/plot_final_annotation_qc_job.sh
-```
-(Full description of every output file:
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-6-built-annotation-check-if-using-step-5).)
-
-**Gene counts** - each genome's final build has 11,074-11,776 protein-coding genes, above its own original
-annotation (9,601-10,464), since genes are being pulled in from every other genome too.
-
-![Protein-coding genes: own original annotation vs. this pipeline's build](05_Cross-genome_annotation_integration/final_annotation_qc_plots/01_gene_counts.png)
-
-**Extra copies** - ATCC 42202 (76), ATCC 46645 (60) and 08-19-02-30 (56) stand out; every other genome has
-between 11 and 46.
-
-![Extra-copy genes, split by valid ORF](05_Cross-genome_annotation_integration/final_annotation_qc_plots/03_extra_copies.png)
-
-**CDS-overlap severity** - 4,997 CDS-overlapping pairs across the panel, split minor (669), substantial (1,953)
-and contained (2,375).
-
-![CDS-overlap severity per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/04_overlap_severity.png)
-
-**Source composition** - where each genome's final genes came from (`main`/original/`good_*`/`rescued_*`).
-
-![Source composition per genome](05_Cross-genome_annotation_integration/final_annotation_qc_plots/05_source_composition.png)
-
-**Overlap strand** - the same 4,997 pairs, split by strand instead of severity: only **13 are same-strand**
-(the ones that "shouldn't normally happen"), the other **4,984 are opposite-strand**.
-
-![CDS-overlapping pairs per genome, by strand](05_Cross-genome_annotation_integration/final_annotation_qc_plots/06_overlap_strand.png)
-
-**Overlap domain support** - of the 4,997 pairs, **129 have InterPro/PFAM domain evidence on both genes**,
-**2,918 on exactly one**, and **1,950 on neither**. These counts use protein domains only; the 7a filter also
-counts a specific description as evidence (see below).
-
-![CDS-overlapping pairs per genome, by domain support](05_Cross-genome_annotation_integration/final_annotation_qc_plots/07_overlap_domain_support.png)
-
-**Pairs by case** - the 4,997 pairs of the raw build, by whether each gene is `main` and whether it carries a
-protein domain:
-
-| # | Case | Pairs |
-|---|---|---:|
-| 1 | `main` × `main` | 190 |
-| 2 | `main` × other, other **has** a domain | 161 |
-| 3 | `main` × other, other has **no** domain | 3,293 |
-| 4 | other × other, **one** has a domain | 369 |
-| 5 | other × other, **both** have a domain | 20 |
-| 6 | other × other, **neither** has a domain | 964 |
-
-Case 6 - 964 pairs, 633 distinct genes: 99.9% opposite-strand, 233 `minor` severity.
-
-Also in that folder: `summary.tsv` (the numbers behind every plot above), `extra_copy_genes.tsv`
-(every extra-copy gene, with description/location/domain/valid-ORF), `cds_overlapping_pairs.tsv`
-(every pair above, one row each) and `overlap_domain_summary.tsv` (the domain-support numbers
-above, per genome).
-
-[↑ Back to top](#analysis-steps)
-
----
-
-### Filtering — 7a pre-filter (done)
-
-Ran [`filter_final_annotation.py`](../../05_Cross-genome_annotation_integration/scripts/filter_final_annotation.py)
-on all 17 genomes (rule details in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#7a-filter-drop-unsupported-genes-before-get_pangenes)).
-Output: `filtered_annotation/<genome>_final_annotation_filtered.gff`, with the genes typed `gene` and
-renumbered `Afu<strain-index>g<00001, ...>`, original ID kept in `original_ID=`. The figures come from
-`plot_filter_qc_job.sh` (`filter_qc_plots/`).
-
-The filter removed **4,307 of 192,136 genes (2.2%)**, between 1.9% and 2.7% per genome:
-
-| Genome | n_original | n_kept | n_removed | % removed |
-|---|---:|---:|---:|---:|
-| AF293 | 11,295 | 11,048 | 247 | 2.2% |
-| A1160 | 11,397 | 11,148 | 249 | 2.2% |
-| A1163 | 11,393 | 11,160 | 233 | 2.0% |
-| GCA_040126065.1 | 11,091 | 10,846 | 245 | 2.2% |
-| GCA_040142845.1 | 11,242 | 10,933 | 309 | 2.7% |
-| GCA_040142855.1 | 11,428 | 11,157 | 271 | 2.4% |
-| GCA_040142865.1 | 11,375 | 11,116 | 259 | 2.3% |
-| GCA_040142875.1 | 11,363 | 11,087 | 276 | 2.4% |
-| GCA_040142885.1 | 11,074 | 10,838 | 236 | 2.1% |
-| GCA_040142945.1 | 11,081 | 10,868 | 213 | 1.9% |
-| GCA_040142955.1 | 11,776 | 11,509 | 267 | 2.3% |
-| GCA_040142975.1 | 11,370 | 11,096 | 274 | 2.4% |
-| GCA_040167795.1 | 11,408 | 11,141 | 267 | 2.3% |
-| GCA_040167805.1 | 11,082 | 10,841 | 241 | 2.2% |
-| GCA_058970245.1 | 11,229 | 11,000 | 229 | 2.0% |
-| GCA_058972525.1 | 11,449 | 11,191 | 258 | 2.3% |
-| GCA_058972625.1 | 11,083 | 10,850 | 233 | 2.1% |
-
-Before and after filtering, per genome:
-
-![Genes before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/01_gene_counts.png)
-
-Why each gene was removed (read from the figure): about half of the removed genes overlapped a
-reference-derived (`main`) gene and had no evidence themselves. The rest are low-coverage `rescued_`
-transfers, ties between two genes with no evidence, genes that overlapped a gene with evidence, and
-extra copies with no valid ORF.
-
-![Why each gene was removed](05_Cross-genome_annotation_integration/filter_qc_plots/03_removal_reasons.png)
-
-Extra-copy genes fall from 11-76 per genome to 0-25; GCA_040142955.1 (25) and GCA_058972525.1 (13)
-keep the most.
-
-![Extra-copy genes before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/02_extra_copies.png)
-
-CDS-overlapping gene pairs fall from 262-303 per genome to 94-110, and the pairs where one gene is
-contained in the other from 128-149 to 43-48. The rules keep some overlaps on purpose (small overlaps
-at a gene's end, pairs where both genes have evidence); which case the remaining pairs belong to was
-not checked.
-
-![CDS-overlap severity before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/04_overlap_severity.png)
-
-Which layer each gene comes from (`main`, the genome's own annotation, `good_` and `rescued_`
-transfers):
-
-![Source composition before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/05_source_composition.png)
-
-### Filtering — 7b no pre-filter / tag (done)
-
-Ran [`tag_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/tag_final_annotation.py)
-on all 17 genomes (rule details in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#7b-no-filtering-tag-decide-after-get_pangenes)).
-Nothing removed - same `gene`-typing/ID-renumbering as 7a, plus an `intersect=` tag on every
-gene recording what it overlaps (`NA`/`with_main`/`with_other_with_domain`/`with_other_no_domain`).
-Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_intersect_pairs.tsv`.
+An AF293 gene that maps well onto the other genomes but has no valid ORF in any of them likely has a wrong
+gene model in AF293: the sequence is there, the model does not translate on it. "Maps well" means median
+Liftoff coverage and identity ≥ 0.9 over the genomes the gene reached. The AF293 model is never checked on
+AF293 itself (there is no AF293→AF293 transfer).
 
 ```bash
-sbatch 05_Cross-genome_annotation_integration/scripts/tag_final_annotation_job.sh
+mkdir -p liftoff_transfer_stats/logs
+sbatch 05_Cross-genome_annotation_integration/scripts/liftoff_transfer_stats_job.sh
 ```
 
-| Genome | n_total | NA | with_main | with_other_with_domain | with_other_no_domain |
-|---|---:|---:|---:|---:|---:|
-| AF293 | 11,295 | 10,768 | 250 | 15 | 262 |
-| A1160 | 11,397 | 10,869 | 224 | 30 | 274 |
-| A1163 | 11,393 | 10,867 | 224 | 32 | 270 |
-| GCA_040126065.1 | 11,091 | 10,564 | 220 | 32 | 275 |
-| GCA_040142845.1 | 11,242 | 10,686 | 220 | 30 | 306 |
-| GCA_040142855.1 | 11,428 | 10,880 | 222 | 32 | 294 |
-| GCA_040142865.1 | 11,375 | 10,827 | 223 | 32 | 293 |
-| GCA_040142875.1 | 11,363 | 10,784 | 220 | 34 | 325 |
-| GCA_040142885.1 | 11,074 | 10,553 | 210 | 28 | 283 |
-| GCA_040142945.1 | 11,081 | 10,575 | 210 | 29 | 267 |
-| GCA_040142955.1 | 11,776 | 11,234 | 211 | 35 | 296 |
-| GCA_040142975.1 | 11,370 | 10,810 | 220 | 33 | 307 |
-| GCA_040167795.1 | 11,408 | 10,851 | 196 | 38 | 323 |
-| GCA_040167805.1 | 11,082 | 10,553 | 206 | 33 | 290 |
-| GCA_058970245.1 | 11,229 | 10,705 | 202 | 36 | 286 |
-| GCA_058972525.1 | 11,449 | 10,905 | 199 | 37 | 308 |
-| GCA_058972625.1 | 11,083 | 10,564 | 208 | 30 | 281 |
+| | |
+| :---: | :---: |
+| ![AF293 genes by number of genomes with a valid ORF](05_Cross-genome_annotation_integration/liftoff_transfer_stats/AF293_valid_orf_hist.png) | ![AF293 transfers by target genome](05_Cross-genome_annotation_integration/liftoff_transfer_stats/AF293_by_reference.png) |
+
+- **9,997 of the 10,124 AF293 genes transferred; 8,260 (83%) have a valid ORF in all 16 genomes.** 3.1%
+  (A1160) to 6.9% (`GCA_040167795.1`) of AF293's genes reach a genome with an invalid ORF.
+- **131 genes have a valid ORF in none of the genomes they reached.** 88 of them reached all 16.
+- **132 candidate wrong models** (`AF293_candidates.tsv`): transferred to ≥ 12 of the 16 genomes, valid ORF
+  in ≤ 20% of them, maps well.
+
+### Step 5: Basket annotation (done)
+
+[`basket_annotation_job.sh`](../../05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
+place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
+AF293. This is the version that loses no gene without a reason
+([No gene is lost without a reason](../../05_Basket_annotation_integration/README.md#no-gene-is-lost-without-a-reason)).
+Run on the cluster on 29 October 2026 (job 1723536), both modes, with the step 04 PSAURON scores and the curators'
+list of deleted genes (`curation_removed_genes_AF293.txt`, old reference GFF FungiDB-71), from
+`05_Basket_annotation_integration/scripts_keep_all_genes/` into `basket_annotation_keep_all_genes/` (the previous run,
+22 October, job 1721463, stays in `basket_annotation/`):
+```bash
+mkdir -p basket_annotation_keep_all_genes/logs
+sbatch --export=ALL,TRANSFER_DIR=liftoff_output/polished,OLD_REFERENCE_GFF=FungiDB-71_AfumigatusAf293.gff,CURATION_REMOVED_LIST=curation_removed_genes_AF293.txt,ID_PREFIX=Af,PLOT_LABEL=Afum 05_Basket_annotation_integration/scripts_keep_all_genes/basket_annotation_job.sh
+```
+
+All checks passed, and every gene of every genome's own annotation has a final model or a written reason (gene
+fate: 0 genes without a record). The final GFFs of `prefer_panel_model`
+(`basket_annotation_keep_all_genes/gff_prefer_panel_model_final/`) go to get_pangenes.
+
+**Panel genes.** 11,542 panel genes: the 10,015 AF293 genes (1 of them a pseudogene) and 1,527 genes not in the AF293
+annotation. 561 copies of a gene in one genome were split off into baskets of their own; 399 of them became panel
+genes. 42 panel genes were removed: 34 lost an opposite-strand overlap, 8 are genes the curators deleted.
+
+![Panel genes kept and removed](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_panel_genes.png)
+
+**Genes per genome.** 10,016 (`GCA_040167805.1`) to 10,608 (`GCA_040142955.1`) genes per genome. AF293 has 10,323: its
+10,015 genes and 308 genes not in its annotation.
+
+![Genes per genome: own annotation and final, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_gene_counts.png)
+
+**From each genome's own annotation to the final GFF.** Unlike *T. gondii*, most genomes gain genes: 489 to 717 genes
+per genome were added where the genome had no gene. The losses are smaller: 60 to 230 pieces of genes replaced by one
+model, 126 to 252 genes eliminated by the quality rules, 6 to 31 TE genes removed in step 02, and 3 to 14 removed at the
+end of step 05. The genes on the contigs removed in step 01 (mitochondrial and redundant contigs) are not counted: step
+01's `drop_contigs.py` rewrote `gff_originals/` in place, so their genes are no longer known.
+
+![Each genome from its own annotation to the final GFF](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_gene_balance.png)
+
+**Genes eliminated by the quality rules.** 3,246 genes in the 16 genomes besides AF293; 323 of them only for being
+shorter than 100 aa (10 in *T. gondii*).
+
+![Genes eliminated by the quality rules, by their signs](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_eliminated_reasons.png)
+
+![PSAURON of the eliminated genes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_eliminated_psauron.png)
+
+![PSAURON of the genes eliminated by PSAURON only](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_eliminated_psauron_only.png)
+
+These figures are redone, with step 02's TE genes, by
+[`gene_fate_job.sh`](../../05_Basket_annotation_integration/README.md#running-it) on the results
+already written:
+```bash
+export PLOT_LABEL=Afum
+export REMOVED_GENES="te_annotation_integration/{genome}.eliminated_genes.gff:TE genes (step 02)"
+sbatch --export=ALL 05_Basket_annotation_integration/scripts_keep_all_genes/gene_fate_job.sh
+```
+
+**Where each model comes from.** In `prefer_panel_model`, 8,875 to 9,305 genes per genome take the panel model in place
+of the genome's own; 373 to 582 fill a place where the genome had no gene; 212 to 404 take another valid model closer
+to the panel model; 73 genes in all are the genome's own gene, back where the panel model could not be placed.
+
+![Origin of each genome's models, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_model_origin.png)
+
+**ORF quality.** 169,611 of the 173,772 genes (98%) have a valid ORF. Only 56 have an ORF broken by the assembly. 4,105
+have an invalid ORF not explained by the assembly, 129 of them in AF293. miniprot repaired 8; the others are mostly
+frameshifts and internal stops.
+
+![ORF quality per genome, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_orf_quality.png)
+
+![Genes with an invalid ORF, by miniprot result](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_miniprot.png)
+
+**Tandem arrays: none.** 1,574 pairs of neighbouring genes of one genome in one basket were compared; none passed
+(protein identity >= 70% over >= 70% of both), as in the previous run.
+
+The prototype of this step (the build, its check and the 7a/7b filters) is kept in
+`README_prototype_step05.md` (kept locally, not in this repository).
 
 [↑ Back to top](#analysis-steps)
 
@@ -1160,216 +1125,135 @@ sbatch 05_Cross-genome_annotation_integration/scripts/tag_final_annotation_job.s
 
 ## 06 – GET_PANGENES
 
-Ran `get_pangenes` twice, on the 7a GFFs (`filtered_annotation/`, filtered before) and on the 7b GFFs
-(`tagged_annotation/`, nothing pre-filtered), 17 genomes each:
+`get_pangenes` on the final GFFs of step 05 (`prefer_panel_model`, `basket_annotation_keep_all_genes/`), on the
+cluster:
 ```bash
-sbatch 06_GET_PANGENES/scripts/link_for_get_pangenes_7a.slurm.sh
-sbatch 06_GET_PANGENES/scripts/run_get_pangenes_7a_job.sh
-sbatch 06_GET_PANGENES/scripts/link_for_get_pangenes_7b.slurm.sh
-sbatch 06_GET_PANGENES/scripts/run_get_pangenes_7b_job.sh
+jid=$(sbatch --parsable --export=ALL,MODE=prefer_panel_model,ANNOTATION_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final,OUT_DIR=for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh)
+sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=./for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
 ```
-Result: **12,984 pangenes** with filtering (7a) and **13,693 pangenes** without (7b)
-(`for_get_pangenes_7{a,b}_pangenes/pangene_matrix*.tab`; `pangene_matrix_genes.tr.tab` lists the gene IDs
-of every genome in every pangene).
+**11,758 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`). The previous run, on `basket_annotation/` (22
+October), gave 11,595 (`for_get_pangenes_basket_prefer_panel_model_pangenes/`).
+
+The earlier pangenomes (7a and 7b, prototype flow) are in `README_prototype_steps06_08.md` (kept locally, not in this repository).
 
 [↑ Back to top](#analysis-steps)
 
 ---
 
-## 07 – Post-GET_PANGENES Adjusting
+## 07 – Post-GET_PANGENES Adjusting and Visualisation
 
-[↑ Back to top](#analysis-steps)
-
----
-
-## 08 – Pangenome Visualisation
-
-> **Preliminary.** Some pangenes hold more than one gene of the same genome (443 with filtering, 454 without
-> filtering) and have not been examined yet ([step 07](#07--post-get_pangenes-adjusting)). The figures below count
-> them as they are. They will be updated once those pangenes are resolved.
-
-The same figures for the two sets of pangenes: **with filtering** (7a, filtered before `get_pangenes`) and
-**no filtering** (7b, tagged, nothing removed). Every figure also comes as `.svg`, and files start with the
-label (`Afum7a`/`Afum7b`). They come from
-[`plot_all_job.sh`](../../08_Pangenome_Visualisation/scripts/plot_all_job.sh), one run for each set:
+The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
+again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Genomes are labelled by their
+accession, except AF293, A1160 and A1163; the strain of each accession is in the
+[genome table of step 01](#01--genome-selection--qc). Parts 1–3 were run on the cluster on 2026-10-30, on the
+`get_pangenes` run above, into folders ending in `_keep_all_genes` (the previous run's folders, without the suffix, are
+kept), with the same commands as for *T. gondii* and `LABEL=Afum`:
 ```bash
-mkdir -p pangenome_plots/logs
-sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7a --label Afum7a
-sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7b --label Afum7b
+LABEL=Afum
+export TITLE="$LABEL Pangenome Explorer"
+export PANGENES_DIR=for_get_pangenes_keep_all_genes_pangenes
+export GFF_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final
+export STEP05_GFF_DIR=$GFF_DIR
+export STEP05_SCRIPTS=05_Basket_annotation_integration/scripts_keep_all_genes
+export ABSENT=basket_annotation_keep_all_genes/decide/absent.tsv
+export STACKED=basket_annotation_keep_all_genes/gff_prefer_panel_model/stacked_dropped.tsv
+export WINNERS=basket_annotation_keep_all_genes/winners.tsv
+I=pangenome_inspection_keep_all_genes; F=pangenome_fixed_keep_all_genes
+P=pangenome_plots_keep_all_genes;      E=pangenome_explorer_keep_all_genes
+S=07_Post_GET_PANGENES_adjusting/scripts
+mkdir -p $I/logs $F/logs $P/logs $E/logs
+j1=$(sbatch --parsable -o $I/logs/%x_%j.out -e $I/logs/%x_%j.err --export=ALL,OUT_DIR=$I $S/inspect_pangenome_job.sh)
+j2=$(sbatch --parsable --dependency=afterok:$j1 -o $F/logs/%x_%j.out -e $F/logs/%x_%j.err --export=ALL,OUT_DIR=$F,ABSENCES=$I/absence_audit/absences.tsv $S/fix_pangenome_safe_job.sh)
+sbatch --dependency=afterok:$j2 -o $P/logs/%x_%j.out -e $P/logs/%x_%j.err --export=ALL,SET=preliminary,LABEL=$LABEL,FIXED_DIR=$F,OUT_DIR=$P $S/plot_all_job.sh
+sbatch --dependency=afterok:$j2 -o $E/logs/%x_%j.out -e $E/logs/%x_%j.err --export=ALL,SET=preliminary,FIXED_DIR=$F,OUT_DIR=$E $S/build_explorer_job.sh
 ```
-Genomes are labelled by their accession, except AF293, A1160 and A1163. The strain of each accession is in the
-[genome table of step 01](#01--genome-selection--qc).
 
----
+| | `get_pangenes` | After the safe fix (preliminary) |
+|---|---:|---:|
+| Pangenes | 11,758 | 11,468 |
+| Core (17) | | 9,638 |
+| Soft-core (16) | | 133 |
+| Shell (3-15) | | 862 |
+| Cloud (1-2) | | 835 |
 
-### With filtering (7a)
+### 1. Inspection
 
-*Pangenes from the GFFs filtered before `get_pangenes`.*
+Job 1724720. Tables in `07_Post_GET_PANGENES_adjusting/pangenome_inspection_keep_all_genes/`.
 
-**Pangenome and core genome size** - genomes are added one at a time in 100 random orders. The pangenome
-grows to 12,984 pangenes (all 17 genomes), still growing by about 70 per genome at the end. The core falls
-to 10,254; the fitted curves put its plateau at 10,295 (Tettelin) and 10,238 (Willenbrock).
-`Afum7a_pancore_separate.png` shows the two curves in separate panels.
+**Absences** (a pangene with no gene in a genome): 26,294. More than half come from the assemblies: the place is at a
+contig edge (8,985) or the flanking genes are on different contigs (5,993).
 
-![Pangenome and core genome size, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_pancore.png)
+| Code | Category | Absences |
+|---|---|---:|
+| 1a | same gene, in another pangene: can be moved | 528 |
+| 1b | same gene, in a pangene shared with the other genomes | 1,035 |
+| 1c | same gene, in no pangene | 0 |
+| 2a | another gene in the place, no transfer | 2,186 |
+| 2b | another gene in the place, over a transfer | 101 |
+| 3 | transfer not used by step 05 | 227 |
+| 4 | place much shorter: likely deletion | 3,742 |
+| 5 | empty place | 943 |
+| 6 | contig edge | 8,985 |
+| 7 | flanking genes split | 5,993 |
+| 8 | region absent | 2,554 |
 
-**Pangene occupancy** - how many genomes each pangene is present in. 10,254 pangenes (79%) are core,
-132 are in 16 genomes (soft-core), 1,173 (9%) are in one genome only and 331 in two.
+**Pangenes with more than one gene of a strain:** 50, most of them genes of different panel genes grouped by
+`get_pangenes` (unrelated 21, split 13, no reference 5, other 5, fragment 4, copy 2).
 
-![Pangene occupancy, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_occupancy.png)
+### 2. Safe fix
 
-**Soft-core pangenes missing per genome** - each soft-core pangene (132 total) is missing from
-exactly one genome, so this counts, per genome, how many of those it accounts for. Soft-core
-genes are expected in nearly every genome, so a genome carrying a much larger share than the
-others is a content-QC flag, not just noise. AF293 - the reference genome - stands out (31 of
-132, 23%, over 3x the mean of 7.4), then AF100-9B (23, 17%) and ATCC 42202 (18, 14%); everything
-from eAF1023 down sits at or below the mean. AF293 leading this list is counter-intuitive (it is
-the best-curated genome in the panel), so it likely reflects gaps in AF293's own annotation
-rather than an assembly problem - worth checking case by case before assuming either one.
+Job 1724721. **120 genes** were moved back to the pangene of their gene, and 35 pangenes left empty disappeared. 408
+candidate moves were left alone: 231 genes claimed by more than one pangene and 177 that would have gone in the other
+direction of a merge. Then **174 baskets** that `get_pangenes` had split over several pangenes were joined (255
+pangenes joined into another; `joins.tsv`). 11,758 → **11,468 pangenes**. 256 split baskets were not joined, all
+because a pangene also holds genes of other baskets (`basket_splits_not_joined.tsv`).
 
-![Soft-core pangenes missing per genome, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_softcore_missing.png)
+The 21,349 absences left, by verdict: absent 7,976, assembly 11,863, copy dropped by step 05 282, elsewhere 1,228.
 
-**Singletons per genome** - ATCC 46645 has the most (213), then W72310 (121) and H237 (107); eAF1023 (15) and
-B5233 (17) have the fewest.
+**Low-confidence pangenes** (`pangene_lists/pangene_quality.tsv`): 286 have an invalid ORF in more than 50% of their
+strains; only 15 of them have a PSAURON score below 0.5 (in *A. fumigatus* the invalid ORFs look more like model
+problems than false genes), and 119 have no InterPro domain. In 110 the same defect is in every invalid strain (2 or
+more). 1 more is a reference pseudogene. **Genes in no pangene:** 68, all with a CDS below 100 bp.
 
-![Singletons per genome, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_singletons.png)
+### 3. Preliminary look
 
-**POCS heatmap** - pairwise percentage of conserved sequences between genomes, clustered (complete linkage);
-darker means more similar, and the colour scale covers the values between different genomes only.
+Jobs 1724722 (figures) and 1724723 (explorer). Figures: `07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/`; explorer:
+`07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary/explorer_standalone.html`.
 
-![POCS heatmap, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_POCS_heatmap.png)
+![Pangenome and core genome size, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_pancore.png)
 
-**Gene properties by occupancy** - every pangene is used (12,984), including the ones with more than one gene in
-a genome; the occupancy is the number of genomes the pangene is present in. Top: proportion of genes with an
-InterPro/PFAM domain, averaged over the pangenes of each occupancy. Bottom: protein length, one value per pangene
-(the median over all its genes). A Tukey HSD test compares the four categories on the value of each pangene, and the
-p-value of core against cloud is written on each panel; it treats the genes of one pangene, which come from different
-genomes, as independent samples, so it is optimistic. Core: 78% of genes with a domain, median 388 aa; cloud: 51% and 246 aa. The `_log` file shows protein length on a log axis.
+The core settles at about 9,600 pangenes (Tettelin 9,669, Willenbrock 9,597).
 
-![Gene properties by occupancy, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_occupancy_properties.png)
+![Pangene occupancy, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_occupancy.png)
 
-**Contig size by occupancy** - the contigs that carry the pangenes, split into size classes. Every pangene is used
-(12,984); each gets one value, the median length of the contigs of all its genes. The bars give the share of the
-pangenes of each category in each class. Cloud pangenes are on contigs below 200 kb more often than the others:
-11% of cloud pangenes (6% below 50 kb), against none of the core and shell pangenes; 22% are on contigs below 1 Mb,
-against 1.5% of core. No pangene has a median contig below 10 kb, so the smallest class starts at 10 kb; the panel still
-has 36 contigs below 10 kb, but they carry only 4 genes (see [step 01](#01--genome-selection--qc)).
+![Singletons per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_singletons.png)
 
-![Contig size by occupancy, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_contig_classes.png)
+ATCC 46645 (`GCA_040142955.1`) has the most singletons (142), then H237 (`GCA_040142975.1`, 70); AF293, 08-19-02-30
+(`GCA_040142875.1`) and W72310 (`GCA_040167795.1`) have 50 each.
 
-**Invalid ORFs by occupancy** - a gene is invalid when Liftoff found no valid open reading frame or the source
-annotation calls it a pseudogene. A pangene is "mostly invalid" when more than 50% of its genes are invalid.
-Mostly invalid: 39% of cloud pangenes (207 of 531), 19% of shell, 7% of soft-core and 1.9% of core (190 of
-10,200). Pangenes with no gene that can be judged (1,343) are left out.
-Even after the 7a filter, a large share of the cloud pangenes is mostly invalid, so additional filtering could be considered.
+![Soft-core pangenes missing per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_softcore_missing.png)
 
-![Number of pangenes with mostly invalid ORFs, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_occupancy_invalid_only.png)
+AF293 misses 37 of the 133 soft-core pangenes (28%), then AF100-9B (`GCA_040126065.1`, 23) and ATCC 42202
+(`GCA_040142845.1`, 16), as in the earlier runs.
 
-![Percentage of pangenes with mostly invalid ORFs, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_occupancy_invalid_percent.png)
+![POCS heatmap](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_POCS_heatmap.png)
 
-![Share of invalid genes by category, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_invalid_share.png)
+![InterPro enrichment, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_domain_enrichment.png)
 
-**Share of invalid genes by category** - each bar is one category, from cloud to core, split by how many of the genes of a
-pangene are invalid: none, up to half, more than half but not all, or all of them. In the cloud most pangenes have one or
-two genes, so a pangene is either all valid or all invalid, and the segment of "all invalid" is about the same as the
-share of "mostly invalid" pangenes in the two figures above.
+The cloud is enriched in the orsellinic acid/F9775 cluster protein D, protein kinases, DUF3435 (the captains of
+Starship elements), the subtelomeric hrmA-associated cluster protein and DUF3723, and again in the transposase domains
+HTH CenpB-type and HTH Psq-type: the transposon **Afu1g00140** (removed from the previous run by curation) is back,
+since the removal has not been run on this pangenome yet. The core is enriched in armadillo-like helical domains and
+sugar transporters.
 
-**InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more often than in the
-remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted). Only pangenes with at least one InterPro
-entry are counted (8,037 core, 765 cloud), and only entries carried by at least 5 pangenes are tested (1,055).
-Cloud: 43 entries are enriched (adjusted p < 0.05, at least 3 pangenes); core: 9. The cloud hits include domains of
-unknown function (DUF3435, DUF3723), acyl transferase and protein kinase-like domains; the core hits include the
-armadillo-type fold, sugar transporter and OB-fold domains. A core pangene collects entries from the genes of up to 17
-genomes, which may favour the core side.
+### 4. Removal after curation
 
-![InterPro term enrichment, with filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7a_domain_enrichment.png)
+Not run yet on this pangenome. `genes_to_remove.tsv` still holds the transposon Afu1g00140, so running part 4 removes it
+again.
 
----
+### 5. Final look
 
-### No filtering (7b)
-
-*Pangenes from the tagged GFFs, nothing removed.*
-
-**Pangenome and core genome size** - the pangenome grows to 13,693 pangenes (all 17 genomes), still growing by
-about 97 per genome at the end. The core falls to 10,433; the fitted curves put its plateau at 10,477 (Tettelin) and
-10,426 (Willenbrock). `Afum7b_pancore_separate.png` shows the two curves in separate panels.
-
-![Pangenome and core genome size, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_pancore.png)
-
-**Pangene occupancy** - 10,433 pangenes (76%) are core, 133 are in 16 genomes (soft-core), 1,596 (12%) are in one
-genome only and 360 in two.
-
-![Pangene occupancy, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy.png)
-
-**Soft-core pangenes missing per genome** - same logic as the 7a plot, 133 soft-core pangenes
-here. AF293 is again the outlier (31 of 133, 23%, close to 4x the mean of 7.8), AF100-9B second
-(24, 18%) and ATCC 42202 third (20, 15%); the rest sit at or below the mean, down to 47-10
-(AF221), A1163 and B5233 (0 each). Same three genomes lead in both 7a and 7b, so it is not an
-artefact of one filtering choice.
-
-![Soft-core pangenes missing per genome, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_softcore_missing.png)
-
-**Singletons per genome** - ATCC 46645 has the most (230), then ATCC 42202 (178) and 08-19-02-30 (160); eAF1023 (14)
-and B5233 (16) have the fewest. Genomes that have very close relatives in the panel (see the POCS heatmap) tend to have
-fewer singletons, because what they share is present in more than one genome.
-
-![Singletons per genome, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_singletons.png)
-
-**POCS heatmap** - same as above. The figure shows values rounded to integers: between different genomes they range
-from 95 to 99. A1160 and A1163 are the most similar pair (100 after rounding), and ATCC 46645 (`GCA_040142955.1`) is
-the genome with the lowest values against all the others (95-96).
-
-![POCS heatmap, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_POCS_heatmap.png)
-
-**Gene properties by occupancy** - same method as above, on 13,693 pangenes. Core: 77% of genes with a domain,
-median 383 aa; cloud: 42% and 204 aa.
-
-![Gene properties by occupancy, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy_properties.png)
-
-**Contig size by occupancy** - same method as above, on 13,693 pangenes. 11% of cloud pangenes are on contigs below
-200 kb (7% below 50 kb), against none of the core and shell pangenes; 28% are on contigs below 1 Mb, against 1.6% of
-core.
-
-![Contig size by occupancy, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_contig_classes.png)
-
-**Invalid ORFs by occupancy** - same method as above. Mostly invalid: 57% of cloud pangenes (535 of 940; 454 of the
-729 singletons), 25% of shell, 8% of soft-core and 2.1% of core (214 of 10,379). Pangenes with no gene that can be
-judged (1,372) are left out.
-
-![Number of pangenes with mostly invalid ORFs, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy_invalid_only.png)
-
-![Percentage of pangenes with mostly invalid ORFs, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy_invalid_percent.png)
-
-![Share of invalid genes by category, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_invalid_share.png)
-
-**Share of invalid genes by category** - each bar is one category, from cloud to core, split by how many of the genes of a
-pangene are invalid: none, up to half, more than half but not all, or all of them. In the cloud most pangenes have one or
-two genes, so a pangene is either all valid or all invalid, and the segment of "all invalid" is about the same as the
-share of "mostly invalid" pangenes in the two figures above.
-
-**Unsupported overlapping genes by occupancy** - only possible without filtering, because it needs the `intersect=`
-tag. A gene is unsupported when it is not from the reference layer (`main`), overlaps another gene, has no
-InterPro/Pfam domain and has no specific description. A pangene is "mostly unsupported" when more than 50% of its genes
-are unsupported. Mostly unsupported: 14% of cloud pangenes (273 of 1,956), 4.3% of shell, 0.8% of soft-core and 1.6%
-of core (165 of 10,433). They are more common in the cloud than in the core.
-
-![Number of pangenes mostly unsupported, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy_unsupported_only.png)
-
-![Percentage of pangenes mostly unsupported, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_occupancy_unsupported_percent.png)
-
-![Share of unsupported genes by category, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_unsupported_share.png)
-
-**Share of unsupported genes by category** - same layout as the share figure above, split by how many of the genes of a
-pangene are unsupported.
-
-**InterPro term enrichment** - same test as above, 8,052 core and 814 cloud pangenes with an InterPro entry, and 1,061
-entries tested. Cloud: 47 entries are enriched; core: 6. The cloud hits include the same domains of unknown function,
-acyl transferase and protein kinase-like domains, and the orsellinic acid/F9775 biosynthesis cluster protein D, which may
-point to secondary metabolite clusters.
-
-![InterPro term enrichment, no filtering](08_Pangenome_Visualisation/pangenome_plots/Afum7b_domain_enrichment.png)
-
----
+Not run yet.
 
 [↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
 

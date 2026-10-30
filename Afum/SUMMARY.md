@@ -14,11 +14,11 @@
 | [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, organelle removal, synteny | ✅ Complete |
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, TE-gene overlap filtering | ✅ Complete |
 | [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed (all strains already annotated) |
-| [04 – InterProScan](README.md#04--interproscan) | Functional domain annotation | ✅ Complete |
+| [04 – Protein evidence (InterProScan and PSAURON)](README.md#04--protein-evidence-interproscan-and-psauron) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting](README.md#07--post-get_pangenes-adjusting) | Manual review and refinement of pangene calls | 🔄 In progress |
-| [08 – Pangenome Visualisation](README.md#08--pangenome-visualisation) | Figures, presence/absence matrix, summary stats | ✅ Complete |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Manual review and refinement of pangene calls | 🔄 In progress |
+| 08 – Pangenome Visualisation | Figures, presence/absence matrix, summary stats (prototype flow; now part of step 07) | ✅ Complete |
 
 ---
 
@@ -59,7 +59,7 @@
 
 ### 03–04
 
-Not needed for *de novo* annotation (all strains already annotated); InterProScan was run on every strain (see the [full report](README.md#04--interproscan)).
+Not needed for *de novo* annotation (all strains already annotated); InterProScan was run on every strain (see the [full report](README.md#04--protein-evidence-interproscan-and-psauron)).
 
 ### 05 – Cross-genome Annotation Integration
 
@@ -114,14 +114,14 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 | :--- | :--- |
 | [README.md](README.md) | Full technical report — all methods, parameters, tables, figures |
 | [genome_order.txt](genome_order.txt) | Ordered list of the 17 strains used |
-| 01_Genome_Selection_QC/ *(working data, not published here)* | QC outputs: ANI, synteny, organelle and redundancy screens |
-| 02_TE_annotation_Clean_Up/ *(working data, not published here)* | TE library, RepeatMasker results, TE-gene overlap |
-| 03_denovo_Genome_Annotation/ *(working data, not published here)* | *de novo* gene predictions |
-| 04_Protein_evidence/ *(working data, not published here)* | Domain annotations |
-| 05_Cross-genome_annotation_integration/ *(working data, not published here)* | Merged annotation files |
-| 06_GET_PANGENES/ *(working data, not published here)* | Pangene clusters |
-| 07_Post_GET_PANGENES_adjusting/ *(working data, not published here)* | Reviewed and curated pangene calls |
-| 08_Pangenome_Visualisation/ *(working data, not published here)* | Figures and summary tables |
+| [01_Genome_Selection_QC/](01_Genome_Selection_QC/) | QC outputs: ANI, synteny, organelle and redundancy screens |
+| [02_TE_annotation_Clean_Up/](02_TE_annotation_Clean_Up/) | TE library, RepeatMasker results, TE-gene overlap |
+| 03_denovo_Genome_Annotation/ | *de novo* gene predictions |
+| 04_InterProScan/ | Domain annotations |
+| [05_Cross-genome_annotation_integration/](05_Cross-genome_annotation_integration/) | Merged annotation files |
+| 06_GET_PANGENES/ | Pangene clusters |
+| [07_Post_GET_PANGENES_adjusting/](07_Post_GET_PANGENES_adjusting/) | Reviewed and curated pangene calls |
+| 08_Pangenome_Visualisation/ | Figures and summary tables |
 
 ---
 

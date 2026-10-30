@@ -2,6 +2,10 @@
 
 This document tracks the execution, parameters, and results of the pangenome analysis for ***Toxoplasma gondii***, following the steps from the [`pangenome_analysis`](../../README.md) pipeline.
 
+> This README describes the current run (October 2026). The first run - the 7a/7b filters, the redundant contigs removed
+> after `get_pangenes` (step 09) and its figures - is kept in `README_first_run.md` (kept locally, not in this repository); its outputs
+> are in `first_run_09_redundant_contigs/` and in the step folders.
+
 ---
 
 ## Species Biology & Pangenome Considerations
@@ -87,17 +91,10 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [01 – Genome Selection & QC](#01--genome-selection--qc)
 - [02 – TE Annotation & Clean Up](#02--te-annotation--clean-up)
 - [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
-- [04 – InterProScan](#04--interproscan)
+- [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 - [06 – GET_PANGENES](#06--get_pangenes)
-- [07 – Post-GET_PANGENES Adjusting](#07--post-get_pangenes-adjusting)
-- [08 – Pangenome Visualisation](#08--pangenome-visualisation)
-  - [With filtering (7a)](#with-filtering-7a)
-  - [No filtering (7b)](#no-filtering-7b)
-- [Redundancy check on the final panel](#redundancy-check-on-the-final-panel)
-- [09 – Redundant Contig Removal](#09--redundant-contig-removal)
-  - [With filtering (7a), redundant contigs removed](#with-filtering-7a-redundant-contigs-removed)
-  - [No filtering (7b), redundant contigs removed](#no-filtering-7b-redundant-contigs-removed)
+- [07 – Post-GET_PANGENES Adjusting and Visualisation](#07--post-get_pangenes-adjusting-and-visualisation)
 
 ---
 
@@ -353,752 +350,13 @@ Command that was run:
 sbatch 01_Genome_Selection_QC/scripts/drop_short_contigs.slurm.sh
 ```
 
-[↑ Back to top](#analysis-steps)
-
----
-
-## 02 – TE Annotation & Clean Up
-
-### 02.1 TE Candidate Discovery Pipeline
-
-The TE candidate pipeline was run on the 15 *T. gondii* genomes:
-
-```bash
-bash 02_TE_annotation_Clean_Up/slurm/run_pipeline_slurm.sh
-```
-
-**Output:** **106 non-redundant candidate TE consensus sequences** across the panel
-(`all_MCHelper_curated_sequences_NR.cdhit80.fa`); **25 of those** pass the RepBase/TE-peptide
-filter (`final_potential_new_TEs.fa`).
-
-### 02.2 TE-Aid — visual validation of the candidates
-
-Ran TE-Aid (coverage plot / self dot-plot / ORFs / hits to known TE proteins) on the
-**unfiltered non-redundant set**, `final_TE_candidates_after_MCHelper/all_MCHelper_curated_sequences_NR.cdhit80.fa`
-— not the RepBase/peptide-filtered `final_potential_new_TEs.fa` — to also see the candidates
-that filter would have dropped (e.g. solo-LTR-only families) before curating into the final
-library:
-
-```bash
-sbatch 02_TE_annotation_Clean_Up/scripts/run_te_aid.slurm.sh
-```
-
-(`INPUT_FASTA`/`OUTDIR` in the script set to the `all_MCHelper_curated_sequences_NR.cdhit80.fa`
-pair, not the default.)
-
-**Output:** `te_aid_all_MCHelper_NR_cdhit80/` — one folder per candidate with its TE-Aid figure,
-plus `te_aid_run_summary.tsv` (candidate · genome it ran against · status).
-
-### 02.3 Manual curation of TE candidates
-
-All 106 TE candidates retrieved by the pipeline were manually inspected using the TE-Aid
-figures and compared against RepBase/known TE databases.
-
-#### Findings
-
-- **No bona fide *T. gondii* transposable elements were identified.** Consistent with the
-  published apicomplexan mobilome literature (Rodriguez & Makalowski, 2022), the curated
-  TE library ended up empty of genuine *T. gondii* TEs. 
-
-- **Human L1 LINE elements detected as apparent TE candidates in multiple strains,
-  including the reference genome ME49.** **5 of the 106 candidates** (all discovered in the
-  ME49 assembly: `rnd-1_family-14/20/31/36/56`) showed the hallmarks of bona fide LINEs
-  (TE-Aid coverage profile, ORF structure, hits to known RT domains) — but database comparison
-  identified them as **human L1 (LINE-1) consensus sequences**. Their presence in multiple genomes (they are in short contigs <10 kb) including ME49 indicates
-  **human host-cell DNA contamination** (most likely from the cell-culture system used to
-  propagate the parasite) present in several assemblies of the panel — confirming the panel
-  does carry contigs of contamination origin, not just fragmented real sequence.
-
-[↑ Back to top](#analysis-steps)
-
----
-
-## 03 – *de novo* Genome Annotation
-
-**Not needed.** All 15 strains in the panel already have gene annotation.
-
-[↑ Back to top](#analysis-steps)
-
----
-
-## 04 – InterProScan
-
-### Running InterProScan
-
-`interpro_manifest.tsv` for this panel (15 genomes, `CHUNK_SIZE=1000`): **150 total chunks**.
-Submit the array job with:
-```bash
-mkdir -p interpro/logs
-N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
-sbatch --array=1-${N}%20 04_Protein_evidence/scripts/interproscan_array_job.slurm.sh
-```
-(currently 150, but always recomputed from the manifest, not hardcoded - see
-[`04_Protein_evidence/README.md`](../../04_Protein_evidence/README.md) for why).
-
-Protein extraction ran on `gff_originals/` (this species has no `gff_cleaned/`). The array job
-**finished**: all 150 chunks completed (each chunk's `.out` ends with
-`Finished <genome> chunk <N>`).
-
-### Merging the chunk results
-
-Combines the per-chunk InterProScan output into one lookup table per genome
-(`interpro/interpro_lookup/`) and checks completeness:
-```bash
-sbatch 04_Protein_evidence/scripts/merge_interpro_job.slurm.sh
-```
-A protein reported as absent from the chunk output is a `NOTE`, not an error: InterProScan only
-writes a row when it finds a hit, so it is a protein with no domain hits. Only a missing chunk
-file (`WARNING`) means the results are incomplete.
-
-### Adding the domain evidence to the GFFs
-
-Writes the `InterPro:`/`PFAM:` evidence into the `Dbxref=` of each CDS line, reading
-`gff_originals/` (`GFF_INDIR` is set to that in this species' copy of the script) and writing
-new GFFs to `gff_with_interpro/` (the input is never modified):
-```bash
-sbatch 04_Protein_evidence/scripts/update_interpro_in_gff.slurm.sh
-```
-`gff_with_interpro/` is the input for step 05.
-
-[↑ Back to top](#analysis-steps)
-
----
-
-## 05 – Cross-genome Annotation Integration
-
-### Step 1: Native annotation check
-
-Run **once**, after [step 04](#04--interproscan), on `gff_with_interpro/` (the GFFs with the
-domain evidence written in), so that the domain columns and plots are real. Output folder for
-this run: `annotation_check_with_interpro/`.
-```bash
-sbatch 05_Cross-genome_annotation_integration/scripts/analyze_input_gffs_job.sh
-```
-(`GFF_DIR="gff_with_interpro"` is the script's default; for the run above `OUT_DIR` was set to
-`annotation_check_with_interpro`. Full description of every output file:
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-1-native-annotation-check).)
-
-**Genes per genome** - 8,000 to 10,000 protein-coding genes per genome, split by whether the
-gene carries InterPro/PFAM evidence (56-62% do, in every genome, so no genome stands out
-as missing domain annotation). ME49 is the only genome with pseudogenes (24, red sliver on top).
-
-![Protein-coding genes per genome, with and without domain evidence](05_Cross-genome_annotation_integration/annotation_check_with_interpro/01_gene_counts_protein_coding.png)
-
-**Gene types** - every gene category found. Nearly everything is protein-coding; the rest are
-non-coding RNA genes (`ncRNA_other`, 144-334 per genome; RH88 has the most at 334), 147 tRNA
-genes in VEG only, and 24 pseudogenes in ME49. No genome has unclassified genes.
-
-![Gene categories per genome](05_Cross-genome_annotation_integration/annotation_check_with_interpro/02_gene_biotype_breakdown.png)
-
-**CDS-to-CDS overlaps** - gene pairs whose coding sequences actually overlap, split by strand.
-Most genomes have 1-22 pairs; ME49 (33), TgCATBr9 (29) and VEG (27) have the most.
-The whole-gene overlap (UTR included) is much larger in ME49 (672 pairs, mostly opposite-strand
-UTR-only), which is why the CDS-level count is the one that matters.
-
-![CDS-overlapping gene pairs per genome, by strand](05_Cross-genome_annotation_integration/annotation_check_with_interpro/05_cds_overlap_counts.png)
-
-**Overlap severity** - the same pairs by how much of the smaller gene's CDS is covered:
-minor (< 20%), substantial (20-80%), contained (>= 80%). Every genome except RH88 has some
-contained pairs; TgCATBr9 and VEG have the most (20 and 16). The pair list with descriptions,
-sizes and `has_domain` is `cds_overlapping_pairs.tsv`.
-
-![CDS overlap severity per genome](05_Cross-genome_annotation_integration/annotation_check_with_interpro/06_cds_overlap_severity.png)
-
-Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR included),
-`04_core_overlap_counts.png` (CDS/exon extent only), and the tables
-(`gene_biotype_counts.tsv`, `overlap_counts.tsv`, `feature_attribute_table.tsv`, one
-`<genome>_gene_classification.tsv` per genome).
-
-The overlaps are kept (see below); this check is what showed which genes to look at.
-
-### Step 2: Genes removed before Liftoff (kill-list filter, done)
-
-Genes with overlapping CDS are **kept** (not enough evidence to say which are wrong - most look
-like gene-model errors, not false genes). The only genes removed are 5 *ME49* protein-coding
-genes whose CDS lies entirely inside one of 5 pseudogenes (same strand, no other gene overlaps
-those pseudogenes). The pseudogenes are confirmed as correct and are **kept**; the overlapping
-genes are removed. Listed in `kill_list_manual.tsv` (project root):
-
-| Removed gene | Description | Overlaps pseudogene | Overlap (bp) |
-|---|---|---|---|
-| `TGME49_242250` | rhoptry kinase family protein ROP19B | `TGME49_500106` | 1533 |
-| `TGME49_224780` | SAG-related sequence SRS40B | `TGME49_500133` | 657 |
-| `TGME49_220950` | hypothetical protein | `TGME49_500154` | 1015 |
-| `TGME49_321710` | Kinase-like \| domain-containing protein | `TGME49_500317` | 965 |
-| `TGME49_321700` | Kinase-like \| domain-containing protein | `TGME49_500405` | 800 |
-
-Removing them (40 GFF lines including their exons/transcripts) is done by
-[`remove_genes_from_gff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list),
-reading `gff_with_interpro/` and writing every genome to `gff_curated/` (genomes without an
-entry in the list are copied unchanged):
-```bash
-sbatch 05_Cross-genome_annotation_integration/scripts/remove_genes_from_gff_job.sh
-```
-`kill_list_manual.tsv` has no header, one gene per line: `genome<TAB>gene_id`
-(e.g. `ME49	TGME49_242250`). Run this step **before** "Prepare the GFFs for Liftoff" below.
-
-### Step 3: Prepare the GFFs for Liftoff (done)
-
-[`prepare_for_liftoff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
-reads `gff_curated/` and writes to `gff_for_liftoff/`: genes reduced to their coding sequence
-(no UTRs), protein-coding genes and pseudogenes unified to `protein_coding_gene`, and the
-non-coding RNA genes given a different type (`ncRNA_gene`, `tRNA_gene`) so Liftoff - which only
-transfers the types in `liftoff_feature_types.txt` - does not copy them onto other genomes. Each
-genome keeps its own non-coding genes. This is what goes into Liftoff:
-```bash
-sbatch 05_Cross-genome_annotation_integration/scripts/prepare_for_liftoff_job.sh
-```
-
-Result (`gff_for_liftoff/prepare_for_liftoff_report.tsv`; `liftoff_feature_types.txt` contains
-only `protein_coding_gene`). Per genome: transcripts processed, UTR lines deleted, exons
-clipped or deleted to the coding extent, genes resized, and total bp cut from gene spans:
-
-| Genome | Transcripts | UTR lines deleted | Exons clipped | Exons deleted | Genes resized | bp trimmed |
-|---|---|---|---|---|---|---|
-| ME49 | 8115 | 15384 | 13465 | 687 | 7507 | 11047634 |
-| ARI | 9771 | 737 | 736 | 1 | 735 | 3608 |
-| CAST | 9338 | 545 | 543 | 1 | 543 | 14698 |
-| COUG | 9664 | 741 | 740 | 0 | 740 | 2084 |
-| FOU | 9859 | 683 | 682 | 1 | 681 | 2783 |
-| GAB2 | 9016 | 379 | 378 | 1 | 378 | 4803 |
-| GT1 | 8179 | 85 | 83 | 2 | 80 | 6054 |
-| MAS | 9829 | 701 | 701 | 0 | 701 | 2316 |
-| p89 | 9527 | 581 | 581 | 0 | 581 | 2083 |
-| RH88 | 8315 | 46 | 26 | 19 | 22 | 30467 |
-| RUB | 9861 | 718 | 716 | 2 | 716 | 2994 |
-| TgCATBr9 | 9656 | 586 | 584 | 2 | 581 | 12112 |
-| TgCatPRC2 | 9973 | 885 | 884 | 1 | 884 | 2236 |
-| VAND | 9124 | 417 | 417 | 0 | 416 | 642 |
-| VEG | 8296 | 0 | 89 | 0 | 89 | 1606 |
-
-*ME49* carries by far the most UTR annotation (15,384 lines, 11 Mb removed from gene spans); the
-other genomes have only a few hundred UTR lines or fewer. *VEG* has no UTR lines at all, but 89
-of its exons extended past the CDS and were clipped.
-
-Gene types changed (only where the type had to change):
-
-| Genome | From | To | Genes |
-|---|---|---|---|
-| ME49 | `pseudogene` | `protein_coding_gene` | 24 |
-| VEG | `gene` | `protein_coding_gene` | 8296 |
-| VEG | `gene` | `tRNA_gene` | 147 |
-
-The 24 *ME49* pseudogenes keep `ebi_biotype=pseudogene` on their gene line, so they stay
-identifiable. All other genomes already used `protein_coding_gene`/`ncRNA_gene`, so nothing was
-retyped there; their non-coding genes (`ncRNA_gene`, 144-334 per genome) are already outside
-the type list Liftoff transfers.
-
-### Step 4: Liftoff, all-against-all (done)
-
-[`liftoff_all_vs_all.sh`](../../05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
-lifts every genome's prepared annotation (`gff_for_liftoff/`) onto every other genome's
-FASTA (`genomes/`) - 15 genomes, so 210 pairs. Run as one job per source genome:
-```bash
-mkdir -p liftoff_output/logs
-sbatch --array=1-15 05_Cross-genome_annotation_integration/scripts/liftoff_all_vs_all.sh
-```
-Results go to `liftoff_output/polished/`, job logs to `liftoff_output/logs/`. Resubmitting skips pairs that are already done.
-
-### Step 5: Build each genome's final annotation (done)
-
-[`build_final_annotation_basic.sh`](../../05_Cross-genome_annotation_integration/README.md#step-5-build-each-genomes-final-annotation)
-builds one annotation per genome anchored on its own coordinates. The reference is ME49 (first line
-of `genome_order.txt`). The layers are the reference's confident transfers (`main`), then the
-genome's own annotation from `gff_for_liftoff/` - which is where its non-coding genes come back in -
-then the other genomes' good transfers (`good_<genome>`), then everything left (`rescued_<genome>`).
-Run after all Liftoff jobs have finished, one job per genome:
-```bash
-mkdir -p expanded_annotation/logs
-sbatch --array=1-15 05_Cross-genome_annotation_integration/scripts/build_final_annotation_basic.sh
-```
-Results: `expanded_annotation/<genome>_final_annotation.gff`, job logs in `expanded_annotation/logs/`.
-
-[↑ Back to top](#analysis-steps)
-
----
-
-### Step 6: Built annotation check
-
-QC on the raw build output, before [step 7](../../05_Cross-genome_annotation_integration/README.md#step-7-final-annotation-if-using-step-5-pre-get_pangenes)'s
-filter runs. Output folder: `final_annotation_qc_plots/`.
-```bash
-mkdir -p final_annotation_qc_plots/logs
-sbatch 05_Cross-genome_annotation_integration/scripts/plot_final_annotation_qc_job.sh
-```
-(Full description of every output file:
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-6-built-annotation-check-if-using-step-5).)
-
-**Gene counts** - each genome's final build has 9,249-9,933 protein-coding genes, well above
-its own original annotation (8,000-10,000), since genes are being pulled in from every other
-genome too.
-
-![Protein-coding genes: own original annotation vs. this pipeline's build](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/01_gene_counts.png)
-
-**Extra copies** - RH88 (179) and ME49 (61) stand out; every other genome has 14 or fewer.
-
-![Extra-copy genes, split by valid ORF](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/03_extra_copies.png)
-
-**CDS-overlap severity** - 8,222 CDS-overlapping pairs across the panel, split minor/substantial/contained.
-
-![CDS-overlap severity per genome](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/04_overlap_severity.png)
-
-**Source composition** - where each genome's final genes came from (`main`/original/`good_*`/`rescued_*`).
-
-![Source composition per genome](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/05_source_composition.png)
-
-**Overlap strand** - the same 8,222 pairs, split by strand instead of severity: only **13 are
-same-strand** (the ones that "shouldn't normally happen"), the other **8,209 are
-opposite-strand**. Same-strand pairs are rare enough on this panel to review by hand, one by one.
-
-![CDS-overlapping pairs per genome, by strand](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/06_overlap_strand.png)
-
-**Overlap domain support** - of the 8,222 pairs, only **29 have InterPro/PFAM domain evidence on
-both genes**, **5,008 on exactly one**, and **3,185 on neither**. These counts use protein
-domains only; the 7a filter also counts a specific description as evidence (see below).
-
-![CDS-overlapping pairs per genome, by domain support](05_Cross-genome_annotation_integration/final_annotation/final_annotation_qc_plots/07_overlap_domain_support.png)
-
-**Pairs by case** - the 8,222 pairs of the raw build, by whether each gene is `main` and whether
-it carries a protein domain:
-
-| # | Case | Pairs |
-|---|---|---:|
-| 1 | `main` × `main` | 237 |
-| 2 | `main` × other, other **has** a domain | 18 |
-| 3 | `main` × other, other has **no** domain | 6,368 |
-| 4 | other × other, **one** has a domain | 420 |
-| 5 | other × other, **both** have a domain | 13 |
-| 6 | other × other, **neither** has a domain | 1,166 |
-
-Case 6 - 1,166 pairs, 954 distinct genes: 99.6% opposite-strand, 113 `minor` severity, 63.5%
-"hypothetical protein" on both sides.
-
-Also in that folder: `summary.tsv` (the numbers behind every plot above), `extra_copy_genes.tsv`
-(every extra-copy gene, with description/location/domain/valid-ORF), `cds_overlapping_pairs.tsv`
-(every pair above, one row each) and `overlap_domain_summary.tsv` (the domain-support numbers
-above, per genome).
-
-[↑ Back to top](#analysis-steps)
-
-### Filtering — 7a pre-filter (done)
-
-Ran [`filter_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/filter_final_annotation.py)
-on all 15 genomes (rule details in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#7a-filter-drop-unsupported-genes-before-get_pangenes)).
-Output: `filtered_annotation/<genome>_final_annotation_filtered.gff` - `gene`-typed, IDs
-renumbered `Tg<strain-index>g<00001, ...>`, original ID kept in `original_ID=`.
-
-**Overlap rule** - when two genes' CDSs overlap, 7a looks at "has evidence" (a protein domain
-**or** a specific description):
-
-| Gene A | Gene B | Result |
-|---|---|---|
-| `main` | `main` | Keep both |
-| `main` | has evidence | Keep both |
-| `main` | no evidence | Drop B, subject to the panel check |
-| has evidence | no evidence | Drop B, subject to the panel check |
-| has evidence | has evidence | Keep both |
-| no evidence | no evidence | Drop the gene with fewer `good_<genome>` transfers panel-wide (tie: the shorter CDS) |
-
-Panel check: a gene present in 2 genomes or fewer is dropped; a gene present in more genomes is
-dropped only if it has a qualifying overlap in at least 2 of them. The verdict is per gene ID, so
-a dropped gene leaves every genome.
-
-| Genome | n_original | n_kept | n_removed | % removed |
-|---|---:|---:|---:|---:|
-| ME49 | 9,425 | 8,690 | 735 | 7.8% |
-| ARI | 9,583 | 8,922 | 661 | 6.9% |
-| CAST | 9,530 | 8,867 | 663 | 7.0% |
-| COUG | 9,728 | 9,084 | 644 | 6.6% |
-| FOU | 9,933 | 9,318 | 615 | 6.2% |
-| GAB2 | 9,478 | 8,850 | 628 | 6.6% |
-| GT1 | 9,249 | 8,655 | 594 | 6.4% |
-| MAS | 9,744 | 9,151 | 593 | 6.1% |
-| p89 | 9,686 | 9,063 | 623 | 6.4% |
-| RH88 | 9,724 | 8,907 | 817 | 8.4% |
-| RUB | 9,763 | 9,130 | 633 | 6.5% |
-| TgCATBr9 | 9,911 | 9,277 | 634 | 6.4% |
-| TgCatPRC2 | 9,747 | 9,131 | 616 | 6.3% |
-| VAND | 9,478 | 8,855 | 623 | 6.6% |
-| VEG | 9,380 | 8,749 | 631 | 6.7% |
-
-**What was removed.** Of the 9,710 genes removed across the 15 genomes:
-- 6,264 (64.5%) overlapped a reference-derived (`main`) gene and had no evidence themselves;
-- 2,597 (26.7%) were `rescued_` genes with Liftoff coverage below 0.5;
-- 380 (3.9%) overlapped another non-`main` gene, neither with evidence (the one with fewer good
-  transfers was dropped);
-- 297 (3.1%) overlapped a gene with evidence and had none;
-- 172 (1.8%) were extra copies with no valid ORF.
-
-Before and after filtering, per genome, from
-[`plot_filter_qc_job.sh`](05_Cross-genome_annotation_integration/scripts/plot_filter_qc_job.sh)
-(`filter_qc_plots/`, numbers in its `summary.tsv`):
-
-![Genes before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/01_gene_counts.png)
-
-![Why each gene was removed](05_Cross-genome_annotation_integration/filter_qc_plots/03_removal_reasons.png)
-
-RH88 has the most genes removed (817) and ME49 the second most (735). The extra copies fall from 179
-to 41 in RH88 and from 61 to 9 in ME49; in the other genomes they were 14 or fewer and are at most 2
-after filtering.
-
-![Extra-copy genes before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/02_extra_copies.png)
-
-CDS-overlapping gene pairs drop from 476-552 per genome to 67-77, and the pairs where one gene is
-contained in the other from 184-234 to 9-15. The ones left are the overlaps the rules keep on
-purpose: small overlaps at a gene's end, and pairs where both genes have evidence.
-
-![CDS-overlap severity before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/04_overlap_severity.png)
-
-Which layer each gene comes from (`main`, the genome's own annotation, `good_` and `rescued_`
-transfers):
-
-![Source composition before and after filtering](05_Cross-genome_annotation_integration/filter_qc_plots/05_source_composition.png)
-
-### Filtering — 7b no pre-filter / tag (done)
-
-Ran [`tag_final_annotation.py`](05_Cross-genome_annotation_integration/scripts/tag_final_annotation.py)
-on all 15 genomes (rule details in the
-[general README](../../05_Cross-genome_annotation_integration/README.md#7b-no-filtering-tag-decide-after-get_pangenes)).
-Nothing removed - same `gene`-typing/ID-renumbering as 7a, plus an `intersect=` tag on every
-gene recording what it overlaps (`NA`/`with_main`/`with_other_with_domain`/`with_other_no_domain`).
-Output: `tagged_annotation/<genome>_final_annotation_tagged.gff` + `<genome>_intersect_pairs.tsv`.
-
-| Genome | n_total | NA | with_main | with_other_with_domain | with_other_no_domain |
-|---|---:|---:|---:|---:|---:|
-| ME49 | 9,425 | 8,408 | 546 | 2 | 469 |
-| ARI | 9,583 | 8,621 | 440 | 25 | 497 |
-| CAST | 9,530 | 8,559 | 429 | 24 | 518 |
-| COUG | 9,728 | 8,772 | 400 | 37 | 519 |
-| FOU | 9,933 | 9,034 | 347 | 47 | 505 |
-| GAB2 | 9,478 | 8,519 | 443 | 15 | 501 |
-| GT1 | 9,249 | 8,251 | 470 | 20 | 508 |
-| MAS | 9,744 | 8,812 | 397 | 36 | 499 |
-| p89 | 9,686 | 8,726 | 405 | 40 | 515 |
-| RH88 | 9,724 | 8,699 | 493 | 14 | 518 |
-| RUB | 9,763 | 8,806 | 391 | 45 | 521 |
-| TgCATBr9 | 9,911 | 9,000 | 361 | 43 | 507 |
-| TgCatPRC2 | 9,747 | 8,784 | 425 | 30 | 508 |
-| VAND | 9,478 | 8,484 | 424 | 35 | 535 |
-| VEG | 9,380 | 8,378 | 483 | 15 | 504 |
-
-[↑ Back to top](#analysis-steps)
-
----
-
-## 06 – GET_PANGENES
-
-Ran `get_pangenes` on the 7b GFFs (`tagged_annotation/`, nothing pre-filtered), 15 genomes:
-```bash
-sbatch 06_GET_PANGENES/scripts/link_for_get_pangenes_7b.slurm.sh
-sbatch 06_GET_PANGENES/scripts/run_get_pangenes_7b_job.sh
-```
-Result: **11,031 pangenes** across the 15 genomes (`for_get_pangenes_7b_pangenes/pangene_matrix*.tab`;
-`pangene_matrix_genes.tr.tab` lists the gene IDs of every genome in every pangene).
-
-[↑ Back to top](#analysis-steps)
-
----
-
-## 07 – Post-GET_PANGENES Adjusting
-
-**Pangenes with more than one gene in the same genome (7b).** `get_pangenes` sometimes puts two or
-more genes of one genome into a single pangene. **1,501 of the 11,031 pangenes (13.6%)** do it in
-at least one genome, adding up to 5,236 genes beyond one per genome.
-
-| Genes in the genome with the most | Pangenes |
-|---|---:|
-| 2 | 1,034 |
-| 3 | 426 |
-| 4 | 32 |
-| 5 | 9 |
-
-- 1,326 of the 1,501 are core pangenes (present in all 15 genomes).
-- In 752 of them only one genome has the extra gene; in 35 all 15 genomes do.
-- Genomes with the most such pangenes: FOU (481), TgCATBr9 (453), COUG (403), MAS (399),
-  RUB (394); the reference ME49 has the fewest (80).
-- 4,826 of the 5,236 extra-gene pairs have consecutive gene numbers (e.g. `Tg15g02056` and
-  `Tg15g02057`), which suggests neighbouring genes on the chromosome.
-
-[`explore_multigene_pangenes.py`](07_Post_GET_PANGENES_adjusting/scripts/explore_multigene_pangenes.py)
-classified the 5,236 neighbouring gene pairs (`multigene_pangenes/Toxo7b_multigene_pairs.tsv`, one
-row per pair). Overlapping genes are not the explanation:
-
-- Only 5 pairs (0.1%) have overlapping CDSs; another 777 (14.8%) overlap only in the gene span
-  (UTR included).
-- 5,230 pairs are same-strand and 6 opposite-strand.
-- The two genes are close neighbours: 2,449 pairs (46.8%) are within 1 kb of each other, 1,909
-  (36.5%) are 1-5 kb apart, 93 (1.8%) are further apart and 3 are on different contigs.
-- 2,695 pairs (51%) are two genes of the genome's own original annotation, so the split is not
-  a Liftoff artefact.
-- Domain evidence: both genes have one in 1,260 pairs, only one gene in 1,831 pairs, neither in
-  2,145 pairs.
-
-Whether these pairs are tandem copies or one gene split into two is not decided yet.
-
-[↑ Back to top](#analysis-steps)
-
----
-
-## 08 – Pangenome Visualisation
-
-> **Preliminary.** Some pangenes hold more than one gene of the same genome (1,501 without
-> filtering, 1,374 with filtering, see [step 07](#07--post-get_pangenes-adjusting)) and are still
-> being investigated. The figures below count them as they are. They will be updated once those pangenes are resolved.
-
-The same figures for the two sets of pangenes: **with filtering** (7a, filtered before
-`get_pangenes`) and **no filtering** (7b, tagged, nothing removed). Every figure also comes as
-`.svg`, and files start with the label (`Toxo7a`/`Toxo7b`). The first five figures of each set
-come from [`plot_all.sh`](08_Pangenome_Visualisation/scripts/plot_all.sh), run locally:
-```bash
-bash 08_Pangenome_Visualisation/scripts/plot_all.sh \
-  -i 06_GET_PANGENES/for_get_pangenes_7b_pangenes/pangene_matrix.tr.tab \
-  -o 08_Pangenome_Visualisation -l Toxo7b
-```
-(same with `for_get_pangenes_7a_pangenes` and `-l Toxo7a`). On the cluster,
-[`plot_all_job.sh`](08_Pangenome_Visualisation/scripts/plot_all_job.sh) runs every plot of this step in one job.
-The folders are given on the command line, and the matrices are found by name below the `get_pangenes` folder:
-```bash
-mkdir -p pangenome_plots/logs
-sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7b --label Toxo7b
-sbatch 08_Pangenome_Visualisation/scripts/plot_all_job.sh --set 7a --label Toxo7a
-```
-`--set` stands for `--pangenes-dir for_get_pangenes_<set>_pangenes --gff-dir for_get_pangenes_<set>`, and turns the
-unsupported-overlap plot on for 7b only. Give the two folders by hand for any other layout (`--help` lists every option).
-
----
-
-### With filtering (7a)
-
-*Pangenes from the GFFs filtered before `get_pangenes`.*
-
-**Pangenome and core genome size** - genomes are added one at a time in 100 random orders. The
-pangenome grows from 8,649 pangenes (one genome) to 9,904 (all 15), still growing by about 70 per
-genome at the end. The core falls to 8,281; the fitted curves put its plateau at 8,307 (Tettelin)
-and 8,264 (Willenbrock). `Toxo7a_pancore_separate.png` shows the two curves in separate panels.
-
-![Pangenome and core genome size, with filtering](08_Pangenome_Visualisation/Toxo7a_pancore.png)
-
-**Pangene occupancy** - how many genomes each pangene is present in. 8,281 pangenes (84%) are core,
-111 are in 14 genomes (soft-core), 990 (10%) are in one genome only and 131 in two.
-
-![Pangene occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy.png)
-
-**Soft-core pangenes missing per genome** - each soft-core pangene (111 total) is missing from
-exactly one genome, so this counts, per genome, how many of those it accounts for. Soft-core genes
-are expected in nearly every genome, so a genome carrying a much larger share than the others is a
-content-QC flag, not just noise. TgCatPRC2 stands out (23 of 111, 21%, over 3x the mean of 7.4) and
-MAS is second (17, 15%); everything from GT1 down sits at or below the mean. Worth checking
-TgCatPRC2's assembly (dropped/short contigs, low-coverage regions) before trusting its occupancy calls.
-
-![Soft-core pangenes missing per genome, with filtering](08_Pangenome_Visualisation/Toxo7a_softcore_missing.png)
-
-**Singletons per genome** - FOU has the most (128), then RH88 (122); GT1 has the fewest (11).
-
-![Singletons per genome, with filtering](08_Pangenome_Visualisation/Toxo7a_singletons.png)
-
-**POCS heatmap** - pairwise percentage of conserved sequences between genomes, clustered (complete
-linkage); darker means more similar, and the colour scale covers the values between different
-genomes only. Between different genomes POCS is 96.7-98.8. RH88 is the most distant genome (mean
-97.4).
-
-![POCS heatmap, with filtering](08_Pangenome_Visualisation/Toxo7a_POCS_heatmap.png)
-
-**Gene properties by occupancy** - every pangene is used (9,904), including the ones with more than one
-gene in a genome; the occupancy is the number of genomes the pangene is present in. Top: proportion of
-genes with an InterPro/PFAM domain, averaged over the pangenes of each occupancy. Bottom: protein
-length, one value per pangene (the median over all its genes). A Tukey HSD test compares the four categories on the value of each pangene, and the line joining cloud and core gives its p-value for core against cloud, which treats
-genes from different genomes as independent samples, so it is optimistic. The number of pangenes of
-each occupancy is written under the axis and is small between 2 and 13 genomes, so those bars are
-noisy. Core: 57% of genes with a domain, median 513 aa; cloud: 44% and 240 aa. The `_log` file
-shows protein length on a log axis.
-
-![Gene properties by occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_occupancy_properties.png)
-
-**Contig size by occupancy** - the contigs that carry the pangenes, split into size classes. Every
-pangene is used (9,904); each gets one value, the median length of the contigs of all its genes. The bars give the share of the pangenes of
-each category in each class. Cloud pangenes sit on short contigs far more often than core ones:
-16% of cloud pangenes are on contigs below 200 kb (10% below 50 kb), against 0.4% (0.1%) of core.
-Contigs below 10 kb were removed from every genome in step 01, so the smallest class starts at
-10 kb.
-
-![Contig size by occupancy, with filtering](08_Pangenome_Visualisation/Toxo7a_contig_classes.png)
-
-**Invalid ORFs by occupancy** - a gene is invalid when Liftoff found no valid open reading frame
-(`valid_ORFs=0`) or the source annotation calls it a pseudogene. A pangene is "mostly invalid" when
-more than 50% of its genes are invalid. Genes taken straight from a genome's own annotation have no
-ORF result and are only marked by the pseudogene biotype; pangenes with no gene that can be judged
-(821) are left out. Every pangene counts, including the ones with more than one gene in a genome.
-Two figures: the number of mostly invalid pangenes per occupancy, and their share of the pangenes of
-that occupancy (the total per occupancy is in the `.tsv`). Mostly invalid: 50% of cloud pangenes
-(190 of 380), 35% of shell, 22% of soft-core and 2.3% of core (187 of 8,269).
-Even after the 7a filter, a large share of the cloud pangenes is mostly invalid, so additional filtering could be considered.
-
-![Pangenes with mostly invalid ORFs, with filtering, count](08_Pangenome_Visualisation/Toxo7a_occupancy_invalid_only.png)
-
-![Pangenes with mostly invalid ORFs, with filtering, percentage](08_Pangenome_Visualisation/Toxo7a_occupancy_invalid_percent.png)
-
-![Share of invalid genes by category, with filtering](08_Pangenome_Visualisation/Toxo7a_invalid_share.png)
-
-**Share of invalid genes by category** - each bar is one category, from cloud to core, split by how many of the genes of a
-pangene are invalid: none, up to half, more than half but not all, or all of them. In the cloud most pangenes have one or
-two genes, so a pangene is either all valid or all invalid, and the segment of "all invalid" is about the same as the
-share of "mostly invalid" pangenes in the two figures above.
-
-**Where the invalid singletons come from** - of the 990 singleton pangenes, 156 have only invalid genes. As in 7b, none is a gene of
-a genome's own annotation: 154 are `rescued_` transfers and 2 are `main`. 152 have no valid ORF and 4 carry the pseudogene
-biotype; none is an extra copy. The donor gene is absent from that genome's final GFF in 71 cases, is in a pangene of two or
-more genomes that the transfer did not join in 61 (in 35 of them the genome already has a gene in that pangene), and is
-another singleton in 24.
-
-The plot of unsupported overlapping genes (not from the reference layer, overlapping another gene, no
-domain and no specific description) is only made without filtering, see
-[No filtering (7b)](#no-filtering-7b): the 7a filter already removes genes of this kind, and the
-`intersect=` tag it needs exists only in the 7b GFFs.
-
-**InterPro term enrichment** - for core and cloud pangenes, which InterPro entries are found more
-often than in the remaining pangenes (one-sided Fisher test, Benjamini-Hochberg adjusted). Only
-pangenes with at least one InterPro entry are counted (4,889 core, 497 cloud), and only entries carried by at
-least 5 pangenes are tested (680). Cloud: 70 of 310 entries tested are enriched (adjusted p < 0.05, at
-least 3 pangenes); core: 10 of 672, among them methyltransferase, MFS transporter, WD40 repeat,
-tetratricopeptide and zinc finger domains. A core pangene collects entries from the genes of up to
-15 genomes, which may favour the core side.
-
-The strongest cloud signal, dynein heavy chain (68 of its 78 pangenes are cloud), is most likely an
-annotation artefact: its singleton pangenes have a median protein length of 534 aa, against 4,294 aa
-in the pangenes present in all genomes, and FOU, p89, TgCATBr9 and MAS carry 29 to 43 genes with the
-domain, against about 10 in most other genomes. This fits one very long gene annotated in several
-pieces, but the positions on the chromosome were not checked. The other cloud hits include
-polyketide synthase domains, acetyl-CoA carboxylase and rhoptry kinase-like.
-
-The cytochrome b/b6 entries are also weaker here (12 of 23 pangenes in the cloud, against 28 of 53
-without filtering; see below). Cytochrome b is a mitochondrial gene, and these may be fragments of
-mitochondrial DNA inserted in the nuclear genome (NUMTs) or poor transfers of them; this was not
-tested.
-
-![InterPro term enrichment, with filtering](08_Pangenome_Visualisation/pangenome_plots/Toxo7a_domain_enrichment.png)
-
----
-
-### No filtering (7b)
-
-*Pangenes from the tagged GFFs, nothing removed.*
-
-**Pangenome and core genome size** - the pangenome grows from about 9,200 pangenes (one genome) to
-11,031 (all 15), still growing by about 100 per genome at the end. The core falls from about 9,200
-to 8,733; the fitted curves put its plateau at 8,770 (Tettelin) and 8,716 (Willenbrock).
-`Toxo7b_pancore_separate.png` shows the two curves in separate panels.
-
-![Pangenome and core genome size, no filtering](08_Pangenome_Visualisation/Toxo7b_pancore.png)
-
-**Pangene occupancy** - 8,733 pangenes (79%) are core, 146 are in 14 genomes (soft-core), 1,448
-(13%) are in one genome only and 163 in two.
-
-![Pangene occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy.png)
-
-**Soft-core pangenes missing per genome** - same logic as the 7a plot, 146 soft-core pangenes here.
-TgCatPRC2 is again the outlier (27 of 146, 18%, close to 3x the mean of 9.7), MAS second (20, 14%);
-the rest sit at or below the mean, down to GAB2/CAST/RH88 (2 each). Same genome stands out in both
-7a and 7b, so it is not an artefact of one filtering choice.
-
-![Soft-core pangenes missing per genome, no filtering](08_Pangenome_Visualisation/Toxo7b_softcore_missing.png)
-
-**Singletons per genome** - RH88 has the most (226), GT1 the fewest (18).
-
-![Singletons per genome, no filtering](08_Pangenome_Visualisation/Toxo7b_singletons.png)
-
-**POCS heatmap** - same as above. Between different genomes POCS is 95.4-98.4. RH88 is the most
-distant genome (mean 96.2).
-
-![POCS heatmap, no filtering](08_Pangenome_Visualisation/Toxo7b_POCS_heatmap.png)
-
-**Gene properties by occupancy** - same method as above, on 11,031 pangenes. Core:
-55% of genes with a domain, median 477 aa; cloud: 40% and 212 aa.
-
-![Gene properties by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_occupancy_properties.png)
-
-**Contig size by occupancy** - same method as above, on 11,031 pangenes. 19% of cloud pangenes are
-on contigs below 200 kb (14% below 50 kb), against 0.4% (0.1%) of core.
-
-![Contig size by occupancy, no filtering](08_Pangenome_Visualisation/Toxo7b_contig_classes.png)
-
-**Invalid ORFs by occupancy** - same method as above. Mostly invalid: 68% of cloud pangenes (510 of
-754; 432 of the 623 singletons), 53% of shell, 28% of soft-core and 3.8% of core (335 of 8,722).
-Pangenes with no gene that can be judged (903) are left out.
-
-![Pangenes with mostly invalid ORFs, no filtering, count](08_Pangenome_Visualisation/Toxo7b_occupancy_invalid_only.png)
-
-![Pangenes with mostly invalid ORFs, no filtering, percentage](08_Pangenome_Visualisation/Toxo7b_occupancy_invalid_percent.png)
-
-![Share of invalid genes by category, no filtering](08_Pangenome_Visualisation/Toxo7b_invalid_share.png)
-
-**Share of invalid genes by category** - each bar is one category, from cloud to core, split by how many of the genes of a
-pangene are invalid: none, up to half, more than half but not all, or all of them. In the cloud most pangenes have one or
-two genes, so a pangene is either all valid or all invalid, and the segment of "all invalid" is about the same as the
-share of "mostly invalid" pangenes in the two figures above.
-
-**Where the invalid singletons come from** - of the 1,448 singleton pangenes, 432 have only invalid genes. None is a gene of a
-genome's own annotation: 431 are `rescued_` transfers (the lowest-confidence Liftoff transfers) and 1 is `main`. 427 have no
-valid ORF and 5 carry the pseudogene biotype; 98 are extra copies. The donor gene, the gene of another genome that was
-transferred, is absent from that genome's final GFF in 194 cases, is in a pangene of two or more genomes that the transfer
-did not join in 174 (in 62 of them the genome already has a gene in that pangene), and is another singleton in 64. These
-transfers may land where the genome has no real copy, or be copies that clustered apart; this was not tested further.
-
-**Unsupported overlapping genes by occupancy** - only possible without filtering, because it needs the
-`intersect=` tag. A gene is unsupported when it is not from the reference layer (`main`), overlaps
-another gene, has no InterPro/Pfam domain and has no specific description (same list of generic
-descriptions as the 7a filter). Main genes and genes with evidence count as good even when they
-overlap. A pangene is "mostly unsupported" when more than 50% of its genes are unsupported. Unlike
-invalid ORFs, these are not concentrated in the cloud: 4.3% of cloud pangenes (70 of 1,611), 8.3% of
-shell, 20% of soft-core and 5.1% of core (443 of 8,733). Leaving out the pangenes with more than one
-gene in a genome gives a similar pattern.
-
-The many core pangenes here may not mean these genes are real. A real gene is under selection, and
-that constraint also holds the sequence of any gene that overlaps it well. An unsupported gene that
-overlaps a conserved real gene would therefore be found in every genome too, and end up in the core,
-only because of the gene it overlaps. This was not tested; it would need the overlap partner of each
-of these genes (the `_intersect_pairs.tsv` files list them) and how much of the gene the overlap covers.
-
-![Pangenes with mostly unsupported genes, no filtering, count](08_Pangenome_Visualisation/Toxo7b_occupancy_unsupported_only.png)
-
-![Pangenes with mostly unsupported genes, no filtering, percentage](08_Pangenome_Visualisation/Toxo7b_occupancy_unsupported_percent.png)
-
-![Share of unsupported genes by category, no filtering](08_Pangenome_Visualisation/Toxo7b_unsupported_share.png)
-
-**Share of unsupported genes by category** - same layout as the share figure above, split by how many of the genes of a
-pangene are unsupported.
-
-**InterPro term enrichment** - same test as above, 4,910 core and 653 cloud pangenes with an
-InterPro entry, and 719 entries tested. Cloud: 84 of 361 entries tested are enriched; core: 15 of 710,
-among them methyltransferase, MFS transporter, WD40 repeat and tetratricopeptide domains.
-
-Dynein heavy chain is again the strongest cloud signal (66 pangenes, 10% of the annotated cloud
-pangenes) and shows the same artefact: singleton pangenes have a median of 528 aa against 4,294 aa
-in the pangenes present in all genomes, and FOU has 44 genes with the domain against about 10 in
-most genomes. The other cloud hits include polyketide synthase domains, cytochrome b/b6 and
-rhoptry kinase-like.
-
-The cytochrome b/b6 entries (28 of 53 pangenes in the cloud) are probably an artefact too. There
-are 231 genes with the cytochrome b N-terminal domain, 12 to 21 per genome, against 103 after
-filtering (about 7 per genome). 166 of the 231 (72%) come from the `rescued_` layer, the
-lowest-confidence transfers, and only 25 from a genome's own annotation; only 7 are Liftoff extra
-copies. Their median Liftoff coverage is 0.81, against 0.93 after filtering. Cytochrome b is a
-mitochondrial gene, so several copies per genome fit mitochondrial DNA inserted in the nuclear
-genome (NUMTs) or poor transfers of them, but this was not tested: it would need the sequences
-aligned to the mitochondrial genome.
-```bash
-sbatch 08_Pangenome_Visualisation/scripts/plot_domain_enrichment_job.sh
-```
-
-![InterPro term enrichment, no filtering](08_Pangenome_Visualisation/pangenome_plots/Toxo7b_domain_enrichment.png)
-
-## Redundancy check on the final panel
+### Contig redundancy screen (done)
 
 Long-read assemblies can leave small contigs that are really a duplicated slice of a larger contig
 (an uncollapsed repeat or a haplotig-style overlap); their genes would be counted twice and inflate the
-pangenome. This is the contig-redundancy screen of [step 01](#01--genome-selection--qc), run at the end
-on the genomes without contigs below 10 kb, with the 7b (no filtering) annotation, so the gene counts are
-those of the final annotation.
+pangenome. The screen was run on the genomes without contigs below 10 kb, after the first run's build, so the
+gene counts below are those of the first run's annotation (7b). Its list is now applied before the build
+([step 05, step 4b](#step-4b-redundant-and-apicoplast-contigs-removed-before-the-build-tgondii-only-done)).
 
 ```bash
 sbatch 01_Genome_Selection_QC/scripts/contig_redundancy_final.slurm.sh
@@ -1195,8 +453,6 @@ Notes:
 - **ME49** `KE139130`: one gene (a KRUF family protein) has a 99.9 % identical copy on `KE138874`, but it
   covers only 67 % of the gene. `KE139841`: its one gene (hypothetical protein) has no copy above 98 %.
   ME49 is the reference and its genes form the `main` layer.
-- In the no-filtering pangenes, 60 of the 88 RH88 genes on flagged contigs are in single-genome pangenes
-  (RH88 has 226 singleton pangenes).
 
 #### Contigs just under the cut
 
@@ -1220,167 +476,595 @@ have no gene). Their genes have not been checked by BLAST yet.
 
 Contigs with no gene are not removed: with no gene in the final annotation they add nothing to the pangenome.
 All contigs that carry genes are removed, whatever the BLAST verdict: the 32 flagged contigs (DROP-OK and REVIEW)
-and the 9 just under the cut, 41 contigs in total (8 in ME49, 33 in RH88, 0.93 Mb, 144 genes). The removal is
-step 09 below. The original GFFs and matrices are kept, to compare.
+and the 9 just under the cut, 41 contigs in total (8 in ME49, 33 in RH88, 0.93 Mb, 144 genes), listed by
+[`make_removal_list.py`](01_Genome_Selection_QC/scripts/make_removal_list.py) in
+[`redundant_contigs_removed.tsv`](01_Genome_Selection_QC/redundant_contigs_removed.tsv). They are removed before the build
+([step 05, step 4b](#step-4b-redundant-and-apicoplast-contigs-removed-before-the-build-tgondii-only-done)).
 
-## 09 – Redundant Contig Removal
 
-*Tgondii only.* The genes of the contigs listed in [`redundant_contigs_removed.tsv`](09_Redundant_Contig_Removal/redundant_contigs_removed.tsv)
-are taken out of the final GFFs and of the `get_pangenes` matrices, without redoing the annotation. It is done for
-the 7a and the 7b set, into new folders (`annotation_7a`, `annotation_7b`, `pangenes_7a`, `pangenes_7b`); the
-original GFFs and matrices are not changed, so the two versions can be compared.
+### Organelle screen — apicoplast (done)
+
+Contigs that hold the apicoplast genome are removed with the redundant contigs: their genes are organellar, not
+nuclear. The mitochondrion was not screened: the ME49 assembly has no mitochondrial contig to use as a reference. In ME49, 20 of the 43 reference genes with an invalid ORF are on the apicoplast contig.
+
+**The reference.** ToxoDB does not label the apicoplast. ME49 contig `KE138841` was identified as the apicoplast genome
+because it is 35,372 bp, the size of the *T. gondii* apicoplast genome (~35 kb), and its 58 genes are the typical
+apicoplast set: ribosomal proteins (S3, S4, S5, S7, L2, L11), RNA polymerase subunits, elongation factor Tu and Ycf24
+(SufB).
+
+**Finding it in every genome.** `KE138841` is blastn'd against every genome, and a contig is called apicoplast when at
+least 90% of the **contig** is covered by the hits. The share of the contig is used, not the share of the apicoplast:
+most assemblies collapse the apicoplast inverted repeat into one copy, so their apicoplast contig is ~24 kb and covers
+only ~71% of the 35 kb reference, while being 100% apicoplast. Contigs with a smaller share are apicoplast DNA inserted
+in the nuclear genome (NUPTs, 0-2% of a nuclear contig at 80-98% identity) and are kept.
+
+**This screen was run locally (on the Mac), not on the cluster:** the same steps as
+[`screen_apicoplast.slurm.sh`](01_Genome_Selection_QC/scripts/screen_apicoplast.slurm.sh) (`samtools faidx` of
+`KE138841`, one `blastn` per genome, then [`apicoplast_contigs.py`](01_Genome_Selection_QC/scripts/apicoplast_contigs.py)),
+typed by hand. The wrapper was written afterwards to repeat it on the cluster and has not been run there yet (it now
+lives in step 01 and counts the genes on the GFFs prepared for Liftoff):
 
 ```bash
-sbatch 09_Redundant_Contig_Removal/scripts/remove_redundant_contig_genes.slurm.sh
-mkdir -p pangenome_plots/logs && sbatch 09_Redundant_Contig_Removal/scripts/plot_nonredundant_job.sh
+sbatch 01_Genome_Selection_QC/scripts/screen_apicoplast.slurm.sh
 ```
 
-1. [`make_removal_list.py`](09_Redundant_Contig_Removal/scripts/make_removal_list.py) lists every small contig that
-   carries genes and is flagged (`small-redundant`) or is 75-89 % duplicated.
-2. [`remove_redundant_contig_genes.py`](09_Redundant_Contig_Removal/scripts/remove_redundant_contig_genes.py) drops those
-   contigs from each GFF (the gene with its children) and the gene IDs from `pangene_matrix_genes.tr.tab`; a pangene left
-   with no gene is removed, and `pangene_matrix.tr.tab` is rebuilt from it. The IDs are unique across genomes and each
-   GFF holds its own genes, so only the GFFs of ME49 and RH88 change.
-3. `plot_nonredundant_job.sh` makes the step-08 plots again, with files starting `Toxo7a_nonredundant` and
-   `Toxo7b_nonredundant`, in [`plots/`](09_Redundant_Contig_Removal/plots/). The POCS heatmap is not redone, because
-   `POCS.matrix.tab` comes from `get_pangenes` and is not recomputed. The neighbourhoods `get_pangenes` uses around a
-   removed gene are not recomputed either; rerunning `get_pangenes` on the new GFFs would make the result exact.
+`apicoplast_contigs.py` writes
+[`apicoplast_screen/apicoplast_contigs.tsv`](01_Genome_Selection_QC/apicoplast_screen/apicoplast_contigs.tsv) in the
+column layout of `redundant_contigs_removed.tsv`.
+[`remove_contigs_before_build.py`](05_Cross-genome_annotation_integration/scripts/remove_contigs_before_build.py) reads both lists
+([step 4b](#step-4b-redundant-and-apicoplast-contigs-removed-before-the-build-tgondii-only-done)). Every contig with a hit is in `apicoplast_screen/apicoplast_hits.tsv`.
 
-Of the 144 genes, 143 were in the 7b matrix (one was not clustered) and 81 in the 7a matrix.
-The 7a filter had already dropped some of the others. What changes:
+14 apicoplast contigs in 10 genomes, 93-100% of each contig covered, 99-100% identity:
 
-| | 7a before | 7a after | 7b before | 7b after |
-| :--- | ---: | ---: | ---: | ---: |
-| Pangenes | 9,904 | 9,847 | 11,031 | 10,922 |
-| Singleton pangenes, all genomes | 990 | 941 | 1,448 | 1,353 |
-| Pangenes in all 15 genomes (core) | 8,281 | 8,281 | 8,733 | 8,733 |
-| of them, RH88 | 122 | 78 | 226 | 145 |
-| of them, ME49 | 28 | 19 | 72 | 55 |
+| Genome | Apicoplast contig(s) | Length (bp) | Genes (first run, 7a domain-only) |
+|---|---|---:|---:|
+| ME49 | KE138841 | 35,372 | 31 |
+| RH88 | CM023094, JAAUHK010000005, JAAUHK010000025, JAAUHK010000031, JAAUHK010000024 | 35,031; 28,644; 30,311; 19,995; 10,279 | 29; 1; 0; 4; 0 |
+| CAST | ML130699 | 24,092 | 33 |
+| FOU | KN003104 | 24,410 | 29 |
+| MAS | KN046792 | 24,390 | 30 |
+| RUB | KN042410 | 24,358 | 30 |
+| TgCATBr9 | KZ793385.1 | 24,383 | 30 |
+| TgCatPRC2 | KQ986331 | 18,165 | 19 |
+| VAND | KN044611 | 24,393 | 30 |
+| p89 | KN000232 | 24,386 | 29 |
 
-A singleton pangene is a pangene present in one genome only; the table counts them for the whole panel and then for RH88 and ME49 alone (the same pangenes, split by genome). The removed pangenes are all cloud: 54 of them in one genome and 3 in two genomes in 7a, 104 and 5 in 7b. The core does not
-change. RH88 loses about a third of its singletons (36 % in both sets); the other genomes change by one or two (a pangene that was shared
-with RH88 becomes a singleton of the other genome).
+ARI, COUG, GAB2, GT1 and VEG have no apicoplast contig in their assembly, only NUPTs in nuclear contigs.
 
-The figures are the same as in step 08, for the two sets; the numbers in brackets are the ones before the removal.
-Every figure also comes as `.svg`, with the tables of the values.
+
+[↑ Back to top](#analysis-steps)
 
 ---
 
-### With filtering (7a), redundant contigs removed
+## 02 – TE Annotation & Clean Up
 
-*The 7a pangenes after the genes of the redundant contigs were removed.*
+### 02.1 TE Candidate Discovery Pipeline
 
-**Pangenome and core genome size** - the pangenome has 9,847 pangenes (9,904) and still grows by about 67 per genome at
-the end (70). The core is 8,281 (same); the fitted curves put its plateau at 8,306 (Tettelin) and 8,262 (Willenbrock),
-against 8,307 and 8,264. `Toxo7a_nonredundant_pancore_separate.png` shows the two curves in separate panels.
+The TE candidate pipeline was run on the 15 *T. gondii* genomes:
 
-![Pangenome and core genome size, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_pancore.png)
+```bash
+bash 02_TE_annotation_Clean_Up/slurm/run_pipeline_slurm.sh
+```
 
-**Pangene occupancy** - 8,281 pangenes are core, 111 are in 14 genomes (both same), 941 are in one genome only (990) and
-126 in two (131).
+**Output:** **106 non-redundant candidate TE consensus sequences** across the panel
+(`all_MCHelper_curated_sequences_NR.cdhit80.fa`); **25 of those** pass the RepBase/TE-peptide
+filter (`final_potential_new_TEs.fa`).
 
-![Pangene occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy.png)
+### 02.2 TE-Aid — visual validation of the candidates
 
-**Soft-core pangenes missing per genome** - unchanged from the 7a figure above (removing redundant
-contigs does not touch soft-core pangenes here): TgCatPRC2 still the outlier (23 of 111, 21%), MAS
-second (17, 15%).
+Ran TE-Aid (coverage plot / self dot-plot / ORFs / hits to known TE proteins) on the
+**unfiltered non-redundant set**, `final_TE_candidates_after_MCHelper/all_MCHelper_curated_sequences_NR.cdhit80.fa`
+— not the RepBase/peptide-filtered `final_potential_new_TEs.fa` — to also see the candidates
+that filter would have dropped (e.g. solo-LTR-only families) before curating into the final
+library:
 
-![Soft-core pangenes missing per genome, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_softcore_missing.png)
+```bash
+sbatch 02_TE_annotation_Clean_Up/scripts/run_te_aid.slurm.sh
+```
 
-**Singletons per genome** - FOU has the most (128) and GT1 the fewest (11), as before. RH88 goes from 122 to 78 and ME49
-from 28 to 19.
+(`INPUT_FASTA`/`OUTDIR` in the script set to the `all_MCHelper_curated_sequences_NR.cdhit80.fa`
+pair, not the default.)
 
-![Singletons per genome, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_singletons.png)
+**Output:** `te_aid_all_MCHelper_NR_cdhit80/` — one folder per candidate with its TE-Aid figure,
+plus `te_aid_run_summary.tsv` (candidate · genome it ran against · status).
 
-**Gene properties by occupancy** - 9,847 pangenes (9,904). Core: 57 % of genes with a domain, median 513 aa (same);
-cloud: 45 % and 241 aa (44 % and 240). The `_log` file shows protein length
-on a log axis.
+### 02.3 Manual curation of TE candidates
 
-![Gene properties by occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_properties.png)
+All 106 TE candidates retrieved by the pipeline were manually inspected using the TE-Aid
+figures and compared against RepBase/known TE databases.
 
-**Contig size by occupancy** - the share of cloud pangenes on contigs below 200 kb falls to 11 % (16 %), and below 50 kb to
-5.2 % (10 %). Core stays at 0.4 % and 0.1 %. The cloud is still on short contigs more often than the core, but less.
+#### Findings
 
-![Contig size by occupancy, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_contig_classes.png)
+- **No bona fide *T. gondii* transposable elements were identified.** Consistent with the
+  published apicomplexan mobilome literature (Rodriguez & Makalowski, 2022), the curated
+  TE library ended up empty of genuine *T. gondii* TEs. 
 
-**Invalid ORFs by occupancy** - mostly invalid: 53 % of cloud pangenes (188 of 354; 50 % before), 35 % of shell, 22 % of
-soft-core and 2.3 % of core (187 of 8,269).
-Additional filtering could still be considered here too.
+- **Human L1 LINE elements detected as apparent TE candidates in multiple strains,
+  including the reference genome ME49.** **5 of the 106 candidates** (all discovered in the
+  ME49 assembly: `rnd-1_family-14/20/31/36/56`) showed the hallmarks of bona fide LINEs
+  (TE-Aid coverage profile, ORF structure, hits to known RT domains) — but database comparison
+  identified them as **human L1 (LINE-1) consensus sequences**. Their presence in multiple genomes (they are in short contigs <10 kb) including ME49 indicates
+  **human host-cell DNA contamination** (most likely from the cell-culture system used to
+  propagate the parasite) present in several assemblies of the panel — confirming the panel
+  does carry contigs of contamination origin, not just fragmented real sequence.
 
-![Number of pangenes with mostly invalid ORFs, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_invalid_only.png)
+[↑ Back to top](#analysis-steps)
 
-![Percentage of pangenes with mostly invalid ORFs, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_occupancy_invalid_percent.png)
+---
 
-![Share of invalid genes by category, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_invalid_share.png)
+## 03 – *de novo* Genome Annotation
 
-**InterPro term enrichment** - 481 cloud and 4,889 core pangenes with an InterPro entry. Cloud: 67 of 309 entries tested are
-enriched (70 of 310); core: 8 of 672 (10 of 672). Dynein heavy chain is still the strongest cloud signal, with the same 68
-pangenes, so removing these contigs does not seem to change the pattern discussed in step 08.
+**Not needed.** All 15 strains in the panel already have gene annotation.
 
-![InterPro term enrichment, 7a, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7a_nonredundant_domain_enrichment.png)
+[↑ Back to top](#analysis-steps)
 
 ---
 
-### No filtering (7b), redundant contigs removed
+## 04 – Protein evidence (InterProScan and PSAURON)
 
-*The 7b pangenes after the genes of the redundant contigs were removed.*
+### Running InterProScan
 
-**Pangenome and core genome size** - the pangenome has 10,922 pangenes (11,031) and still grows by about 92 per genome at
-the end (98). The core is 8,733 (same); the plateau is 8,768 (Tettelin) and 8,712 (Willenbrock), against 8,770 and
-8,716.
+`interpro_manifest.tsv` for this panel (15 genomes, `CHUNK_SIZE=1000`): **150 total chunks**.
+Submit the array job with:
+```bash
+mkdir -p interpro/logs
+N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
+sbatch --array=1-${N}%20 04_InterProScan/scripts/interproscan_array_job.slurm.sh
+```
+(currently 150, but always recomputed from the manifest, not hardcoded - see
+[`04_InterProScan/README.md`](../../04_Protein_evidence/README.md) for why).
 
-![Pangenome and core genome size, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_pancore.png)
+Protein extraction ran on `gff_originals/` (this species has no `gff_cleaned/`). The array job
+**finished**: all 150 chunks completed (each chunk's `.out` ends with
+`Finished <genome> chunk <N>`).
 
-**Pangene occupancy** - 8,733 pangenes are core, 146 are in 14 genomes (both same), 1,353 are in one genome only (1,448)
-and 155 in two (163).
+### Merging the chunk results
 
-![Pangene occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy.png)
+Combines the per-chunk InterProScan output into one lookup table per genome
+(`interpro/interpro_lookup/`) and checks completeness:
+```bash
+sbatch 04_InterProScan/scripts/merge_interpro_job.slurm.sh
+```
+A protein reported as absent from the chunk output is a `NOTE`, not an error: InterProScan only
+writes a row when it finds a hit, so it is a protein with no domain hits. Only a missing chunk
+file (`WARNING`) means the results are incomplete.
 
-**Soft-core pangenes missing per genome** - unchanged from the 7b figure above: TgCatPRC2 still the
-outlier (27 of 146, 18%), MAS second (20, 14%).
+### Adding the domain evidence to the GFFs
 
-![Soft-core pangenes missing per genome, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_softcore_missing.png)
+Writes the `InterPro:`/`PFAM:` evidence into the `Dbxref=` of each CDS line, reading
+`gff_originals/` (`GFF_INDIR` is set to that in this species' copy of the script) and writing
+new GFFs to `gff_with_interpro/` (the input is never modified):
+```bash
+sbatch 04_InterProScan/scripts/update_interpro_in_gff.slurm.sh
+```
+`gff_with_interpro/` is the input for step 05.
 
-**Singletons per genome** - FOU now has the most (164); RH88 had the most before (226) and goes to 145. GT1 has the fewest
-(18). ME49 goes from 72 to 55.
+### PSAURON on every protein
 
-![Singletons per genome, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_singletons.png)
+Scores every protein of `interpro/proteins/` (the files extracted for InterProScan, 15 genomes) with PSAURON
+(group container `GAQA_psauron.sif`, PSAURON 1.0.8), one array task per genome, into `psauron/<genome>.csv`.
+Step 05 reads this folder (`PSAURON_DIR="psauron"`) to decide which genes without an ME49 gene can enter the panel,
+and to settle overlaps.
+```bash
+mkdir -p psauron/logs
+N=$(grep -v '^#' genome_order.txt | awk 'NF' | wc -l)
+sbatch --array=1-${N} 04_InterProScan/scripts/psauron_array_job.slurm.sh
+```
+Ran on 2026-10-21: all 15 genomes complete, every protein scored (each log ends with `N scores for N proteins`).
+Before that, step 05 scored only its candidates inside the job (`RUN_PSAURON="yes"`,
+`basket_annotation/psauron_candidates.csv`).
 
-**Gene properties by occupancy** - 10,922 pangenes (11,031). Core: 55 % of genes with a domain, median 477 aa (same); cloud:
-40 % and 211 aa (40 % and 212).
-
-![Gene properties by occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_properties.png)
-
-**Contig size by occupancy** - cloud pangenes on contigs below 200 kb: 13.5 % (19.4 %); below 50 kb: 8.2 % (14.2 %). Core
-stays at 0.4 % and 0.1 %.
-
-![Contig size by occupancy, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_contig_classes.png)
-
-**Invalid ORFs by occupancy** - mostly invalid: 68 % of cloud pangenes (473 of 694; 510 of 754 before), 53 % of shell, 28 %
-of soft-core and 3.8 % of core (335 of 8,722). The share hardly changes, so these contigs do not seem to drive this result.
-
-![Number of pangenes with mostly invalid ORFs, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_invalid_only.png)
-
-![Percentage of pangenes with mostly invalid ORFs, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_invalid_percent.png)
-
-![Share of invalid genes by category, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_invalid_share.png)
-
-**Unsupported overlapping genes by occupancy** - 4.6 % of cloud pangenes (69 of 1,508; 4.3 % before), 8.4 % of shell, 20 % of
-soft-core and 5.1 % of core (443 of 8,733), the same core count as before.
-
-![Number of pangenes mostly unsupported, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_unsupported_only.png)
-
-![Percentage of pangenes mostly unsupported, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_occupancy_unsupported_percent.png)
-
-![Share of unsupported genes by category, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_unsupported_share.png)
-
-**InterPro term enrichment** - 611 cloud and 4,910 core pangenes with an InterPro entry. Cloud: 77 of 347 entries tested are
-enriched (84 of 361); core: 13 of 706 (15 of 710). Dynein heavy chain is still the strongest cloud signal (66 pangenes, same).
-Cytochrome b/b6 (N-terminal domain) falls from 28 to 25 cloud pangenes, so most of them do not seem to come from the removed
-contigs either.
-
-![InterPro term enrichment, 7b, redundant contigs removed](09_Redundant_Contig_Removal/plots/Toxo7b_nonredundant_domain_enrichment.png)
+[↑ Back to top](#analysis-steps)
 
 ---
+
+## 05 – Cross-genome Annotation Integration
+
+### Step 1: Native annotation check
+
+Run **once**, after [step 04](#04--protein-evidence-interproscan-and-psauron), on `gff_with_interpro/` (the GFFs with the
+domain evidence written in), so that the domain columns and plots are real. Output folder for
+this run: `annotation_check_with_interpro/`.
+```bash
+sbatch 05_Cross-genome_annotation_integration/scripts/analyze_input_gffs_job.sh
+```
+(`GFF_DIR="gff_with_interpro"` is the script's default; for the run above `OUT_DIR` was set to
+`annotation_check_with_interpro`. Full description of every output file:
+[general README](../../05_Cross-genome_annotation_integration/README.md#step-1-native-annotation-check).)
+
+**Genes per genome** - 8,000 to 10,000 protein-coding genes per genome, split by whether the
+gene carries InterPro/PFAM evidence (56-62% do, in every genome, so no genome stands out
+as missing domain annotation). ME49 is the only genome with pseudogenes (24, red sliver on top).
+
+![Protein-coding genes per genome, with and without domain evidence](05_Cross-genome_annotation_integration/annotation_check_with_interpro/01_gene_counts_protein_coding.png)
+
+**Gene types** - every gene category found. Nearly everything is protein-coding; the rest are
+non-coding RNA genes (`ncRNA_other`, 144-334 per genome; RH88 has the most at 334), 147 tRNA
+genes in VEG only, and 24 pseudogenes in ME49. No genome has unclassified genes.
+
+![Gene categories per genome](05_Cross-genome_annotation_integration/annotation_check_with_interpro/02_gene_biotype_breakdown.png)
+
+**CDS-to-CDS overlaps** - gene pairs whose coding sequences actually overlap, split by strand.
+Most genomes have 1-22 pairs; ME49 (33), TgCATBr9 (29) and VEG (27) have the most.
+The whole-gene overlap (UTR included) is much larger in ME49 (672 pairs, mostly opposite-strand
+UTR-only), which is why the CDS-level count is the one that matters.
+
+![CDS-overlapping gene pairs per genome, by strand](05_Cross-genome_annotation_integration/annotation_check_with_interpro/05_cds_overlap_counts.png)
+
+**Overlap severity** - the same pairs by how much of the smaller gene's CDS is covered:
+minor (< 20%), substantial (20-80%), contained (>= 80%). Every genome except RH88 has some
+contained pairs; TgCATBr9 and VEG have the most (20 and 16). The pair list with descriptions,
+sizes and `has_domain` is `cds_overlapping_pairs.tsv`.
+
+![CDS overlap severity per genome](05_Cross-genome_annotation_integration/annotation_check_with_interpro/06_cds_overlap_severity.png)
+
+Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR included),
+`04_core_overlap_counts.png` (CDS/exon extent only), and the tables
+(`gene_biotype_counts.tsv`, `overlap_counts.tsv`, `feature_attribute_table.tsv`, one
+`<genome>_gene_classification.tsv` per genome).
+
+The overlaps are kept (see below); this check is what showed which genes to look at.
+
+### Step 2: Genes removed before Liftoff (kill-list filter, done)
+
+Genes with overlapping CDS are **kept** (not enough evidence to say which are wrong - most look
+like gene-model errors, not false genes). The only genes removed are 5 *ME49* protein-coding
+genes whose CDS lies entirely inside one of 5 pseudogenes (same strand, no other gene overlaps
+those pseudogenes). The pseudogenes are confirmed as correct and are **kept**; the overlapping
+genes are removed. Listed in `kill_list_manual.tsv` (project root):
+
+| Removed gene | Description | Overlaps pseudogene | Overlap (bp) |
+|---|---|---|---|
+| `TGME49_242250` | rhoptry kinase family protein ROP19B | `TGME49_500106` | 1533 |
+| `TGME49_224780` | SAG-related sequence SRS40B | `TGME49_500133` | 657 |
+| `TGME49_220950` | hypothetical protein | `TGME49_500154` | 1015 |
+| `TGME49_321710` | Kinase-like \| domain-containing protein | `TGME49_500317` | 965 |
+| `TGME49_321700` | Kinase-like \| domain-containing protein | `TGME49_500405` | 800 |
+
+Removing them (40 GFF lines including their exons/transcripts) is done by
+[`remove_genes_from_gff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list),
+reading `gff_with_interpro/` and writing every genome to `gff_curated/` (genomes without an
+entry in the list are copied unchanged):
+```bash
+sbatch 05_Cross-genome_annotation_integration/scripts/remove_genes_from_gff_job.sh
+```
+`kill_list_manual.tsv` has no header, one gene per line: `genome<TAB>gene_id`
+(e.g. `ME49	TGME49_242250`). Run this step **before** "Prepare the GFFs for Liftoff" below.
+
+### Step 3: Prepare the GFFs for Liftoff (done)
+
+[`prepare_for_liftoff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
+reads `gff_curated/` and writes to `gff_for_liftoff/`: genes reduced to their coding sequence
+(no UTRs), protein-coding genes and pseudogenes unified to `protein_coding_gene`, and the
+non-coding RNA genes (tRNA, rRNA, other ncRNA) removed, so they are neither transferred by Liftoff nor
+clustered by `get_pangenes`. This is what goes into Liftoff:
+```bash
+sbatch 05_Cross-genome_annotation_integration/scripts/prepare_for_liftoff_job.sh
+```
+
+Result (`gff_for_liftoff/prepare_for_liftoff_report.tsv`; `liftoff_feature_types.txt` contains
+only `protein_coding_gene`). Per genome: transcripts processed, UTR lines deleted, exons
+clipped or deleted to the coding extent, genes resized, and total bp cut from gene spans:
+
+| Genome | Transcripts | UTR lines deleted | Exons clipped | Exons deleted | Genes resized | bp trimmed |
+|---|---|---|---|---|---|---|
+| ME49 | 8115 | 15384 | 13465 | 687 | 7507 | 11047634 |
+| ARI | 9771 | 737 | 736 | 1 | 735 | 3608 |
+| CAST | 9338 | 545 | 543 | 1 | 543 | 14698 |
+| COUG | 9664 | 741 | 740 | 0 | 740 | 2084 |
+| FOU | 9859 | 683 | 682 | 1 | 681 | 2783 |
+| GAB2 | 9016 | 379 | 378 | 1 | 378 | 4803 |
+| GT1 | 8179 | 85 | 83 | 2 | 80 | 6054 |
+| MAS | 9829 | 701 | 701 | 0 | 701 | 2316 |
+| p89 | 9527 | 581 | 581 | 0 | 581 | 2083 |
+| RH88 | 8315 | 46 | 26 | 19 | 22 | 30467 |
+| RUB | 9861 | 718 | 716 | 2 | 716 | 2994 |
+| TgCATBr9 | 9656 | 586 | 584 | 2 | 581 | 12112 |
+| TgCatPRC2 | 9973 | 885 | 884 | 1 | 884 | 2236 |
+| VAND | 9124 | 417 | 417 | 0 | 416 | 642 |
+| VEG | 8296 | 0 | 89 | 0 | 89 | 1606 |
+
+*ME49* carries by far the most UTR annotation (15,384 lines, 11 Mb removed from gene spans); the
+other genomes have only a few hundred UTR lines or fewer. *VEG* has no UTR lines at all, but 89
+of its exons extended past the CDS and were clipped.
+
+**Rerun on 7 October 2026.** The first run used an earlier version of the script that only retyped the non-coding
+genes, so they stayed in each genome's own annotation (in *VEG* the 147 tRNAs ended up typed `gene` and were seen by
+`get_pangenes`). Step 3 was run again on the cluster with the current script, which removes them; Liftoff did not
+need to run again, because these genes were never transferred. Genes retyped or removed:
+
+| Genome | Retyped to `protein_coding_gene` | Non-coding genes removed |
+|---|---:|---:|
+| ME49 | 24 pseudogenes | 194 |
+| ARI | | 155 |
+| CAST | | 165 |
+| COUG | | 148 |
+| FOU | | 159 |
+| GAB2 | | 144 |
+| GT1 | | 149 |
+| MAS | | 158 |
+| p89 | | 154 |
+| RH88 | | 334 |
+| RUB | | 161 |
+| TgCATBr9 | | 161 |
+| TgCatPRC2 | | 153 |
+| VAND | | 149 |
+| VEG | 8,296 (typed `gene`) | 147 (tRNAs) |
+
+The 24 *ME49* pseudogenes keep `ebi_biotype=pseudogene` on their gene line, so they stay identifiable.
+
+### Step 4: Liftoff, all-against-all (done)
+
+[`liftoff_all_vs_all.sh`](../../05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
+lifts every genome's prepared annotation (`gff_for_liftoff/`) onto every other genome's
+FASTA (`genomes/`) - 15 genomes, so 210 pairs. Run as one job per source genome:
+```bash
+mkdir -p liftoff_output/logs
+sbatch --array=1-15 05_Cross-genome_annotation_integration/scripts/liftoff_all_vs_all.sh
+```
+Results go to `liftoff_output/polished/`, job logs to `liftoff_output/logs/`. Resubmitting skips pairs that are already done.
+
+#### ME49 genes transferred with a valid ORF
+
+A ME49 gene that maps well onto the other genomes but has no valid ORF in any of them likely has a wrong
+gene model in ME49: the sequence is there, the model does not translate on it. "Maps well" means median
+Liftoff coverage and identity ≥ 0.9 over the genomes the gene reached. The ME49 model is never checked on
+ME49 itself (there is no ME49→ME49 transfer).
+
+```bash
+mkdir -p liftoff_transfer_stats/logs
+sbatch 05_Cross-genome_annotation_integration/scripts/liftoff_transfer_stats_job.sh
+```
+
+| | |
+| :---: | :---: |
+| ![ME49 genes by number of genomes with a valid ORF](05_Cross-genome_annotation_integration/liftoff_transfer_stats/ME49_valid_orf_hist.png) | ![ME49 transfers by target genome](05_Cross-genome_annotation_integration/liftoff_transfer_stats/ME49_by_reference.png) |
+
+- **8,047 ME49 genes transferred; 5,740 (71%) have a valid ORF in all 14 genomes.** 3.8% (VEG) to 10.1%
+  (FOU) of ME49's genes reach a genome with an invalid ORF.
+- **102 genes have a valid ORF in none of the genomes they reached.** 32 of them reached all 14.
+- **105 candidate wrong models** (`ME49_candidates.tsv`): transferred to ≥ 11 of the 14 genomes, valid ORF
+  in ≤ 20% of them, maps well. Selenoproteins are expected false positives (their in-frame TGA reads as a stop).
+
+### Step 4b: Redundant and apicoplast contigs removed before the build (Tgondii only, done)
+
+The [redundant contigs](#contig-redundancy-screen-done) and the [apicoplast contigs](#organelle-screen--apicoplast-done)
+(step 01) were found after Liftoff had run. Removing them from the build's inputs gives the same result as removing them before Liftoff, without
+running Liftoff again: no gene on those contigs, no transfer of their genes into the other genomes, and no transfer onto
+them. The places those transfers had taken are free again during the build, so the genes that belong there come in.
+
+[`remove_contigs_before_build.py`](05_Cross-genome_annotation_integration/scripts/remove_contigs_before_build.py) reads both lists
+(`01_Genome_Selection_QC/redundant_contigs_removed.tsv` and `01_Genome_Selection_QC/apicoplast_screen/apicoplast_contigs.tsv`;
+a contig in both is removed once) and
+writes new folders: `gff_for_liftoff_nonredundant/`, `liftoff_output/polished_nonredundant/` (a file with nothing to
+remove is a link) and `genomes_nonredundant/` (the genomes without those contigs, for `get_pangenes`). Run on the cluster
+with its wrapper:
+```bash
+sbatch 05_Cross-genome_annotation_integration/scripts/remove_contigs_before_build.slurm.sh
+```
+
+**52 contigs in 10 genomes** (41 redundant, 14 apicoplast, 3 in both) and **332 genes** of the genomes' own
+annotations removed; 2,799 transfers onto those contigs and 474 transfers of their genes removed from the Liftoff
+outputs (`contigs_removed_before_build.tsv`; the run wrote it to the old step 09 folder, the wrapper now writes it to
+`05_Cross-genome_annotation_integration/`):
+
+| Genome | Contigs | Own genes removed |
+|---|---:|---:|
+| ME49 | 9 | 49 |
+| RH88 | 35 | 86 |
+| CAST | 1 | 31 |
+| FOU | 1 | 28 |
+| MAS | 1 | 28 |
+| p89 | 1 | 28 |
+| RUB | 1 | 27 |
+| TgCATBr9 | 1 | 28 |
+| TgCatPRC2 | 1 | 19 |
+| VAND | 1 | 8 |
+
+### Step 5: Basket annotation (done)
+
+[`basket_annotation_job.sh`](../../05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
+place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
+ME49. This is the version that loses no gene without a reason
+([No gene is lost without a reason](../../05_Basket_annotation_integration/README.md#no-gene-is-lost-without-a-reason)).
+Run on the cluster on 29 October 2026 (job 1723532), both modes, with the step 04 PSAURON scores and the curators'
+list of the genes deleted in ToxoDB 66, from `05_Basket_annotation_integration/scripts_keep_all_genes/` into
+`basket_annotation_keep_all_genes/` (the previous run, 22 October, stays in `basket_annotation/`):
+```bash
+mkdir -p basket_annotation_keep_all_genes/logs
+sbatch --export=ALL,NATIVE_DIR=gff_for_liftoff_nonredundant,TRANSFER_DIR=liftoff_output/polished_nonredundant,DOMAIN_DIR=annotation_check_with_interpro,GENOME_DIR=genomes_nonredundant,OLD_REFERENCE_GFF=ToxoDB-65_TgondiiME49.gff,CURATION_REMOVED_LIST=curation_removed_genes_ME49.txt,ID_PREFIX=Tg,PLOT_LABEL=Toxo 05_Basket_annotation_integration/scripts_keep_all_genes/basket_annotation_job.sh
+```
+
+All checks passed, and every gene of every genome's own annotation has a final model or a written reason (gene
+fate: 0 genes without a record). The final GFFs of `prefer_panel_model`
+(`basket_annotation_keep_all_genes/gff_prefer_panel_model_final/`) go to get_pangenes.
+
+**Panel genes.** 8,365 panel genes: the 8,026 ME49 genes (24 of them pseudogenes) and 339 genes not in the ME49
+annotation. 143 copies of a gene in one genome were split off into baskets of their own; 91 of them became panel
+genes. 64 panel genes were removed: 52 lost an opposite-strand overlap, 12 are genes the curators deleted.
+
+![Panel genes kept and removed](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_panel_genes.png)
+
+**Genes per genome.** 7,900 (MAS) to 8,159 (RH88) genes per genome. ME49 has 8,074: its 8,026 genes and 48 genes not in
+its annotation.
+
+![Genes per genome: own annotation and final, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_gene_counts.png)
+
+**From each genome's own annotation to the final GFF.** Most strains have about 2,000 genes fewer than in their own
+annotation, mainly because genes annotated in pieces are replaced by one model (168 to 1,922 pieces per genome; GT1,
+VEG and RH88 have the fewest). The other losses: 87 to 286 genes per genome on contigs removed in step 01 (contigs <
+10 kb, apicoplast and redundant contigs), 242 to 351 eliminated by the quality rules, and 11 to 24 removed at the end of
+step 05. 301 to 454 genes per genome were added where the genome had no gene.
+
+![Each genome from its own annotation to the final GFF](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_prefer_panel_model_gene_balance.png)
+
+**Genes eliminated by the quality rules.** 4,153 genes in the 14 genomes besides ME49, half of them for PSAURON alone.
+
+![Genes eliminated by the quality rules, by their signs](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_prefer_panel_model_eliminated_reasons.png)
+
+![PSAURON of the eliminated genes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_prefer_panel_model_eliminated_psauron.png)
+
+![PSAURON of the genes eliminated by PSAURON only](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_prefer_panel_model_eliminated_psauron_only.png)
+
+These three figures were made with
+[`gene_fate_job.sh`](../../05_Basket_annotation_integration/README.md#running-it), which redoes the gene
+fate and its figures on the results already written, with the step 01 files of the removed contigs:
+```bash
+export PLOT_LABEL=Toxo
+export REMOVED_GENES="contig_size_profile/small_contig_genes.tsv:contig < 10 kb"
+export REMOVED_CONTIGS="09_Redundant_Contig_Removal/apicoplast_screen/apicoplast_contigs.tsv:apicoplast contig|09_Redundant_Contig_Removal/redundant_contigs_removed.tsv:redundant contig"
+export ORIGINAL_GFF_DIR=gff_originals
+sbatch --export=ALL 05_Basket_annotation_integration/scripts_keep_all_genes/gene_fate_job.sh
+```
+
+**Where each model comes from.** In `prefer_panel_model`, 6,888 to 7,441 genes per genome take the panel model in place
+of the genome's own; 212 to 332 fill a place where the genome had no gene; 130 to 330 take another valid model closer
+to the panel model; 28 genes in all are the genome's own gene, back where the panel model could not be placed (e.g.
+ARI's SAG2C, swapped with SAG2D by Liftoff).
+
+![Origin of each genome's models, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_model_origin.png)
+
+**ORF quality.** 112,596 of the 119,647 genes (94%) have a valid ORF. 4,414 have an ORF broken by the assembly (an N in
+the CDS or near a contig end). 2,637 have an invalid ORF not explained by the assembly, 36 of them in ME49. miniprot
+repaired 33; the others are mostly frameshifts and internal stops.
+
+![ORF quality per genome, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_orf_quality.png)
+
+![Genes with an invalid ORF, by miniprot result](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_miniprot.png)
+
+**Tandem arrays.** 21 baskets hold a tandem array (e.g. ROP5, SRS and family D genes); 21 extra copies were added.
+
+The prototype of this step (the build, its check and the tagging) is kept in
+`README_prototype_step05.md` (kept locally, not in this repository).
+
+[↑ Back to top](#analysis-steps)
+
+---
+
+## 06 – GET_PANGENES
+
+`get_pangenes` on the final GFFs of step 05 (`prefer_panel_model`, `basket_annotation_keep_all_genes/`), on the
+cluster:
+```bash
+jid=$(sbatch --parsable --export=ALL,MODE=prefer_panel_model,ANNOTATION_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final,OUT_DIR=for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh)
+sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=./for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
+```
+**8,386 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`). The previous run, on `basket_annotation/` (22
+October), gave 8,379 (`for_get_pangenes_basket_prefer_panel_model_pangenes/`).
+
+The earlier pangenomes (first run, prototype flow) are in `README_prototype_steps06_08.md` (kept locally, not in this repository).
+
+[↑ Back to top](#analysis-steps)
+
+---
+
+## 07 – Post-GET_PANGENES Adjusting and Visualisation
+
+The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
+again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 were run on the
+cluster on 2026-10-30, on the `get_pangenes` run above, into folders ending in `_keep_all_genes` (the previous run's
+folders, without the suffix, are kept):
+```bash
+LABEL=Toxo
+export TITLE="$LABEL Pangenome Explorer"
+export PANGENES_DIR=for_get_pangenes_keep_all_genes_pangenes
+export GFF_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final
+export STEP05_GFF_DIR=$GFF_DIR
+export STEP05_SCRIPTS=05_Basket_annotation_integration/scripts_keep_all_genes
+export ABSENT=basket_annotation_keep_all_genes/decide/absent.tsv
+export STACKED=basket_annotation_keep_all_genes/gff_prefer_panel_model/stacked_dropped.tsv
+export WINNERS=basket_annotation_keep_all_genes/winners.tsv
+I=pangenome_inspection_keep_all_genes; F=pangenome_fixed_keep_all_genes
+P=pangenome_plots_keep_all_genes;      E=pangenome_explorer_keep_all_genes
+S=07_Post_GET_PANGENES_adjusting/scripts
+mkdir -p $I/logs $F/logs $P/logs $E/logs
+j1=$(sbatch --parsable -o $I/logs/%x_%j.out -e $I/logs/%x_%j.err --export=ALL,OUT_DIR=$I $S/inspect_pangenome_job.sh)
+j2=$(sbatch --parsable --dependency=afterok:$j1 -o $F/logs/%x_%j.out -e $F/logs/%x_%j.err --export=ALL,OUT_DIR=$F,ABSENCES=$I/absence_audit/absences.tsv $S/fix_pangenome_safe_job.sh)
+sbatch --dependency=afterok:$j2 -o $P/logs/%x_%j.out -e $P/logs/%x_%j.err --export=ALL,SET=preliminary,LABEL=$LABEL,FIXED_DIR=$F,OUT_DIR=$P $S/plot_all_job.sh
+sbatch --dependency=afterok:$j2 -o $E/logs/%x_%j.out -e $E/logs/%x_%j.err --export=ALL,SET=preliminary,FIXED_DIR=$F,OUT_DIR=$E $S/build_explorer_job.sh
+```
+
+| | `get_pangenes` | After the safe fix (preliminary) |
+|---|---:|---:|
+| Pangenes | 8,386 | 8,264 |
+| Core (15) | | 7,754 |
+| Soft-core (14) | | 71 |
+| Shell (3-13) | | 269 |
+| Cloud (1-2) | | 170 |
+
+### 1. Inspection
+
+Job 1724688. Tables in `07_Post_GET_PANGENES_adjusting/pangenome_inspection_keep_all_genes/`.
+
+**Absences** (a pangene with no gene in a genome): 6,348.
+
+| Code | Category | Absences |
+|---|---|---:|
+| 1a | same gene, in another pangene: can be moved | 745 |
+| 1b | same gene, in a pangene shared with the other genomes | 253 |
+| 1c | same gene, in no pangene | 7 |
+| 2a | another gene in the place, no transfer | 492 |
+| 2b | another gene in the place, over a transfer | 311 |
+| 3 | transfer not used by step 05 | 548 |
+| 4 | place much shorter: likely deletion | 439 |
+| 5 | empty place | 754 |
+| 6 | contig edge | 2,289 |
+| 7 | flanking genes split | 47 |
+| 8 | region absent | 463 |
+
+**Pangenes with more than one gene of a strain:** 109. Most hold genes of different panel genes that `get_pangenes`
+grouped together (unrelated 28, copy 20, other 20, fragment 18, split 11, no reference 7, tandem copy 5).
+
+### 2. Safe fix
+
+Job 1724689. **87 genes** were moved back to the pangene of their gene, and 37 pangenes left empty disappeared. 658
+candidate moves were left alone: 327 genes claimed by more than one pangene, 320 that would have gone in the other
+direction of a merge, and 11 chains. Then **50 baskets** that `get_pangenes` had split over several pangenes were joined
+(85 pangenes joined into another; `joins.tsv`), e.g. TGME49_310430, split over 7 pangenes and now one pangene of 15
+strains. 8,386 → **8,264 pangenes**. 208 split baskets were not joined (`basket_splits_not_joined.tsv`): in 206 a
+pangene also holds genes of other baskets, in 2 a strain has two genes of the basket.
+
+The 4,528 absences left, by verdict: absent 1,585, assembly 1,941, copy dropped by step 05 667, elsewhere 335.
+
+**Low-confidence pangenes** (`pangene_lists/pangene_quality.tsv`): 168 have an invalid ORF in more than 50% of their
+strains. 69 of them also have a PSAURON score below 0.5, and 117 have no InterPro domain. In 54 the same defect is in
+every invalid strain (2 or more), so it is shared (or the model is wrong). 19 more are reference pseudogenes. **Genes in
+no pangene:** 18, all with a CDS below 100 bp.
+
+### 3. Preliminary look
+
+Jobs 1724690 (figures) and 1724691 (explorer). Figures: `07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/`; explorer:
+`07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary/explorer_standalone.html`.
+
+![Pangenome and core genome size, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_pancore.png)
+
+The core settles at about 7,750 pangenes (Tettelin 7,764, Willenbrock 7,710).
+
+![Pangene occupancy, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_occupancy.png)
+
+![Singletons per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_singletons.png)
+
+RH88 has the most singletons (55), then ME49 (16) and TgCatPRC2 (8).
+
+![Soft-core pangenes missing per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_softcore_missing.png)
+
+TgCatPRC2 misses 17 of the 71 soft-core pangenes.
+
+![POCS heatmap](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_POCS_heatmap.png)
+
+![InterPro enrichment, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_domain_enrichment.png)
+
+The cloud is enriched in cytochrome b / cytochrome c oxidase domains (14 of its 92 pangenes with a domain), SRS
+domains (23), rhoptry kinases and V-ATPase proteolipid subunits; nothing is enriched in the core. The cytochrome genes
+are mitochondrial genes; their copies in the cloud are probably copies in the nuclear assembly. No gene has been added
+to the removal list yet.
+
+### 4. Removal after curation
+
+Not run yet on this pangenome (`07_Post_GET_PANGENES_adjusting/genes_to_remove.tsv` has no gene).
+
+### 5. Final look
+
+Not run yet.
 
 [↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
