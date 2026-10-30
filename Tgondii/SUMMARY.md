@@ -17,10 +17,7 @@
 | [04 – Protein evidence (InterProScan and PSAURON)](README.md#04--protein-evidence-interproscan-and-psauron) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Manual review and refinement of pangene calls | 🔄 In progress |
-| 08 – Pangenome Visualisation | Figures, presence/absence matrix, summary stats (prototype flow; now part of step 07) | ✅ Complete |
-| [Redundancy check](README.md#redundancy-check-on-the-final-panel) | Duplicated contigs in the final panel | ✅ Complete |
-| [09 – Redundant Contig Removal](README.md#09--redundant-contig-removal) | Genes of the redundant contigs removed from the GFFs and pangene matrices (*T. gondii* only) | ✅ Complete |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, figures and explorer (done); curation and removal of false genes | 🔄 In progress |
 
 ---
 
@@ -33,7 +30,8 @@
   cleaner assembly (only 62 small contigs). These small contigs carry
   **2,388 protein-coding genes** across the panel, including 289 known SRS/ROP/GRA/RON/AP2/MIC
   virulence-family genes and ~636 organelle-genome genes.
-- **Organelle and redundant-contig screening were not run at this stage.** The protocol calls for removing organellar and redundant contigs. For *T. gondii*, these could not be identified reliably: organellar sequences occur across multiple contigs that are not consistently labeled, and nuclear contigs may contain organellar fragments (NUMTs/NUPTs). The origin of many small contigs also remains uncertain: they may be assembly artifacts, fragments of the unusual organellar genomes. As a panel-wide rule, **all contigs shorter than 10 kb were therefore excluded** instead of being classified individually. It removed 2,388 annotated genes. A redundancy screen was run later, on the final panel (see *Redundancy check on the final panel* below).
+- **All contigs shorter than 10 kb were excluded**, as a panel-wide rule, instead of classifying each small contig (their origin - assembly artifacts, organellar fragments - could not be told reliably). It removed 2,388 annotated genes.
+- **Apicoplast and redundant contigs removed.** The apicoplast genome was found in 14 contigs of 10 genomes (blastn of ME49 `KE138841`); 41 contigs that duplicate part of a longer contig of the same assembly were found in ME49 and RH88. These 52 contigs (332 genes) are removed before the step 05 build. The mitochondrion was not screened (ME49 has no mitochondrial contig).
 - **Chromosome structure and macro-synteny are highly conserved across all lineages.** 93.4–95.8% of the ME49 reference is covered in 1:1 collinear blocks, with no inter-chromosomal translocations or arm-scale rearrangements across any lineage. While scaffold-level dot-plots visually show frequent reverse alignments (~40–60% red), this reflects arbitrary scaffold deposition orientation. 
 - **One recurrent inversion polymorphism identified:** a ~70 kb inverted block at the end
   of chromosome IX is shared by 4 strains (CAST, RUB, VAND, TgCatPRC2) — a real
@@ -63,52 +61,30 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
 
 ### 05 – Cross-genome Annotation Integration
 
-- Each strain's annotation is rebuilt from the reference's transferred genes, the strain's own genes
-  and genes transferred from the other strains, giving **9,249–9,933 protein-coding genes per
-  strain**. Non-coding RNA genes (tRNA, rRNA, ncRNA) are left out, because they were being typed as
-  ordinary genes on the way.
-- Two versions of the annotation go on to `get_pangenes`: **with filtering** (7a) and **no
-  filtering** (7b, genes only tagged).
-- The filter removed **6.7% of the genes** (9,710 of 144,359; 6.1–8.4% per strain). Two thirds of
-  them overlapped a reference gene and had no evidence themselves; a quarter were low-coverage
-  transfers from other strains.
-- CDS-overlapping gene pairs fall from 476–552 per strain to 67–77.
+- **Basket annotation.** The genes of all strains that lie at the same place form a basket; each basket gets one panel
+  model (ME49's when it has one), written into every strain where it fits. **8,365 panel genes**: the 8,026 ME49 genes
+  and 339 genes not in the ME49 annotation.
+- **No gene is lost without a reason:** every gene of every strain's own annotation has a final model or a written
+  reason. 143 real copies of a gene in one strain were kept apart; tandem arrays (e.g. ROP5, SRS) keep their copies.
+- **7,900–8,159 genes per strain**, about 2,000 fewer than in their own annotations, mainly because genes annotated in
+  pieces are replaced by one model. 4,153 genes were eliminated by the quality rules (PSAURON, < 100 aa, no valid ORF),
+  half of them for PSAURON alone; 301–454 genes per strain were added where the strain had no gene.
+- **94% of the genes have a valid ORF**; 4,414 have an ORF broken by the assembly (N or contig end).
 
 ### 06 – GET_PANGENES
 
-- **11,031 pangenes without filtering** and **9,904 with filtering**, across the 15 strains.
+- **8,386 pangenes** across the 15 strains.
 
 ### 07 – Post-GET_PANGENES Adjusting *(in progress)*
 
-- **13.6% of the pangenes (1,501 without filtering, 1,374 with filtering) hold more than one gene of
-  the same strain.** They are not overlapping genes (only 0.1% of the pairs overlap in the CDS):
-  they are same-strand neighbours, 83% within 5 kb. Whether they are tandem copies or one gene
-  split in two is still open.
-
-### 08 – Pangenome Visualisation
-
-- **The pangenome is still growing.** Adding the 15th strain still adds about 100 pangenes without filtering and about 70 with filtering.
-  The core is 8,733 pangenes (79%) without filtering and 8,281 (84%) with filtering; 13% and 10% of the pangenes are in one strain only.
-- **The cloud looks different from the core.** Cloud pangenes have shorter proteins (median 212 aa against 477 aa in the core, no filtering),
-  fewer domains (40% of genes against 55%), and sit more often on short contigs (19% below 200 kb against 0.4% of the core).
-- **Many cloud pangenes have genes without a valid ORF:** 68% without filtering and 50% with filtering, against 2-4% of the core. The
-  singletons of this kind are almost all Liftoff transfers of the lowest-confidence layer, not genes of a strain's own annotation.
-- **InterPro enrichment.** The cloud is enriched in dynein heavy chain (a long gene that may be annotated in pieces) and polyketide synthase
-  domains; the core in methyltransferase, MFS transporter, WD40 and tetratricopeptide domains. The cytochrome b/b6 entries in the cloud may
-  be organelle DNA inserted in the nucleus or poor transfers; this was not tested.
-- Preliminary: pangenes with more than one gene of the same strain are not resolved yet.
-
-### Redundancy check on the final panel
-
-- Only **RH88** (100 flagged contigs, 1.7 Mb) and **ME49** (6 contigs, 94 kb) have contigs that are duplicated in their own assembly; the other
-  13 strains have none. Contigs with no gene do not matter for the pangenome.
-
-### 09 – Redundant Contig Removal
-
-- The genes of the flagged contigs that carry genes, plus the contigs just under the cut (41 contigs, 0.93 Mb, 144 genes), were removed from the
-  GFFs and the pangene matrices, without redoing the annotation. The original files were kept for comparison.
-- The pangenome goes from 11,031 to 10,922 pangenes without filtering; all the pangenes removed are cloud, and the core does not change.
-  RH88 goes from 226 to 145 singletons.
+- **Safe fix:** 87 genes moved back to the pangene of their gene, and 50 genes that `get_pangenes` had split over
+  several pangenes joined again. **8,264 pangenes**: 7,754 core (15 strains), 71 soft-core, 269 shell, 170 cloud.
+- **The core settles at about 7,750 pangenes**; RH88 has the most singletons (55).
+- **The cloud is enriched in cytochrome b / cytochrome c oxidase domains** (probably mitochondrial DNA in the nuclear
+  assemblies), SRS domains and rhoptry kinases.
+- 168 pangenes have an invalid ORF in more than half of their strains (69 of them with PSAURON < 0.5); they are the
+  candidates for curation.
+- Still to do: curation and removal of false genes, and the final figures.
 
 ---
 
@@ -121,17 +97,15 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
   that knowingly costs 2,388 real genes (289 known virulence-family genes among them). It was
   applied to every strain.
 - **Organellar DNA (NUMTs/NUPTs) is abundant and strain-variable.** *T. gondii* carries
-  >11,000 organellar DNA insertions (>1 Mb) in the nuclear genome, and unlike Afum, two
-  organelles must be screened — the mitochondrion and the apicoplast. Most hits will be
-  genuine nuclear insertions to keep, not whole-organelle contigs to drop.
+  >11,000 organellar DNA insertions (>1 Mb) in the nuclear genome. The apicoplast contigs were removed; the mitochondrion
+  was not screened, and the cytochrome genes in the cloud are probably mitochondrial copies in the nuclear assemblies.
 - **Lineage-specific copy-number variation at key loci** (e.g. ROP5: 6 copies in Type I/III
   vs. 11 in Type II) will appear as gene gain/loss in the pangenome matrix. These loci
   require manual review rather than relying on the matrix alone.
-- **Pangenes with more than one gene per strain, and fragmented gene models, are not resolved yet.**
-  They can inflate the cloud (singletons and low-occupancy pangenes), so cloud-related figures and
-  enrichments are preliminary.
-- **Invalid ORFs in the cloud.** A large share of the cloud is made of transfers with a broken ORF, so cloud-related figures may overstate
-  the strain-specific content; additional filtering could be considered.
+- **Some genes are still split over several pangenes.** 208 baskets remain split after the safe fix, where a pangene also
+  holds genes of other baskets (e.g. neighbouring members of a gene family); they can inflate the cloud and are left for
+  curation. 109 pangenes hold more than one gene of a strain.
+- **The pangenome is preliminary** until the curation (removal of false genes) is done.
 - The pangenome matrix captures **gene presence/absence only** — virulence differences
   between lineages are driven largely by allelic variation within shared genes (ROP kinases,
   GRA effectors, SRS surface antigens), which require separate targeted analyses.

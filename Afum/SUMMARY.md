@@ -11,14 +11,13 @@
 
 | Step | Description | Status |
 | :--- | :--- | :---: |
-| [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, organelle removal, synteny | ✅ Complete |
+| [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, organelle removal, synteny, assembly assessment | ✅ Complete |
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, TE-gene overlap filtering | ✅ Complete |
 | [03 – *de novo* Genome Annotation](README.md#03--de-novo-genome-annotation) | Gene prediction on cleaned assemblies | ⏭️ Not needed (all strains already annotated) |
 | [04 – Protein evidence (InterProScan and PSAURON)](README.md#04--protein-evidence-interproscan-and-psauron) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Manual review and refinement of pangene calls | 🔄 In progress |
-| 08 – Pangenome Visualisation | Figures, presence/absence matrix, summary stats (prototype flow; now part of step 07) | ✅ Complete |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, figures and explorer (done); curation and removal of false genes | 🔄 In progress |
 
 ---
 
@@ -40,7 +39,10 @@
   chromosome 2 is shared by 4 strains (W72310, eAF1023, eAF1090, eAF1436) — a real
   segregating variant in the population, not an assembly error.
 - ⚠️ **ATCC 46645** is the lowest-quality assembly in the panel (most fragmented, lowest
-  alignment identity) and should be interpreted with caution.
+  alignment identity) and should be interpreted with caution. The assembly assessment also shows it as the outlier:
+  largest genome (30.5 Mb), most genes (10,665) and one of the lowest N50s (1.96 Mb).
+- **Two annotation styles** in the panel: A1160, A1163, D141 and AF293 have more genes than mRNAs and fewer exons; the
+  other 13 genomes have isoforms (more mRNAs than genes).
 
 ### 02 – TE Annotation & Clean Up
 
@@ -63,31 +65,31 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 
 ### 05 – Cross-genome Annotation Integration
 
-- Each strain's annotation is rebuilt from the reference's transferred genes, the strain's own genes and genes transferred from the other strains,
-  as in the *T. gondii* panel. Two versions go on to `get_pangenes`: **with filtering** (7a) and **no filtering** (7b, genes only tagged).
-- The filter removed **2.2% of the genes** (4,307 of 192,136; 1.9-2.7% per strain), leaving 10,838 to 11,509 genes per strain.
+- **Basket annotation.** The genes of all strains that lie at the same place form a basket; each basket gets one panel
+  model (AF293's when it has one), written into every strain where it fits. **11,542 panel genes**: the 10,015 AF293
+  genes and 1,527 genes not in the AF293 annotation.
+- **No gene is lost without a reason:** every gene of every strain's own annotation has a final model or a written
+  reason. 561 real copies of a gene in one strain were kept apart.
+- **10,016–10,608 genes per strain.** Unlike *T. gondii*, most strains gain genes: 489–717 per strain were added where
+  the strain had no gene. 3,246 genes were eliminated by the quality rules (PSAURON, < 100 aa, no valid ORF).
+- **98% of the genes have a valid ORF**; only 56 have an ORF broken by the assembly.
 
 ### 06 – GET_PANGENES
 
-- **12,984 pangenes with filtering** and **13,693 without**, across the 17 strains.
+- **11,758 pangenes** across the 17 strains.
 
 ### 07 – Post-GET_PANGENES Adjusting *(in progress)*
 
-- Not analysed yet. About 3% of the pangenes hold more than one gene of the same strain (443 with filtering, 454 without).
-
-### 08 – Pangenome Visualisation
-
-- **The pangenome is still growing:** adding the 17th strain still adds about 70 pangenes with filtering and about 97 without. The core is
-  10,254 pangenes (79%) with filtering and 10,433 (76%) without; 9% and 12% of the pangenes are in one strain only. ATCC 46645 has the most
-  singletons (213 and 230).
-- **The cloud looks different from the core.** Cloud pangenes have shorter proteins (median 204 aa against 383 aa in the core, no filtering),
-  fewer domains (42% of genes against 77%), and sit more often on contigs below 200 kb (11% against none of the core).
-- **Many cloud pangenes have genes without a valid ORF:** 39% with filtering and 57% without, against about 2% of the core. Without filtering,
-  14% of the cloud pangenes are mostly made of overlapping genes with no domain or specific description, against 1.6% of the core.
-- **InterPro enrichment.** The cloud is enriched in domains of unknown function (DUF3435, DUF3723), acyl transferase and protein kinase-like
-  domains; without filtering also in the orsellinic acid biosynthesis cluster protein D. The DUFs may point to Starship elements, to be confirmed.
-  The core is enriched in the armadillo-type fold, sugar transporter and OB-fold domains.
-- Preliminary: pangenes with more than one gene of the same strain are not resolved yet.
+- **Safe fix:** 120 genes moved back to the pangene of their gene, and 174 genes that `get_pangenes` had split over
+  several pangenes joined again. **11,468 pangenes**: 9,638 core (17 strains), 133 soft-core, 862 shell, 835 cloud.
+- **The core settles at about 9,600 pangenes**; ATCC 46645 has the most singletons (142). AF293 misses 37 of the 133
+  soft-core pangenes.
+- **The cloud is enriched** in protein kinases, DUF3435 (the captains of Starship elements), the subtelomeric
+  hrmA-associated cluster protein and the orsellinic acid/F9775 cluster protein D (subtelomeric and secondary
+  metabolite clusters), and in transposase domains from the transposon Afu1g00140, which the curation removes.
+- 286 pangenes have an invalid ORF in more than half of their strains, but only 15 of them have PSAURON < 0.5: in
+  *A. fumigatus* broken ORFs look more like model problems than false genes.
+- Still to do: curation and removal of false genes (the transposon Afu1g00140 is already listed), and the final figures.
 
 ---
 
@@ -100,8 +102,11 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 - The synteny-based approach requires chromosome-level assemblies for the most reliable calls.
   Sub-telomeric accessory regions — where most lineage-specific genes live — are the least
   certain part of any pangenome, including this one.
-- **Invalid ORFs in the cloud.** A large share of the cloud is made of transfers with a broken ORF, so cloud-related figures may overstate
-  the strain-specific content; additional filtering could be considered.
+- **Some genes are still split over several pangenes.** 256 baskets remain split after the safe fix, where a pangene also
+  holds genes of other baskets; they can inflate the cloud and are left for curation.
+- **Short effector genes.** The < 100 aa rule of step 05 eliminates short proteins, and fungal effectors can be shorter.
+  A list of protected genes (e.g. predicted effectors) is planned, so that their baskets are never eliminated.
+- **The pangenome is preliminary** until the curation (removal of false genes) is done.
 - The pangenome matrix captures **gene presence/absence only**. Azole resistance in
   *A. fumigatus* is driven largely by *sequence variants within* core genes (e.g., *cyp51A*
   promoter repeats + coding substitutions), which require a separate targeted analysis.
@@ -117,11 +122,10 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 | [01_Genome_Selection_QC/](01_Genome_Selection_QC/) | QC outputs: ANI, synteny, organelle and redundancy screens |
 | [02_TE_annotation_Clean_Up/](02_TE_annotation_Clean_Up/) | TE library, RepeatMasker results, TE-gene overlap |
 | 03_denovo_Genome_Annotation/ | *de novo* gene predictions |
-| 04_InterProScan/ | Domain annotations |
-| [05_Cross-genome_annotation_integration/](05_Cross-genome_annotation_integration/) | Merged annotation files |
+| 04_InterProScan/ | Domain annotations and PSAURON scores |
+| [05_Basket_annotation_integration/](05_Basket_annotation_integration/) | Basket annotation: final GFFs, gene fate, figures |
 | 06_GET_PANGENES/ | Pangene clusters |
 | [07_Post_GET_PANGENES_adjusting/](07_Post_GET_PANGENES_adjusting/) | Reviewed and curated pangene calls |
-| 08_Pangenome_Visualisation/ | Figures and summary tables |
 
 ---
 
