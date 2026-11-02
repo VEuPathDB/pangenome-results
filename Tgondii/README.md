@@ -1044,6 +1044,28 @@ domains (23), rhoptry kinases and V-ATPase proteolipid subunits; nothing is enri
 are mitochondrial genes; their copies in the cloud are mitochondrial DNA in the nuclear assemblies, and will probably
 be removed in the curation. No gene has been added to the removal list yet.
 
+#### Orthogroups (test)
+
+A test of how the pangenome compares with orthogroups; it is not a pipeline step yet. Each pangene gets the VEuPathDB
+OrthoMCL orthogroup of the ME49 genes it holds (its panel gene and the original IDs of its ME49 genes), from the ToxoDB
+"Genes by Ortholog Pattern" download for ME49 (`GenesByOrthologPattern_Summary.txt`). The genes of the other strains
+are not looked up; pangenes without an ME49 gene get no orthogroup. Run on the Mac:
+```bash
+python3 ../pangenome_analysis/07_Post_GET_PANGENES_adjusting/scripts/add_orthogroups.py \
+    --explorer-dir 07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary \
+    --og-table GenesByOrthologPattern_Summary.txt --reference ME49 \
+    --out-dir 07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary_orthogroups
+```
+then `explorer_orthogroups.html` (step 07 scripts, with the title filled in) as the page of that folder, packed with
+`make_standalone_explorer.py` into
+`07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary_orthogroups/explorer_standalone_orthogroups.html`.
+The page can be searched by orthogroup (`OG8_...`), shows each pangene's orthogroup with a link to all its pangenes in
+the pangenome browser, and can list only the pangenes whose orthogroup is in two or more pangenes.
+
+8,114 of the 8,264 pangenes have an orthogroup (6,003 orthogroups). 852 orthogroups are in two or more pangenes, which
+hold 2,971 pangenes: genes that OrthoMCL groups together but that sit at different places in the genomes. For example
+`OG8_0012049` (SRS genes) is in 43 pangenes.
+
 ### 4. Removal after curation
 
 Not run yet on this pangenome (`07_Post_GET_PANGENES_adjusting/genes_to_remove.tsv` has no gene).
