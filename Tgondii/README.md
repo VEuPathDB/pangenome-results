@@ -2,10 +2,6 @@
 
 This document tracks the execution, parameters, and results of the pangenome analysis for ***Toxoplasma gondii***, following the steps from the [`pangenome_analysis`](../../README.md) pipeline.
 
-> This README describes the current run (October 2026). The first run - the 7a/7b filters, the redundant contigs removed
-> after `get_pangenes` (step 09) and its figures - is kept in `README_first_run.md` (kept locally, not in this repository); its outputs
-> are in `first_run_09_redundant_contigs/` and in the step folders.
-
 ---
 
 ## Species Biology & Pangenome Considerations
@@ -40,10 +36,10 @@ This document tracks the execution, parameters, and results of the pangenome ana
   organelle. **Implication for [step 01](#01--genome-selection--qc):** the
   [organelle screen](../../01_Genome_Selection_QC/README.md#10-organelle-screen)
   should expect to find many more, and more scattered, organellar fragments in the nuclear
-  assemblies than the single small NUMT seen in the Afum panel — most will be small fragments
+  assemblies — most will be small fragments
   genuinely embedded in nuclear contigs (real nuclear DNA — keep, per the existing
   fragment-vs-whole-organelle-contig rule) rather than a handful of whole-organelle contigs
-  to drop, so this step will likely need more manual judgment call volume here than for Afum.
+  to drop, so this step will likely need many manual judgment calls.
   Also, unlike a fungus, *T. gondii* carries **two organelles to screen** — mitochondrion
   *and* apicoplast (a relict, non-photosynthetic plastid retained by most Apicomplexa) — both
   need their own contig/fragment identified before the
@@ -69,16 +65,15 @@ This document tracks the execution, parameters, and results of the pangenome ana
   between lineages ([Behnke et al., 2011](https://doi.org/10.1073/pnas.1015338108)). A plain
   presence/absence pangene matrix will read this as ordinary gene gain/loss; it's a
   tandem-array copy-number difference at one locus. `GET_PANGENES` collinearity should help
-  place the copies, but review this locus by hand rather than trusting the matrix alone —
-  same caveat as the efflux-transporter / BGC loci noted for Afum. **ROP** (rhoptry), **GRA**
+  place the copies, but review this locus by hand rather than trusting the matrix alone.
+  **ROP** (rhoptry), **GRA**
   (dense granule) and **SRS** (surface antigen) are comparably large, fast-evolving secreted
   effector families worth the same scrutiny — telling paralogs from orthologs across such an
   expanded family is where synteny-based calls are least reliable.
 
-* **Haploid, like Afum, but the transient diploid stage is obligate-in-cat, not
+* **Haploid, but the transient diploid stage is obligate-in-cat, not
   incidental.** Tachyzoites and bradyzoites (everything outside the cat) are haploid — clean
-  presence/absence and copy-number calls, no allele phasing needed, same as the fungal panels
-  in this project. The zygote formed after fertilization in the cat gut is briefly diploid
+  presence/absence and copy-number calls, no allele phasing needed. The zygote formed after fertilization in the cat gut is briefly diploid
   before meiosis produces haploid sporozoites; none of the assemblies in this panel are from
   that transient stage.
 
@@ -354,8 +349,8 @@ sbatch 01_Genome_Selection_QC/scripts/drop_short_contigs.slurm.sh
 
 Long-read assemblies can leave small contigs that are really a duplicated slice of a larger contig
 (an uncollapsed repeat or a haplotig-style overlap); their genes would be counted twice and inflate the
-pangenome. The screen was run on the genomes without contigs below 10 kb, after the first run's build, so the
-gene counts below are those of the first run's annotation (7b). Its list is now applied before the build
+pangenome. The screen was run on the genomes without contigs below 10 kb; the gene counts below come from an
+annotation made before the step 05 build. Its list is applied before the build
 ([step 05, step 4b](#step-4b-redundant-and-apicoplast-contigs-removed-before-the-build-tgondii-only-done)).
 
 ```bash
@@ -516,7 +511,7 @@ column layout of `redundant_contigs_removed.tsv`.
 
 14 apicoplast contigs in 10 genomes, 93-100% of each contig covered, 99-100% identity:
 
-| Genome | Apicoplast contig(s) | Length (bp) | Genes (first run, 7a domain-only) |
+| Genome | Apicoplast contig(s) | Length (bp) | Genes (before step 05) |
 |---|---|---:|---:|
 | ME49 | KE138841 | 35,372 | 31 |
 | RH88 | CM023094, JAAUHK010000005, JAAUHK010000025, JAAUHK010000031, JAAUHK010000024 | 35,031; 28,644; 30,311; 19,995; 10,279 | 29; 1; 0; 4; 0 |
@@ -768,10 +763,8 @@ clipped or deleted to the coding extent, genes resized, and total bp cut from ge
 other genomes have only a few hundred UTR lines or fewer. *VEG* has no UTR lines at all, but 89
 of its exons extended past the CDS and were clipped.
 
-**Rerun on 7 October 2026.** The first run used an earlier version of the script that only retyped the non-coding
-genes, so they stayed in each genome's own annotation (in *VEG* the 147 tRNAs ended up typed `gene` and were seen by
-`get_pangenes`). Step 3 was run again on the cluster with the current script, which removes them; Liftoff did not
-need to run again, because these genes were never transferred. Genes retyped or removed:
+Step 3 also removes the non-coding genes (tRNA, rRNA, ncRNA) from each genome's own annotation, and retypes the
+reference pseudogenes. Genes retyped or removed:
 
 | Genome | Retyped to `protein_coding_gene` | Non-coding genes removed |
 |---|---:|---:|
@@ -865,11 +858,10 @@ outputs (`contigs_removed_before_build.tsv`; the run wrote it to the old step 09
 
 [`basket_annotation_job.sh`](../../05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
 place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
-ME49. This is the version that loses no gene without a reason
-([No gene is lost without a reason](../../05_Basket_annotation_integration/README.md#no-gene-is-lost-without-a-reason)).
+ME49.
 Run on the cluster on 29 October 2026 (job 1723532), both modes, with the step 04 PSAURON scores and the curators'
 list of the genes deleted in ToxoDB 66, from `05_Basket_annotation_integration/scripts_keep_all_genes/` into
-`basket_annotation_keep_all_genes/` (the previous run, 22 October, stays in `basket_annotation/`):
+`basket_annotation_keep_all_genes/`:
 ```bash
 mkdir -p basket_annotation_keep_all_genes/logs
 sbatch --export=ALL,NATIVE_DIR=gff_for_liftoff_nonredundant,TRANSFER_DIR=liftoff_output/polished_nonredundant,DOMAIN_DIR=annotation_check_with_interpro,GENOME_DIR=genomes_nonredundant,OLD_REFERENCE_GFF=ToxoDB-65_TgondiiME49.gff,CURATION_REMOVED_LIST=curation_removed_genes_ME49.txt,ID_PREFIX=Tg,PLOT_LABEL=Toxo 05_Basket_annotation_integration/scripts_keep_all_genes/basket_annotation_job.sh
@@ -934,9 +926,6 @@ repaired 33; the others are mostly frameshifts and internal stops.
 
 **Tandem arrays.** 21 baskets hold a tandem array (e.g. ROP5, SRS and family D genes); 21 extra copies were added.
 
-The prototype of this step (the build, its check and the tagging) is kept in
-`README_prototype_step05.md` (kept locally, not in this repository).
-
 [↑ Back to top](#analysis-steps)
 
 ---
@@ -949,10 +938,7 @@ cluster:
 jid=$(sbatch --parsable --export=ALL,MODE=prefer_panel_model,ANNOTATION_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final,OUT_DIR=for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh)
 sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=./for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
 ```
-**8,386 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`). The previous run, on `basket_annotation/` (22
-October), gave 8,379 (`for_get_pangenes_basket_prefer_panel_model_pangenes/`).
-
-The earlier pangenomes (first run, prototype flow) are in `README_prototype_steps06_08.md` (kept locally, not in this repository).
+**8,386 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`).
 
 [↑ Back to top](#analysis-steps)
 
@@ -962,8 +948,7 @@ The earlier pangenomes (first run, prototype flow) are in `README_prototype_step
 
 The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
 again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 were run on the
-cluster on 2026-10-30, on the `get_pangenes` run above, into folders ending in `_keep_all_genes` (the previous run's
-folders, without the suffix, are kept):
+cluster on 2026-10-30, on the `get_pangenes` run above, into folders ending in `_keep_all_genes`:
 ```bash
 LABEL=Toxo
 export TITLE="$LABEL Pangenome Explorer"
@@ -1056,8 +1041,8 @@ TgCatPRC2 misses 17 of the 71 soft-core pangenes.
 
 The cloud is enriched in cytochrome b / cytochrome c oxidase domains (14 of its 92 pangenes with a domain), SRS
 domains (23), rhoptry kinases and V-ATPase proteolipid subunits; nothing is enriched in the core. The cytochrome genes
-are mitochondrial genes; their copies in the cloud are probably copies in the nuclear assembly. No gene has been added
-to the removal list yet.
+are mitochondrial genes; their copies in the cloud are mitochondrial DNA in the nuclear assemblies, and will probably
+be removed in the curation. No gene has been added to the removal list yet.
 
 ### 4. Removal after curation
 

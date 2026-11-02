@@ -156,8 +156,6 @@ variable.
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 - [06 – GET_PANGENES](#06--get_pangenes)
 - [07 – Post-GET_PANGENES Adjusting and Visualisation](#07--post-get_pangenes-adjusting-and-visualisation)
-  - With filtering (7a)
-  - No filtering (7b)
 
 ---
 
@@ -926,7 +924,7 @@ Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR inclu
 No genes are removed for this species: there is no manual kill list (`kill_list_manual.tsv`), so no
 `gff_curated/` is produced and no `sbatch` is run for this step (see the
 [general README](../../05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list)
-for what this step does when a kill list is used, as in the *T. gondii* panel). Every gene from
+for what this step does when a kill list is used). Every gene from
 `gff_with_interpro/` (step 04's output) goes on to Step 3 unchanged.
 
 ### Step 3: Prepare the GFFs for Liftoff (done)
@@ -1047,12 +1045,10 @@ sbatch 05_Cross-genome_annotation_integration/scripts/liftoff_transfer_stats_job
 
 [`basket_annotation_job.sh`](../../05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
 place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
-AF293. This is the version that loses no gene without a reason
-([No gene is lost without a reason](../../05_Basket_annotation_integration/README.md#no-gene-is-lost-without-a-reason)).
+AF293.
 Run on the cluster on 29 October 2026 (job 1723536), both modes, with the step 04 PSAURON scores and the curators'
 list of deleted genes (`curation_removed_genes_AF293.txt`, old reference GFF FungiDB-71), from
-`05_Basket_annotation_integration/scripts_keep_all_genes/` into `basket_annotation_keep_all_genes/` (the previous run,
-22 October, job 1721463, stays in `basket_annotation/`):
+`05_Basket_annotation_integration/scripts_keep_all_genes/` into `basket_annotation_keep_all_genes/`:
 ```bash
 mkdir -p basket_annotation_keep_all_genes/logs
 sbatch --export=ALL,TRANSFER_DIR=liftoff_output/polished,OLD_REFERENCE_GFF=FungiDB-71_AfumigatusAf293.gff,CURATION_REMOVED_LIST=curation_removed_genes_AF293.txt,ID_PREFIX=Af,PLOT_LABEL=Afum 05_Basket_annotation_integration/scripts_keep_all_genes/basket_annotation_job.sh
@@ -1073,7 +1069,7 @@ genes. 42 panel genes were removed: 34 lost an opposite-strand overlap, 8 are ge
 
 ![Genes per genome: own annotation and final, both modes](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_gene_counts.png)
 
-**From each genome's own annotation to the final GFF.** Unlike *T. gondii*, most genomes gain genes: 489 to 717 genes
+**From each genome's own annotation to the final GFF.** Most genomes gain genes: 489 to 717 genes
 per genome were added where the genome had no gene. The losses are smaller: 60 to 230 pieces of genes replaced by one
 model, 126 to 252 genes eliminated by the quality rules, 6 to 31 TE genes removed in step 02, and 3 to 14 removed at the
 end of step 05. The genes on the contigs removed in step 01 (mitochondrial and redundant contigs) are not counted: step
@@ -1082,7 +1078,7 @@ end of step 05. The genes on the contigs removed in step 01 (mitochondrial and r
 ![Each genome from its own annotation to the final GFF](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_gene_balance.png)
 
 **Genes eliminated by the quality rules.** 3,246 genes in the 16 genomes besides AF293; 323 of them only for being
-shorter than 100 aa (10 in *T. gondii*).
+shorter than 100 aa.
 
 ![Genes eliminated by the quality rules, by their signs](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_eliminated_reasons.png)
 
@@ -1114,10 +1110,7 @@ frameshifts and internal stops.
 ![Genes with an invalid ORF, by miniprot result](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_miniprot.png)
 
 **Tandem arrays: none.** 1,574 pairs of neighbouring genes of one genome in one basket were compared; none passed
-(protein identity >= 70% over >= 70% of both), as in the previous run.
-
-The prototype of this step (the build, its check and the 7a/7b filters) is kept in
-`README_prototype_step05.md` (kept locally, not in this repository).
+(protein identity >= 70% over >= 70% of both).
 
 [↑ Back to top](#analysis-steps)
 
@@ -1131,10 +1124,7 @@ cluster:
 jid=$(sbatch --parsable --export=ALL,MODE=prefer_panel_model,ANNOTATION_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final,OUT_DIR=for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh)
 sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=./for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
 ```
-**11,758 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`). The previous run, on `basket_annotation/` (22
-October), gave 11,595 (`for_get_pangenes_basket_prefer_panel_model_pangenes/`).
-
-The earlier pangenomes (7a and 7b, prototype flow) are in `README_prototype_steps06_08.md` (kept locally, not in this repository).
+**11,758 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`).
 
 [↑ Back to top](#analysis-steps)
 
@@ -1146,8 +1136,7 @@ The pangenome is fixed where it is safe, looked at, cleaned of the genes found f
 again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Genomes are labelled by their
 accession, except AF293, A1160 and A1163; the strain of each accession is in the
 [genome table of step 01](#01--genome-selection--qc). Parts 1–3 were run on the cluster on 2026-10-30, on the
-`get_pangenes` run above, into folders ending in `_keep_all_genes` (the previous run's folders, without the suffix, are
-kept), with the same commands as for *T. gondii* and `LABEL=Afum`:
+`get_pangenes` run above, into folders ending in `_keep_all_genes`:
 ```bash
 LABEL=Afum
 export TITLE="$LABEL Pangenome Explorer"
@@ -1211,8 +1200,7 @@ because a pangene also holds genes of other baskets (`basket_splits_not_joined.t
 The 21,349 absences left, by verdict: absent 7,976, assembly 11,863, copy dropped by step 05 282, elsewhere 1,228.
 
 **Low-confidence pangenes** (`pangene_lists/pangene_quality.tsv`): 286 have an invalid ORF in more than 50% of their
-strains; only 15 of them have a PSAURON score below 0.5 (in *A. fumigatus* the invalid ORFs look more like model
-problems than false genes), and 119 have no InterPro domain. In 110 the same defect is in every invalid strain (2 or
+strains. 15 of them also have a PSAURON score below 0.5, and 119 have no InterPro domain. In 110 the same defect is in every invalid strain (2 or
 more). 1 more is a reference pseudogene. **Genes in no pangene:** 68, all with a CDS below 100 bp.
 
 ### 3. Preliminary look
@@ -1234,22 +1222,23 @@ ATCC 46645 (`GCA_040142955.1`) has the most singletons (142), then H237 (`GCA_04
 ![Soft-core pangenes missing per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_softcore_missing.png)
 
 AF293 misses 37 of the 133 soft-core pangenes (28%), then AF100-9B (`GCA_040126065.1`, 23) and ATCC 42202
-(`GCA_040142845.1`, 16), as in the earlier runs.
+(`GCA_040142845.1`, 16).
 
 ![POCS heatmap](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_POCS_heatmap.png)
 
 ![InterPro enrichment, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Afum_preliminary_domain_enrichment.png)
 
 The cloud is enriched in the orsellinic acid/F9775 cluster protein D, protein kinases, DUF3435 (the captains of
-Starship elements), the subtelomeric hrmA-associated cluster protein and DUF3723, and again in the transposase domains
-HTH CenpB-type and HTH Psq-type: the transposon **Afu1g00140** (removed from the previous run by curation) is back,
-since the removal has not been run on this pangenome yet. The core is enriched in armadillo-like helical domains and
+Starship elements), the subtelomeric hrmA-associated cluster protein and DUF3723, and in the transposase domains HTH
+CenpB-type and HTH Psq-type. These come from one panel gene, **Afu1g00140** (AF293), a pogo/Tc1-mariner transposon:
+69% of its CDS is covered by Mariner-1_AF, below the 80% cut of the
+[TE overlap with gene models](#024-te-overlap-with-gene-models), so step 02 kept it. It was confirmed as a TE and is
+removed in the curation. The core is enriched in armadillo-like helical domains and
 sugar transporters.
 
 ### 4. Removal after curation
 
-Not run yet on this pangenome. `genes_to_remove.tsv` still holds the transposon Afu1g00140, so running part 4 removes it
-again.
+Not run yet. `genes_to_remove.tsv` lists the transposon Afu1g00140.
 
 ### 5. Final look
 

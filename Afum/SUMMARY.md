@@ -68,9 +68,8 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 - **Basket annotation.** The genes of all strains that lie at the same place form a basket; each basket gets one panel
   model (AF293's when it has one), written into every strain where it fits. **11,542 panel genes**: the 10,015 AF293
   genes and 1,527 genes not in the AF293 annotation.
-- **No gene is lost without a reason:** every gene of every strain's own annotation has a final model or a written
-  reason. 561 real copies of a gene in one strain were kept apart.
-- **10,016–10,608 genes per strain.** Unlike *T. gondii*, most strains gain genes: 489–717 per strain were added where
+- **Copies of a gene in one strain are kept apart:** 561 copies became genes of their own.
+- **10,016–10,608 genes per strain.** Most strains gain genes: 489–717 per strain were added where
   the strain had no gene. 3,246 genes were eliminated by the quality rules (PSAURON, < 100 aa, no valid ORF).
 - **98% of the genes have a valid ORF**; only 56 have an ORF broken by the assembly.
 
@@ -86,9 +85,8 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
   soft-core pangenes.
 - **The cloud is enriched** in protein kinases, DUF3435 (the captains of Starship elements), the subtelomeric
   hrmA-associated cluster protein and the orsellinic acid/F9775 cluster protein D (subtelomeric and secondary
-  metabolite clusters), and in transposase domains from the transposon Afu1g00140, which the curation removes.
-- 286 pangenes have an invalid ORF in more than half of their strains, but only 15 of them have PSAURON < 0.5: in
-  *A. fumigatus* broken ORFs look more like model problems than false genes.
+  metabolite clusters), and in transposase domains from the transposon Afu1g00140: below the 80% TE-overlap cut of step 02, so kept there,
+  but confirmed as a TE; it is removed in the curation.
 - Still to do: curation and removal of false genes (the transposon Afu1g00140 is already listed), and the final figures.
 
 ---

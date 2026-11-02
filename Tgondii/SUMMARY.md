@@ -64,8 +64,8 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
 - **Basket annotation.** The genes of all strains that lie at the same place form a basket; each basket gets one panel
   model (ME49's when it has one), written into every strain where it fits. **8,365 panel genes**: the 8,026 ME49 genes
   and 339 genes not in the ME49 annotation.
-- **No gene is lost without a reason:** every gene of every strain's own annotation has a final model or a written
-  reason. 143 real copies of a gene in one strain were kept apart; tandem arrays (e.g. ROP5, SRS) keep their copies.
+- **Copies of a gene in one strain are kept apart:** 143 copies became genes of their own; tandem arrays (e.g. ROP5,
+  SRS) keep their copies.
 - **7,900–8,159 genes per strain**, about 2,000 fewer than in their own annotations, mainly because genes annotated in
   pieces are replaced by one model. 4,153 genes were eliminated by the quality rules (PSAURON, < 100 aa, no valid ORF),
   half of them for PSAURON alone; 301–454 genes per strain were added where the strain had no gene.
@@ -80,10 +80,8 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
 - **Safe fix:** 87 genes moved back to the pangene of their gene, and 50 genes that `get_pangenes` had split over
   several pangenes joined again. **8,264 pangenes**: 7,754 core (15 strains), 71 soft-core, 269 shell, 170 cloud.
 - **The core settles at about 7,750 pangenes**; RH88 has the most singletons (55).
-- **The cloud is enriched in cytochrome b / cytochrome c oxidase domains** (probably mitochondrial DNA in the nuclear
-  assemblies), SRS domains and rhoptry kinases.
-- 168 pangenes have an invalid ORF in more than half of their strains (69 of them with PSAURON < 0.5); they are the
-  candidates for curation.
+- **The cloud is enriched in cytochrome b / cytochrome c oxidase domains**, SRS domains and rhoptry kinases. The
+  cytochrome genes are mitochondrial DNA in the nuclear assemblies; they will probably be removed in the curation.
 - Still to do: curation and removal of false genes, and the final figures.
 
 ---
@@ -91,14 +89,13 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
 ## Important caveats
 
 - **Small contigs are being dropped by an arbitrary length cutoff, not per-strain review.**
-  Unlike the Afum panel (which was largely chromosome-scale after cleanup), most *T. gondii*
-  assemblies are highly fragmented (thousands of scaffolds). Rather than reviewing each small
+  Most *T. gondii* assemblies are highly fragmented (thousands of scaffolds). Rather than reviewing each small
   contig individually, the panel drops every contig <10kb outright — a simple blanket rule
   that knowingly costs 2,388 real genes (289 known virulence-family genes among them). It was
   applied to every strain.
 - **Organellar DNA (NUMTs/NUPTs) is abundant and strain-variable.** *T. gondii* carries
   >11,000 organellar DNA insertions (>1 Mb) in the nuclear genome. The apicoplast contigs were removed; the mitochondrion
-  was not screened, and the cytochrome genes in the cloud are probably mitochondrial copies in the nuclear assemblies.
+  was not screened, and the cytochrome genes in the cloud are mitochondrial copies in the nuclear assemblies.
 - **Lineage-specific copy-number variation at key loci** (e.g. ROP5: 6 copies in Type I/III
   vs. 11 in Type II) will appear as gene gain/loss in the pangenome matrix. These loci
   require manual review rather than relying on the matrix alone.
