@@ -90,6 +90,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 - [06 – GET_PANGENES](#06--get_pangenes)
 - [07 – Post-GET_PANGENES Adjusting and Visualisation](#07--post-get_pangenes-adjusting-and-visualisation)
+- [08 – Final GFF](#08--final-gff) (to do)
 
 ---
 
@@ -933,12 +934,12 @@ repaired 33; the others are mostly frameshifts and internal stops.
 ## 06 – GET_PANGENES
 
 `get_pangenes` on the final GFFs of step 05 (`prefer_panel_model`, `basket_annotation_keep_all_genes/`), on the
-cluster:
+cluster on 2026-11-12, with the jobs' defaults:
 ```bash
-jid=$(sbatch --parsable --export=ALL,MODE=prefer_panel_model,ANNOTATION_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final,OUT_DIR=for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh)
-sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=./for_get_pangenes_keep_all_genes 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
+sbatch --wait 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh
+sbatch 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
 ```
-**8,386 pangenes** (`for_get_pangenes_keep_all_genes_pangenes/`).
+**8,387 pangenes** (`for_get_pangenes_basket_prefer_panel_model_pangenes/`).
 
 [↑ Back to top](#analysis-steps)
 
@@ -947,131 +948,174 @@ sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=
 ## 07 – Post-GET_PANGENES Adjusting and Visualisation
 
 The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
-again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 were run on the
-cluster on 2026-10-30, on the `get_pangenes` run above, into folders ending in `_keep_all_genes`:
+again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 and the reference
+gene check were run on the cluster on 2026-11-12, right after `get_pangenes`, with the jobs' defaults (step 05 in
+`basket_annotation_keep_all_genes/`):
 ```bash
-LABEL=Toxo
-export TITLE="$LABEL Pangenome Explorer"
-export PANGENES_DIR=for_get_pangenes_keep_all_genes_pangenes
-export GFF_DIR=basket_annotation_keep_all_genes/gff_prefer_panel_model_final
-export STEP05_GFF_DIR=$GFF_DIR
-export STEP05_SCRIPTS=05_Basket_annotation_integration/scripts_keep_all_genes
-export ABSENT=basket_annotation_keep_all_genes/decide/absent.tsv
-export STACKED=basket_annotation_keep_all_genes/gff_prefer_panel_model/stacked_dropped.tsv
-export WINNERS=basket_annotation_keep_all_genes/winners.tsv
-I=pangenome_inspection_keep_all_genes; F=pangenome_fixed_keep_all_genes
-P=pangenome_plots_keep_all_genes;      E=pangenome_explorer_keep_all_genes
-S=07_Post_GET_PANGENES_adjusting/scripts
-mkdir -p $I/logs $F/logs $P/logs $E/logs
-j1=$(sbatch --parsable -o $I/logs/%x_%j.out -e $I/logs/%x_%j.err --export=ALL,OUT_DIR=$I $S/inspect_pangenome_job.sh)
-j2=$(sbatch --parsable --dependency=afterok:$j1 -o $F/logs/%x_%j.out -e $F/logs/%x_%j.err --export=ALL,OUT_DIR=$F,ABSENCES=$I/absence_audit/absences.tsv $S/fix_pangenome_safe_job.sh)
-sbatch --dependency=afterok:$j2 -o $P/logs/%x_%j.out -e $P/logs/%x_%j.err --export=ALL,SET=preliminary,LABEL=$LABEL,FIXED_DIR=$F,OUT_DIR=$P $S/plot_all_job.sh
-sbatch --dependency=afterok:$j2 -o $E/logs/%x_%j.out -e $E/logs/%x_%j.err --export=ALL,SET=preliminary,FIXED_DIR=$F,OUT_DIR=$E $S/build_explorer_job.sh
+mkdir -p pangenome_inspection/logs pangenome_fixed/logs pangenome_plots/logs pangenome_explorer/logs reference_check/logs
+J1=$(sbatch --parsable 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh)
+J2=$(sbatch --parsable --dependency=afterok:$J1 07_Post_GET_PANGENES_adjusting/scripts/inspect_pangenome_job.sh)
+J3=$(sbatch --parsable --dependency=afterok:$J2 07_Post_GET_PANGENES_adjusting/scripts/fix_pangenome_safe_job.sh)
+sbatch --dependency=afterok:$J3 --export=ALL,SET=preliminary 07_Post_GET_PANGENES_adjusting/scripts/plot_all_job.sh
+sbatch --dependency=afterok:$J3 --export=ALL,SET=preliminary 07_Post_GET_PANGENES_adjusting/scripts/build_explorer_job.sh
+sbatch --dependency=afterok:$J3 07_Post_GET_PANGENES_adjusting/scripts/reference_check_job.sh
 ```
 
-| | `get_pangenes` | After the safe fix (preliminary) |
-|---|---:|---:|
-| Pangenes | 8,386 | 8,264 |
-| Core (15) | | 7,754 |
-| Soft-core (14) | | 71 |
-| Shell (3-13) | | 269 |
-| Cloud (1-2) | | 170 |
+| | `get_pangenes` | After the safe fix (preliminary) | Final |
+|---|---:|---:|---:|
+| Pangenes | 8,387 | 8,265 | 8,178 |
+| Core (15) | | 7,754 | 7,729 |
+| Soft-core (14) | | 71 | 67 |
+| Shell (3-13) | | 270 | 248 |
+| Cloud (1-2) | | 170 | 134 |
 
 ### 1. Inspection
 
-Job 1724688. Tables in `07_Post_GET_PANGENES_adjusting/pangenome_inspection_keep_all_genes/`.
+Job 1732101. Tables in `07_Post_GET_PANGENES_adjusting/pangenome_inspection/`.
 
-**Absences** (a pangene with no gene in a genome): 6,348.
+**Absences** (a pangene with no gene in a genome): 6,361.
 
 | Code | Category | Absences |
 |---|---|---:|
-| 1a | same gene, in another pangene: can be moved | 745 |
-| 1b | same gene, in a pangene shared with the other genomes | 253 |
+| 1a | same gene, in another pangene: can be moved | 748 |
+| 1b | same gene, in a pangene shared with the other genomes | 258 |
 | 1c | same gene, in no pangene | 7 |
 | 2a | another gene in the place, no transfer | 492 |
-| 2b | another gene in the place, over a transfer | 311 |
-| 3 | transfer not used by step 05 | 548 |
-| 4 | place much shorter: likely deletion | 439 |
-| 5 | empty place | 754 |
-| 6 | contig edge | 2,289 |
+| 2b | another gene in the place, over a transfer | 309 |
+| 3 | transfer not used by step 05 | 551 |
+| 4 | place much shorter: likely deletion | 436 |
+| 5 | empty place | 760 |
+| 6 | contig edge | 2,290 |
 | 7 | flanking genes split | 47 |
 | 8 | region absent | 463 |
 
-**Pangenes with more than one gene of a strain:** 109. Most hold genes of different panel genes that `get_pangenes`
-grouped together (unrelated 28, copy 20, other 20, fragment 18, split 11, no reference 7, tandem copy 5).
+**Pangenes with more than one gene of a strain:** 110. Most hold genes of different panel genes that `get_pangenes`
+grouped together (unrelated 29, other 21, copy 20, fragment 18, split 11, no reference 6, tandem copy 5).
 
 ### 2. Safe fix
 
-Job 1724689. **87 genes** were moved back to the pangene of their gene, and 37 pangenes left empty disappeared. 658
+Job 1732102. **87 genes** were moved back to the pangene of their gene, and 37 pangenes left empty disappeared. 661
 candidate moves were left alone: 327 genes claimed by more than one pangene, 320 that would have gone in the other
-direction of a merge, and 11 chains. Then **50 baskets** that `get_pangenes` had split over several pangenes were joined
+direction of a merge, and 14 chains. Then **50 baskets** that `get_pangenes` had split over several pangenes were joined
 (85 pangenes joined into another; `joins.tsv`), e.g. TGME49_310430, split over 7 pangenes and now one pangene of 15
-strains. 8,386 → **8,264 pangenes**. 208 split baskets were not joined (`basket_splits_not_joined.tsv`): in 206 a
+strains. 8,387 → **8,265 pangenes**. 208 split baskets were not joined (`basket_splits_not_joined.tsv`): in 206 a
 pangene also holds genes of other baskets, in 2 a strain has two genes of the basket.
 
-The 4,528 absences left, by verdict: absent 1,585, assembly 1,941, copy dropped by step 05 667, elsewhere 335.
+The 4,541 absences left, by verdict: absent 1,588, assembly 1,942, copy dropped by step 05 668, elsewhere 343.
 
-**Low-confidence pangenes** (`pangene_lists/pangene_quality.tsv`): 168 have an invalid ORF in more than 50% of their
-strains. 69 of them also have a PSAURON score below 0.5, and 117 have no InterPro domain. In 54 the same defect is in
+**Low-confidence pangenes** (`pangene_lists/pangene_quality.tsv`): 166 have an invalid ORF in more than 50% of their
+strains. 68 of them also have a PSAURON score below 0.5, and 116 have no InterPro domain. In 54 the same defect is in
 every invalid strain (2 or more), so it is shared (or the model is wrong). 19 more are reference pseudogenes. **Genes in
 no pangene:** 18, all with a CDS below 100 bp.
 
 ### 3. Preliminary look
 
-Jobs 1724690 (figures) and 1724691 (explorer). Figures: `07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/`; explorer:
-`07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary/explorer_standalone.html`.
+Jobs 1732103 (figures) and 1732104 (explorer). Figures: `07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/`;
+explorer: `07_Post_GET_PANGENES_adjusting/pangenome_explorer/preliminary/explorer_standalone.html`.
 
-![Pangenome and core genome size, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_pancore.png)
+![Pangenome and core genome size, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/Toxo_preliminary_pancore.png)
 
-The core settles at about 7,750 pangenes (Tettelin 7,764, Willenbrock 7,710).
+The core settles at about 7,750 pangenes (Tettelin 7,764, Willenbrock 7,711).
 
-![Pangene occupancy, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_occupancy.png)
+![Pangene occupancy, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/Toxo_preliminary_occupancy.png)
 
-![Singletons per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_singletons.png)
+![Singletons per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/Toxo_preliminary_singletons.png)
 
 RH88 has the most singletons (55), then ME49 (16) and TgCatPRC2 (8).
 
-![Soft-core pangenes missing per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_softcore_missing.png)
+![Soft-core pangenes missing per genome, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/Toxo_preliminary_softcore_missing.png)
 
 TgCatPRC2 misses 17 of the 71 soft-core pangenes.
 
-![POCS heatmap](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_POCS_heatmap.png)
+![POCS heatmap](07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/Toxo_preliminary_POCS_heatmap.png)
 
-![InterPro enrichment, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots_keep_all_genes/preliminary/Toxo_preliminary_domain_enrichment.png)
+![InterPro enrichment, preliminary](07_Post_GET_PANGENES_adjusting/pangenome_plots/preliminary/Toxo_preliminary_domain_enrichment.png)
 
 The cloud is enriched in cytochrome b / cytochrome c oxidase domains (14 of its 92 pangenes with a domain), SRS
 domains (23), rhoptry kinases and V-ATPase proteolipid subunits; nothing is enriched in the core. The cytochrome genes
-are mitochondrial genes; their copies in the cloud are mitochondrial DNA in the nuclear assemblies, and will probably
-be removed in the curation. No gene has been added to the removal list yet.
+are mitochondrial genes; their copies in the cloud are pieces of mitochondrial DNA in the nuclear assemblies.
 
-#### Orthogroups (test)
+The explorer has the VEuPathDB OrthoMCL orthogroup of each pangene's ME49 genes, from the ToxoDB "Genes by Ortholog
+Pattern" download for ME49 (`GenesByOrthologPattern_Summary.txt`, the job's `OG_TABLE`), linked by the ME49 gene IDs.
+Only the ME49 genes have an orthogroup: the genes of the other strains are not looked up, so a pangene with no ME49
+gene has none. Giving every gene of every strain its orthogroup is a step still to do. 8,115 of the 8,265 pangenes have an orthogroup (6,003 orthogroups). 852 orthogroups are in two or
+more pangenes, which hold 2,972 pangenes: genes that OrthoMCL groups together but that sit at different places in the
+genomes. For example `OG8_0012049` (SRS genes) is in 43 pangenes.
 
-A test of how the pangenome compares with orthogroups; it is not a pipeline step yet. Each pangene gets the VEuPathDB
-OrthoMCL orthogroup of the ME49 genes it holds (its panel gene and the original IDs of its ME49 genes), from the ToxoDB
-"Genes by Ortholog Pattern" download for ME49 (`GenesByOrthologPattern_Summary.txt`). The genes of the other strains
-are not looked up; pangenes without an ME49 gene get no orthogroup. Run on the Mac:
-```bash
-python3 ../pangenome_analysis/07_Post_GET_PANGENES_adjusting/scripts/add_orthogroups.py \
-    --explorer-dir 07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary \
-    --og-table GenesByOrthologPattern_Summary.txt --reference ME49 \
-    --out-dir 07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary_orthogroups
-```
-then `explorer_orthogroups.html` (step 07 scripts, with the title filled in) as the page of that folder, packed with
-`make_standalone_explorer.py` into
-`07_Post_GET_PANGENES_adjusting/pangenome_explorer_keep_all_genes/preliminary_orthogroups/explorer_standalone_orthogroups.html`.
-The page can be searched by orthogroup (`OG8_...`), shows each pangene's orthogroup with a link to all its pangenes in
-the pangenome browser, and can list only the pangenes whose orthogroup is in two or more pangenes.
+### Reference gene check
 
-8,114 of the 8,264 pangenes have an orthogroup (6,003 orthogroups). 852 orthogroups are in two or more pangenes, which
-hold 2,971 pangenes: genes that OrthoMCL groups together but that sit at different places in the genomes. For example
-`OG8_0012049` (SRS genes) is in 43 pangenes.
+The 48 genes the pipeline added to ME49, with RNA-seq (the 84 bigWigs of the VEuPathDB ME49 RNA-seq datasets) and the
+ToxoDB intron junctions. Job 1732105, with the job's defaults (this run's folders, the bigWig folder and
+`unifiedIntronJunction.gff`); the page is `07_Post_GET_PANGENES_adjusting/reference_check/reference_check.html`.
+
+The 48 genes were curated on the page:
+
+| Decision | Genes |
+|---|---:|
+| false gene: deleted from every strain | 23 |
+| mitochondrial (cytochrome b, cox1, cox3): left out of the pangenome | 17 |
+| kept now, to delete from the reference GFF later (decided in [step 08](../../08_Final_GFF/README.md)) | 5 |
+| new gene, kept | 3 |
 
 ### 4. Removal after curation
 
-Not run yet on this pangenome (`07_Post_GET_PANGENES_adjusting/genes_to_remove.tsv` has no gene).
+Run on 2026-11-13 with the jobs' defaults (`PANGENE_PREFIX=Tg`):
+```bash
+mkdir -p pangenome_final/logs
+J4=$(sbatch --parsable --export=ALL,ACTIONS= 07_Post_GET_PANGENES_adjusting/scripts/remove_panel_genes_job.sh)
+sbatch --dependency=afterok:$J4 --export=ALL,SET=final 07_Post_GET_PANGENES_adjusting/scripts/plot_all_job.sh
+sbatch --dependency=afterok:$J4 --export=ALL,SET=final 07_Post_GET_PANGENES_adjusting/scripts/build_explorer_job.sh
+```
+
+- `genes_to_remove.tsv`: the panel genes of the 23 false genes (reason `curation: false gene (ME49 <gene>)`).
+- `genes_to_exclude_from_pangenome.tsv`: 37 mitochondrial panel genes (reason `mito: <description>`), found by domain
+  and by name. By domain: besides the 17 ME49 genes, every panel gene of a pangene where a gene has a cytochrome b,
+  cox1 or cox3 InterPro domain (IPR005797, IPR005798, IPR016174, IPR027387, IPR036150, IPR000883, IPR023615,
+  IPR023616, IPR036927, IPR000298, IPR013833, IPR035973). By name: the four ME49 pseudogenes "cytochrome
+  domain-containing protein" (TGME49_500051, TGME49_500088, TGME49_500165, TGME49_500209), short broken copies with
+  no domain found, one of which shares pangenes with cytochrome b genes. The PrsW metalloprotease (TGME49_215010),
+  which shares a pangene with one cox1 piece, is kept; the nuclear subunits of complex III ("cytochrome b-c1 complex
+  subunit") are not mitochondrial genes and are kept.
+- `strain_genes_to_remove.tsv`: empty.
+
+**326 genes** were removed (21 to 23 per strain) and **323 genes** left out of the pangenome; 87 pangenes left empty
+disappeared (64 of them mitochondrial). 8,265 → **8,178 pangenes**, renamed `Tg_pan_00001` to `Tg_pan_08178` (old
+names in `pangenome_final/pangene_ids.tsv`). Tables in `07_Post_GET_PANGENES_adjusting/pangenome_final/`.
 
 ### 5. Final look
 
-Not run yet.
+Figures: `07_Post_GET_PANGENES_adjusting/pangenome_plots/final/`; explorer:
+`07_Post_GET_PANGENES_adjusting/pangenome_explorer/final/explorer_standalone.html`.
+
+![Pangenome and core genome size, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Toxo_final_pancore.png)
+
+The core settles at about 7,700 pangenes (Tettelin 7,738, Willenbrock 7,687).
+
+![Pangene occupancy, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Toxo_final_occupancy.png)
+
+![Singletons per genome, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Toxo_final_singletons.png)
+
+RH88 has the most singletons (38), then ME49 (12) and TgCatPRC2 (6).
+
+![Soft-core pangenes missing per genome, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Toxo_final_softcore_missing.png)
+
+TgCatPRC2 misses 17 of the 67 soft-core pangenes.
+
+![InterPro enrichment, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Toxo_final_domain_enrichment.png)
+
+The cytochrome domains are no longer enriched in the cloud. The cloud is enriched in SRS domains (23 of its 58
+pangenes with a domain), rhoptry kinases, protein kinases and V-ATPase proteolipid subunits; nothing is enriched in the
+core.
+
+8,106 of the 8,178 final pangenes have an orthogroup (6,001 orthogroups; 850 in two or more pangenes).
+
+[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+
+---
+
+## 08 – Final GFF
+
+To do. The final annotation (one GFF3 per strain) will be made from the GFFs of step 07; the plan and the
+decisions still to make are in the [step 08 README](../../08_Final_GFF/README.md).
 
 [↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)

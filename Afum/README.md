@@ -156,6 +156,7 @@ variable.
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 - [06 – GET_PANGENES](#06--get_pangenes)
 - [07 – Post-GET_PANGENES Adjusting and Visualisation](#07--post-get_pangenes-adjusting-and-visualisation)
+- [08 – Final GFF](#08--final-gff) (to do)
 
 ---
 
@@ -1236,13 +1237,99 @@ CenpB-type and HTH Psq-type. These come from one panel gene, **Afu1g00140** (AF2
 removed in the curation. The core is enriched in armadillo-like helical domains and
 sugar transporters.
 
+### Reference gene check
+
+The genes the pipeline added to AF293, with RNA-seq (the bigWigs of the 12 FungiDB AF293 RNA-seq datasets in
+`/mnt/hc-storage/groups/veupathdb_annotation/adriana_data_veupathdb/fungi/bigwig`; where a sample has strand files, its
+combined file is not used) and the FungiDB intron junctions (`unifiedIntronJunction.gff.gz`). The step 05 GFF and the
+safe-fix matrix are those of the same run (the step 05 rerun of 2026-11-11 gave the same result):
+
+```bash
+mkdir -p reference_check/logs
+sbatch --export=ALL,STEP05_DIR=old_runs/2026-11-11_keep_all_genes_run/basket_annotation_keep_all_genes,FIXED_DIR=pangenome_fixed \
+    07_Post_GET_PANGENES_adjusting/scripts/reference_check_job.sh
+# only the page again, with the RNA-seq table already computed: add RERUN_RNASEQ=no to the --export list
+```
+
+Submitted on 2026-11-11; the page goes to `07_Post_GET_PANGENES_adjusting/reference_check/reference_check.html`.
+On 2026-11-12 the page was built again with the "BLAST in NCBI" link of each new gene (the job's defaults
+`GENOME_DIR=genomes` and `BLAST_EXCLUDE="Aspergillus fumigatus (taxid:746128)"`), reusing the RNA-seq table, under
+another name so the first page is kept:
+
+```bash
+sbatch --export=ALL,STEP05_DIR=old_runs/2026-11-11_keep_all_genes_run/basket_annotation_keep_all_genes,FIXED_DIR=pangenome_fixed,RERUN_RNASEQ=no,OUT_PAGE=reference_check_blast.html \
+    07_Post_GET_PANGENES_adjusting/scripts/reference_check_job.sh
+```
+
+The 308 new AF293 genes were curated on the page (table `07_Post_GET_PANGENES_adjusting/curation_actions_Afum.tsv`):
+175 false genes, deleted from every strain; 102 kept as new genes; 31 to be deleted in AF293 only, left for the group
+to decide and not applied yet.
+
 ### 4. Removal after curation
 
-Not run yet. `genes_to_remove.tsv` lists the transposon Afu1g00140.
+`genes_to_remove.tsv` lists 176 panel genes: the transposon Afu1g00140 (reason `TE`) and the panel genes of the 175
+false genes (reason `curation: false gene (AF293 <gene>)`). `strain_genes_to_remove.tsv` and
+`genes_to_exclude_from_pangenome.tsv` are empty. Run on 2026-11-13, with the step 05 and `get_pangenes` folders of the
+same run:
+
+```bash
+S5=old_runs/2026-11-11_keep_all_genes_run/basket_annotation_keep_all_genes
+mkdir -p pangenome_final/logs pangenome_plots/logs pangenome_explorer/logs
+J4=$(sbatch --parsable --export=ALL,ACTIONS=,PANGENE_PREFIX=Af,GFF_DIR=$S5/gff_prefer_panel_model_final,STEP05_DIR=$S5,PANGENES_DIR=for_get_pangenes_keep_all_genes_pangenes \
+    07_Post_GET_PANGENES_adjusting/scripts/remove_panel_genes_job.sh)
+sbatch --dependency=afterok:$J4 --export=ALL,SET=final 07_Post_GET_PANGENES_adjusting/scripts/plot_all_job.sh
+sbatch --dependency=afterok:$J4 --export=ALL,SET=final 07_Post_GET_PANGENES_adjusting/scripts/build_explorer_job.sh
+```
+
+All 176 panel genes were found. **2,458 genes** were removed (123 to 176 per genome), and 190 pangenes left empty
+disappeared: 11,468 → **11,278 pangenes**, renamed `Af_pan_00001` to `Af_pan_11278` (old names in
+`pangenome_final/pangene_ids.tsv`). Tables in `07_Post_GET_PANGENES_adjusting/pangenome_final/`.
 
 ### 5. Final look
 
-Not run yet.
+The explorer has no orthogroups yet: VEuPathDB's "Genes by Ortholog Pattern" table of AF293 was not added (`OG_TABLE`),
+and the genes of the other strains have no orthogroup either; this is a step still to do.
+
+Figures: `07_Post_GET_PANGENES_adjusting/pangenome_plots/final/`; explorer:
+`07_Post_GET_PANGENES_adjusting/pangenome_explorer/final/explorer_standalone.html`.
+
+| | Final |
+|---|---:|
+| Pangenes | 11,278 |
+| Core (17) | 9,536 |
+| Soft-core (16) | 125 |
+| Shell (3-15) | 803 |
+| Cloud (1-2) | 814 |
+
+![Pangenome and core genome size, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Afum_final_pancore.png)
+
+The core settles at about 9,500 pangenes (Tettelin 9,566, Willenbrock 9,502).
+
+![Pangene occupancy, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Afum_final_occupancy.png)
+
+![Singletons per genome, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Afum_final_singletons.png)
+
+ATCC 46645 (`GCA_040142955.1`) has the most singletons (141), then H237 (`GCA_040142975.1`, 67).
+
+![Soft-core pangenes missing per genome, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Afum_final_softcore_missing.png)
+
+AF293 misses 37 of the 125 soft-core pangenes (30%), then AF100-9B (`GCA_040126065.1`, 20).
+
+![InterPro enrichment, final](07_Post_GET_PANGENES_adjusting/pangenome_plots/final/Afum_final_domain_enrichment.png)
+
+The transposase domains (HTH CenpB-type, HTH Psq-type) are no longer enriched in the cloud. The cloud is still enriched
+in the orsellinic acid/F9775 cluster protein D, protein kinases, DUF3435, helicases, the subtelomeric hrmA-associated
+cluster protein, glucosamine-6-phosphate isomerase and glycoside hydrolase family 3; the core in armadillo-like
+helical domains and sugar transporters.
+
+[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+
+---
+
+## 08 – Final GFF
+
+To do. The final annotation (one GFF3 per strain) will be made from the GFFs of step 07; the plan and the
+decisions still to make are in the [step 08 README](../../08_Final_GFF/README.md).
 
 [↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
 

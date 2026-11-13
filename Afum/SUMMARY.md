@@ -1,8 +1,7 @@
 # *Aspergillus fumigatus* Pangenome — Summary
 
 > **Quick read for an overview of the analysis and key findings.**
-> For the full technical report — methods, parameters, tables, and figures — see
-> [README.md](README.md).
+> For the methods, parameters, tables and figures, see the [full report](README.md).
 
 ---
 
@@ -17,7 +16,8 @@
 | [04 – Protein evidence (InterProScan and PSAURON)](README.md#04--protein-evidence-interproscan-and-psauron) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, figures and explorer (done); curation and removal of false genes | 🔄 In progress |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, curation and removal of false genes, final figures and explorer | ✅ Complete |
+| [08 – Final GFF](../../08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
 
 ---
 
@@ -77,7 +77,7 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 
 - **11,758 pangenes** across the 17 strains.
 
-### 07 – Post-GET_PANGENES Adjusting *(in progress)*
+### 07 – Post-GET_PANGENES Adjusting
 
 - **Safe fix:** 120 genes moved back to the pangene of their gene, and 174 genes that `get_pangenes` had split over
   several pangenes joined again. **11,468 pangenes**: 9,638 core (17 strains), 133 soft-core, 862 shell, 835 cloud.
@@ -87,7 +87,10 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
   hrmA-associated cluster protein and the orsellinic acid/F9775 cluster protein D (subtelomeric and secondary
   metabolite clusters), and in transposase domains from the transposon Afu1g00140: below the 80% TE-overlap cut of step 02, so kept there,
   but confirmed as a TE; it is removed in the curation.
-- Still to do: curation and removal of false genes (the transposon Afu1g00140 is already listed), and the final figures.
+- **Curation:** of the 308 genes the pipeline added to AF293, 175 were judged false and deleted from every strain with
+  the transposon (176 panel genes, 2,458 genes); 102 were kept; 31 to delete in AF293 only are left for the group.
+- **Final pangenome: 11,278 pangenes**, named `Af_pan_00001`–`Af_pan_11278`: 9,536 core, 125 soft-core, 803 shell,
+  814 cloud. The core settles at about 9,500 pangenes; the transposase domains are no longer enriched in the cloud.
 
 ---
 
@@ -104,7 +107,8 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
   holds genes of other baskets; they can inflate the cloud and are left for curation.
 - **Short effector genes.** The < 100 aa rule of step 05 eliminates short proteins, and fungal effectors can be shorter.
   A list of protected genes (e.g. predicted effectors) is planned, so that their baskets are never eliminated.
-- **The pangenome is preliminary** until the curation (removal of false genes) is done.
+- **The final GFF is not made yet** ([step 08](../../08_Final_GFF/README.md)): what to do with
+  broken ORFs, the gene IDs, and what to put back (UTRs, other transcripts, non-coding genes) are still to be decided.
 - The pangenome matrix captures **gene presence/absence only**. Azole resistance in
   *A. fumigatus* is driven largely by *sequence variants within* core genes (e.g., *cyp51A*
   promoter repeats + coding substitutions), which require a separate targeted analysis.
@@ -115,14 +119,14 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 
 | File | Description |
 | :--- | :--- |
-| [README.md](README.md) | Full technical report — all methods, parameters, tables, figures |
+| [Full report](README.md) | Full technical report — all methods, parameters, tables, figures |
 | [genome_order.txt](genome_order.txt) | Ordered list of the 17 strains used |
 | [01_Genome_Selection_QC/](01_Genome_Selection_QC/) | QC outputs: ANI, synteny, organelle and redundancy screens |
 | [02_TE_annotation_Clean_Up/](02_TE_annotation_Clean_Up/) | TE library, RepeatMasker results, TE-gene overlap |
-| 03_denovo_Genome_Annotation/ | *de novo* gene predictions |
-| 04_InterProScan/ | Domain annotations and PSAURON scores |
+| [03_denovo_Genome_Annotation/](03_denovo_Genome_Annotation/) | *de novo* gene predictions |
+| [04_InterProScan/](04_InterProScan/) | Domain annotations and PSAURON scores |
 | [05_Basket_annotation_integration/](05_Basket_annotation_integration/) | Basket annotation: final GFFs, gene fate, figures |
-| 06_GET_PANGENES/ | Pangene clusters |
+| [06_GET_PANGENES/](06_GET_PANGENES/) | Pangene clusters |
 | [07_Post_GET_PANGENES_adjusting/](07_Post_GET_PANGENES_adjusting/) | Reviewed and curated pangene calls |
 
 ---

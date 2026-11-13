@@ -1,8 +1,7 @@
 # *Toxoplasma gondii* Pangenome — Summary
 
 > **Quick read for an overview of the analysis and key findings.**
-> For the full technical report — methods, parameters, tables, and figures — see
-> [README.md](README.md).
+> For the methods, parameters, tables and figures, see the [full report](README.md).
 
 ---
 
@@ -17,7 +16,8 @@
 | [04 – Protein evidence (InterProScan and PSAURON)](README.md#04--protein-evidence-interproscan-and-psauron) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, figures and explorer (done); curation and removal of false genes | 🔄 In progress |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, curation and removal of false genes, final figures and explorer | ✅ Complete |
+| [08 – Final GFF](../../08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
 
 ---
 
@@ -73,16 +73,20 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
 
 ### 06 – GET_PANGENES
 
-- **8,386 pangenes** across the 15 strains.
+- **8,387 pangenes** across the 15 strains.
 
-### 07 – Post-GET_PANGENES Adjusting *(in progress)*
+### 07 – Post-GET_PANGENES Adjusting
 
 - **Safe fix:** 87 genes moved back to the pangene of their gene, and 50 genes that `get_pangenes` had split over
-  several pangenes joined again. **8,264 pangenes**: 7,754 core (15 strains), 71 soft-core, 269 shell, 170 cloud.
-- **The core settles at about 7,750 pangenes**; RH88 has the most singletons (55).
+  several pangenes joined again. **8,265 pangenes**: 7,754 core (15 strains), 71 soft-core, 270 shell, 170 cloud.
 - **The cloud is enriched in cytochrome b / cytochrome c oxidase domains**, SRS domains and rhoptry kinases. The
-  cytochrome genes are mitochondrial DNA in the nuclear assemblies; they will probably be removed in the curation.
-- Still to do: curation and removal of false genes, and the final figures.
+  cytochrome genes are mitochondrial DNA in the nuclear assemblies.
+- **Curation:** of the 48 genes the pipeline added to ME49, 23 were judged false and deleted from every strain (326
+  genes); 17 are mitochondrial. All mitochondrial genes (37 panel genes, 323 genes, found by their cytochrome b, cox1
+  and cox3 domains and by name) are left out of the pangenome but kept in the GFFs.
+- **Final pangenome: 8,178 pangenes**, named `Tg_pan_00001`–`Tg_pan_08178`: 7,729 core, 67 soft-core, 248 shell,
+  134 cloud. The core settles at about 7,700 pangenes; RH88 has the most singletons (38). The cytochrome domains are
+  no longer enriched in the cloud.
 
 ---
 
@@ -95,14 +99,15 @@ Not needed: all 15 strains already have a genome annotation (GFF, from ToxoDB/VE
   applied to every strain.
 - **Organellar DNA (NUMTs/NUPTs) is abundant and strain-variable.** *T. gondii* carries
   >11,000 organellar DNA insertions (>1 Mb) in the nuclear genome. The apicoplast contigs were removed; the mitochondrion
-  was not screened, and the cytochrome genes in the cloud are mitochondrial copies in the nuclear assemblies.
+  was not screened; the mitochondrial gene copies in the nuclear assemblies are left out of the pangenome (step 07).
 - **Lineage-specific copy-number variation at key loci** (e.g. ROP5: 6 copies in Type I/III
   vs. 11 in Type II) will appear as gene gain/loss in the pangenome matrix. These loci
   require manual review rather than relying on the matrix alone.
 - **Some genes are still split over several pangenes.** 208 baskets remain split after the safe fix, where a pangene also
   holds genes of other baskets (e.g. neighbouring members of a gene family); they can inflate the cloud and are left for
-  curation. 109 pangenes hold more than one gene of a strain.
-- **The pangenome is preliminary** until the curation (removal of false genes) is done.
+  curation. 110 pangenes hold more than one gene of a strain.
+- **The final GFF is not made yet** ([step 08](../../08_Final_GFF/README.md)): what to do with
+  broken ORFs, the gene IDs, and what to put back (UTRs, other transcripts, non-coding genes) are still to be decided.
 - The pangenome matrix captures **gene presence/absence only** — virulence differences
   between lineages are driven largely by allelic variation within shared genes (ROP kinases,
   GRA effectors, SRS surface antigens), which require separate targeted analyses.
