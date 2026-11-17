@@ -17,7 +17,7 @@
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
 | [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, curation and removal of false genes, final figures and explorer | ✅ Complete |
-| [08 – Final GFF](../../08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
+| [08 – Final GFF](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
 
 ---
 
@@ -107,7 +107,7 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
   holds genes of other baskets; they can inflate the cloud and are left for curation.
 - **Short effector genes.** The < 100 aa rule of step 05 eliminates short proteins, and fungal effectors can be shorter.
   A list of protected genes (e.g. predicted effectors) is planned, so that their baskets are never eliminated.
-- **The final GFF is not made yet** ([step 08](../../08_Final_GFF/README.md)): what to do with
+- **The final GFF is not made yet** ([step 08](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md)): what to do with
   broken ORFs, the gene IDs, and what to put back (UTRs, other transcripts, non-coding genes) are still to be decided.
 - The pangenome matrix captures **gene presence/absence only**. Azole resistance in
   *A. fumigatus* is driven largely by *sequence variants within* core genes (e.g., *cyp51A*
@@ -131,4 +131,4 @@ Not needed for *de novo* annotation (all strains already annotated); InterProSca
 
 ---
 
-[↑ Back to top](#analysis-progress) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+[↑ Back to top](#analysis-progress) &nbsp;|&nbsp; [Back to Pangenome Pipeline](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md)

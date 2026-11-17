@@ -1,6 +1,8 @@
 # *Toxoplasma gondii* Pangenome Analysis
 
-This document tracks the execution, parameters, and results of the pangenome analysis for ***Toxoplasma gondii***, following the steps from the [`pangenome_analysis`](../../README.md) pipeline.
+This document tracks the execution, parameters, and results of the pangenome analysis for ***Toxoplasma gondii***, following the steps from the [`pangenome_analysis`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md) pipeline.
+
+> **Note:** this report was written while the pipeline was being developed. Some commands, folder names and links refer to earlier versions of the pipeline and may not match the current [pipeline repository](https://github.com/VEuPathDB/pangenome-pipeline).
 
 ---
 
@@ -14,7 +16,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 * **No transposable elements.** A systematic apicomplexan-wide mobilome screen
   ([Rodriguez & Makalowski, 2022](https://doi.org/10.3390/genes13050887), using
   RepeatModeler, RepeatMasker, LTRpred, MGEScan and TEclass — largely the same toolkit this
-  pipeline's [TE candidate pipeline](../../02_TE_annotation_Clean_Up/README.md)
+  pipeline's [TE candidate pipeline](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/02_TE_annotation_Clean_Up/README.md)
   uses) found **no bona fide TEs in *T. gondii*, nor in its closest relatives** *Hammondia*,
   *Neospora*, and *Sarcocystis* (the whole family came back negative; *Cryptosporidium* too).
   TEs are present elsewhere in Apicomplexa (*Eimeria*, some *Babesia*/*Theileria* species,
@@ -34,7 +36,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
   continuously acquired and a significant source of **intraspecific** variation, i.e. it
   differs from strain to strain within the panel, not just between *T. gondii* and its
   organelle. **Implication for [step 01](#01--genome-selection--qc):** the
-  [organelle screen](../../01_Genome_Selection_QC/README.md#10-organelle-screen)
+  [organelle screen](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/01_Genome_Selection_QC/README.md#10-organelle-screen)
   should expect to find many more, and more scattered, organellar fragments in the nuclear
   assemblies — most will be small fragments
   genuinely embedded in nuclear contigs (real nuclear DNA — keep, per the existing
@@ -43,7 +45,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
   Also, unlike a fungus, *T. gondii* carries **two organelles to screen** — mitochondrion
   *and* apicoplast (a relict, non-photosynthetic plastid retained by most Apicomplexa) — both
   need their own contig/fragment identified before the
-  [organelle screen](../../01_Genome_Selection_QC/README.md#10-organelle-screen)
+  [organelle screen](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/01_Genome_Selection_QC/README.md#10-organelle-screen)
   can be run.
 
 * **Population structure is clonal despite an obligate sexual cycle.** Type I, II and III
@@ -608,7 +610,7 @@ N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
 sbatch --array=1-${N}%20 04_InterProScan/scripts/interproscan_array_job.slurm.sh
 ```
 (currently 150, but always recomputed from the manifest, not hardcoded - see
-[`04_InterProScan/README.md`](../../04_Protein_evidence/README.md) for why).
+[`04_InterProScan/README.md`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) for why).
 
 Protein extraction ran on `gff_originals/` (this species has no `gff_cleaned/`). The array job
 **finished**: all 150 chunks completed (each chunk's `.out` ends with
@@ -666,7 +668,7 @@ sbatch 05_Cross-genome_annotation_integration/scripts/analyze_input_gffs_job.sh
 ```
 (`GFF_DIR="gff_with_interpro"` is the script's default; for the run above `OUT_DIR` was set to
 `annotation_check_with_interpro`. Full description of every output file:
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-1-native-annotation-check).)
+[general README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-1-native-annotation-check).)
 
 **Genes per genome** - 8,000 to 10,000 protein-coding genes per genome, split by whether the
 gene carries InterPro/PFAM evidence (56-62% do, in every genome, so no genome stands out
@@ -718,7 +720,7 @@ genes are removed. Listed in `kill_list_manual.tsv` (project root):
 | `TGME49_321700` | Kinase-like \| domain-containing protein | `TGME49_500405` | 800 |
 
 Removing them (40 GFF lines including their exons/transcripts) is done by
-[`remove_genes_from_gff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list),
+[`remove_genes_from_gff_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list),
 reading `gff_with_interpro/` and writing every genome to `gff_curated/` (genomes without an
 entry in the list are copied unchanged):
 ```bash
@@ -729,7 +731,7 @@ sbatch 05_Cross-genome_annotation_integration/scripts/remove_genes_from_gff_job.
 
 ### Step 3: Prepare the GFFs for Liftoff (done)
 
-[`prepare_for_liftoff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
+[`prepare_for_liftoff_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
 reads `gff_curated/` and writes to `gff_for_liftoff/`: genes reduced to their coding sequence
 (no UTRs), protein-coding genes and pseudogenes unified to `protein_coding_gene`, and the
 non-coding RNA genes (tRNA, rRNA, other ncRNA) removed, so they are neither transferred by Liftoff nor
@@ -789,7 +791,7 @@ The 24 *ME49* pseudogenes keep `ebi_biotype=pseudogene` on their gene line, so t
 
 ### Step 4: Liftoff, all-against-all (done)
 
-[`liftoff_all_vs_all.sh`](../../05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
+[`liftoff_all_vs_all.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
 lifts every genome's prepared annotation (`gff_for_liftoff/`) onto every other genome's
 FASTA (`genomes/`) - 15 genomes, so 210 pairs. Run as one job per source genome:
 ```bash
@@ -857,7 +859,7 @@ outputs (`contigs_removed_before_build.tsv`; the run wrote it to the old step 09
 
 ### Step 5: Basket annotation (done)
 
-[`basket_annotation_job.sh`](../../05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
+[`basket_annotation_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
 place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
 ME49.
 Run on the cluster on 29 October 2026 (job 1723532), both modes, with the step 04 PSAURON scores and the curators'
@@ -900,7 +902,7 @@ step 05. 301 to 454 genes per genome were added where the genome had no gene.
 ![PSAURON of the genes eliminated by PSAURON only](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Toxo_prefer_panel_model_eliminated_psauron_only.png)
 
 These three figures were made with
-[`gene_fate_job.sh`](../../05_Basket_annotation_integration/README.md#running-it), which redoes the gene
+[`gene_fate_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md#running-it), which redoes the gene
 fate and its figures on the results already written, with the step 01 files of the removed contigs:
 ```bash
 export PLOT_LABEL=Toxo
@@ -948,7 +950,7 @@ sbatch 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
 ## 07 – Post-GET_PANGENES Adjusting and Visualisation
 
 The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
-again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 and the reference
+again ([step 07 README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 and the reference
 gene check were run on the cluster on 2026-11-12, right after `get_pangenes`, with the jobs' defaults (step 05 in
 `basket_annotation_keep_all_genes/`):
 ```bash
@@ -1054,7 +1056,7 @@ The 48 genes were curated on the page:
 |---|---:|
 | false gene: deleted from every strain | 23 |
 | mitochondrial (cytochrome b, cox1, cox3): left out of the pangenome | 17 |
-| kept now, to delete from the reference GFF later (decided in [step 08](../../08_Final_GFF/README.md)) | 5 |
+| kept now, to delete from the reference GFF later (decided in [step 08](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md)) | 5 |
 | new gene, kept | 3 |
 
 ### 4. Removal after curation
@@ -1109,13 +1111,13 @@ core.
 
 8,106 of the 8,178 final pangenes have an orthogroup (6,001 orthogroups; 850 in two or more pangenes).
 
-[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md)
 
 ---
 
 ## 08 – Final GFF
 
 To do. The final annotation (one GFF3 per strain) will be made from the GFFs of step 07; the plan and the
-decisions still to make are in the [step 08 README](../../08_Final_GFF/README.md).
+decisions still to make are in the [step 08 README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md).
 
-[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md)

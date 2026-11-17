@@ -1,6 +1,8 @@
 # *Aspergillus fumigatus* Pangenome Analysis
 
-This document tracks the execution, parameters, and results of the pangenome analysis for ***Aspergillus fumigatus***, following the steps from the [`pangenome_analysis`](../../README.md) pipeline.
+This document tracks the execution, parameters, and results of the pangenome analysis for ***Aspergillus fumigatus***, following the steps from the [`pangenome_analysis`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md) pipeline.
+
+> **Note:** this report was written while the pipeline was being developed. Some commands, folder names and links refer to earlier versions of the pipeline and may not match the current [pipeline repository](https://github.com/VEuPathDB/pangenome-pipeline).
 
 ---
 
@@ -299,7 +301,7 @@ tiles the entire contig, so the whole thing is organellar and safe to drop.
 
 These 12 contigs are in [`01_Genome_Selection_QC/drop_contigs.txt`](01_Genome_Selection_QC/drop_contigs.txt).
 They were removed from `genomes/` and `gff_originals/` with the shared
-[contig-removal tool](../../01_Genome_Selection_QC/README.md#12-remove-the-unwanted-contigs) —
+[contig-removal tool](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/01_Genome_Selection_QC/README.md#12-remove-the-unwanted-contigs) —
 the wrapper does a dry run, then applies:
 
 ```bash
@@ -827,7 +829,7 @@ N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
 sbatch --array=1-${N}%20 04_InterProScan/scripts/interproscan_array_job.slurm.sh
 ```
 (currently 184, but always recomputed from the manifest, not hardcoded - see
-[`04_InterProScan/README.md`](../../04_Protein_evidence/README.md) for why: a bare
+[`04_InterProScan/README.md`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) for why: a bare
 `sbatch interproscan_array_job.slurm.sh` with no `--array=...` only runs 1 smoke-test task).
 
 Protein extraction ran on `gff_cleaned/` (step 02's TE-kill-list output — organelle,
@@ -924,14 +926,14 @@ Also in that folder: `03_gene_overlap_counts.png` (whole-gene overlap, UTR inclu
 
 No genes are removed for this species: there is no manual kill list (`kill_list_manual.tsv`), so no
 `gff_curated/` is produced and no `sbatch` is run for this step (see the
-[general README](../../05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list)
+[general README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-2-remove-specific-genes-from-the-gffs-optional-manual-kill-list)
 for what this step does when a kill list is used). Every gene from
 `gff_with_interpro/` (step 04's output) goes on to Step 3 unchanged.
 
 ### Step 3: Prepare the GFFs for Liftoff (done)
 
 Since Step 2 is skipped,
-[`prepare_for_liftoff_job.sh`](../../05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
+[`prepare_for_liftoff_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-3-prepare-the-gffs-for-liftoff)
 reads `gff_with_interpro/` (step 04's output) directly and writes to `gff_for_liftoff/`: genes
 reduced to their coding sequence (no UTRs), protein-coding genes and pseudogenes unified to
 `protein_coding_gene`, and tRNA genes given their own type (`tRNA_gene`) so Liftoff - which only
@@ -1011,7 +1013,7 @@ Gene types changed (only where the type had to change):
 
 ### Step 4: Liftoff, all-against-all (done)
 
-[`liftoff_all_vs_all.sh`](../../05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
+[`liftoff_all_vs_all.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Cross-genome_annotation_integration/README.md#step-4-liftoff)
 lifts every genome's prepared annotation (`gff_for_liftoff/`) onto every other genome's
 FASTA (`genomes/`) - 17 genomes, so 272 pairs. Run as one job per source genome:
 ```bash
@@ -1044,7 +1046,7 @@ sbatch 05_Cross-genome_annotation_integration/scripts/liftoff_transfer_stats_job
 
 ### Step 5: Basket annotation (done)
 
-[`basket_annotation_job.sh`](../../05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
+[`basket_annotation_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
 place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
 AF293.
 Run on the cluster on 29 October 2026 (job 1723536), both modes, with the step 04 PSAURON scores and the curators'
@@ -1088,7 +1090,7 @@ shorter than 100 aa.
 ![PSAURON of the genes eliminated by PSAURON only](05_Basket_annotation_integration/basket_annotation_keep_all_genes/plots/Afum_prefer_panel_model_eliminated_psauron_only.png)
 
 These figures are redone, with step 02's TE genes, by
-[`gene_fate_job.sh`](../../05_Basket_annotation_integration/README.md#running-it) on the results
+[`gene_fate_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md#running-it) on the results
 already written:
 ```bash
 export PLOT_LABEL=Afum
@@ -1134,7 +1136,7 @@ sbatch --dependency=afterok:$jid --export=ALL,MODE=prefer_panel_model,INPUT_DIR=
 ## 07 – Post-GET_PANGENES Adjusting and Visualisation
 
 The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
-again ([step 07 README](../../07_Post_GET_PANGENES_adjusting/README.md)). Genomes are labelled by their
+again ([step 07 README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md)). Genomes are labelled by their
 accession, except AF293, A1160 and A1163; the strain of each accession is in the
 [genome table of step 01](#01--genome-selection--qc). Parts 1–3 were run on the cluster on 2026-10-30, on the
 `get_pangenes` run above, into folders ending in `_keep_all_genes`:
@@ -1322,14 +1324,14 @@ in the orsellinic acid/F9775 cluster protein D, protein kinases, DUF3435, helica
 cluster protein, glucosamine-6-phosphate isomerase and glycoside hydrolase family 3; the core in armadillo-like
 helical domains and sugar transporters.
 
-[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md)
 
 ---
 
 ## 08 – Final GFF
 
 To do. The final annotation (one GFF3 per strain) will be made from the GFFs of step 07; the plan and the
-decisions still to make are in the [step 08 README](../../08_Final_GFF/README.md).
+decisions still to make are in the [step 08 README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md).
 
-[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](../../README.md)
+[↑ Back to top](#analysis-steps) &nbsp;|&nbsp; [Back to Pangenome Pipeline](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md)
 
