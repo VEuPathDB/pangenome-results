@@ -304,6 +304,63 @@ sbatch 01_Genome_Selection_QC/scripts/screen_organelles.slurm.sh
 - **CD01 has neither organelle.** Its assembly contains no apicoplast or mitochondrial sequence.
 - **10 of the 15 apicoplast contigs are longer than the 3D7 one** (43–52 kb vs 34 kb). The whole 3D7 apicoplast aligns to each of them. The script calls GA01's (51.5 kb) `in_scaffold` only because of its length.
 
+### Contig redundancy screen
+
+Run on the cluster on the 16 retained genomes, 2026-11-18. `CHROM_MIN_MB` was lowered to 0.5 so that chromosomes 1 (0.64 Mb) and 2 (0.95 Mb) count as chromosome-scale:
+
+```bash
+# in contig_redundancy.slurm.sh
+CHROM_MIN_MB="0.5"
+```
+
+```bash
+sbatch 01_Genome_Selection_QC/scripts/contig_redundancy.slurm.sh
+sbatch 01_Genome_Selection_QC/scripts/check_redundant_genes.slurm.sh --also-unplaced
+```
+
+Full report: [`REPORT.md`](01_Genome_Selection_QC/contig_redundancy/REPORT.md).
+
+17 small contigs in 10 genomes are flagged `small-redundant` (≥ 90% of the contig duplicated in a longer contig of the same assembly). The genes on them were then searched in the rest of the genome (≥ 98% identity, ≥ 90% of the gene covered).
+
+**Removed (13 contigs, 228 kb, 23 genes):** contigs with no genes, or whose genes all have an identical copy elsewhere in the same genome.
+
+| Genome | Contig | Length (bp) | % duplicated in a longer contig | Genes | Genes with an identical copy elsewhere |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| GA01 | `PfGA01_00_1` | 15,586 | 100 | 0 | – |
+| GA01 | `PfGA01_00_3` | 17,284 | 100 | 0 | – |
+| HB3 | `PfHB3_00_0` | 13,275 | 100 | 0 | – |
+| HB3 | `PfHB3_00_26` | 10,375 | 99.6 | 0 | – |
+| IT | `PfIT_00_5` | 12,211 | 94.1 | 0 | – |
+| IT | `PfIT_00_8` | 17,178 | 100 | 0 | – |
+| KH02 | `PfKH02_00_3` | 6,708 | 97.7 | 0 | – |
+| 7G8-2019 | `VBRD01000009.1` | 32,271 | 95.7 | 7 | 7 |
+| GN01 | `PfGN01_00_5` | 24,162 | 100 | 5 | 5 |
+| HB3 | `PfHB3_00_14` | 11,586 | 100 | 3 | 3 |
+| KH02 | `PfKH02_00_6` | 14,305 | 100 | 2 | 2 |
+| SN01 | `PfSN01_00_3` | 21,238 | 99.9 | 5 | 5 |
+| NF166 | `VBRE01000025.1` | 31,444 | 99.1 | 1 | 1\* |
+
+\* The copy of this gene on `VBRE01000014.1` is identical in sequence but not annotated as a gene.
+
+**Kept (4 contigs):** they carry variant-family genes (PfEMP1, *rifin*, *stevor*) with no full copy elsewhere in the genome: KH01 `PfKH01_00_26`, NF54 `VBRF01000002.1` and `VBRF01000029.1`, SN01 `PfSN01_00_18`.
+
+### Contig removal
+
+Run on the cluster, 2026-11-18. The genomes and GFFs were first copied to `original_files_copy/`, because the removal rewrites `genomes/` and `gff_originals/` in place:
+
+```bash
+mkdir -p original_files_copy
+cp -r genomes original_files_copy/genomes
+cp -r gff_originals original_files_copy/gff
+
+sbatch 01_Genome_Selection_QC/scripts/drop_contigs_slurm.sh
+```
+
+Drop list: [`drop_contigs.txt`](01_Genome_Selection_QC/drop_contigs.txt). 43 contigs were removed:
+
+- **30 organelle contigs** (apicoplast and mitochondrion of the 15 genomes that have them; 1,308 genes);
+- **13 redundant contigs** (228 kb, 23 genes; see the [contig redundancy screen](#contig-redundancy-screen)).
+
 ---
 
 ## 02 – TE Annotation & Clean Up
