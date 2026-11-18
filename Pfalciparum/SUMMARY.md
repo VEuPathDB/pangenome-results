@@ -62,9 +62,6 @@ Not needed: all genomes already have a genome annotation (GFF, from PlasmoDB).
 - **Closely related genomes in the panel.** NF54 and 3D7 are nearly identical, and the panel holds two assemblies of
   7G8 (`7G8` and `7G8-2019`). Both 7G8 assemblies are kept for now; near-duplicate genomes weight the shared genes
   of their lineage in the pangenome counts.
-- **The pangenome shows gene presence/absence, not sequence variation.** Important differences between strains, such
-  as drug-resistance mutations in *kelch13* or *pfcrt*, are point mutations in shared genes and do not appear in the
-  pangenome matrix.
 
 ---
 
