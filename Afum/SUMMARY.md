@@ -1,5 +1,7 @@
 # *Aspergillus fumigatus* Pangenome — Summary
 
+> **⚠️ Draft results – do not use.** These are draft results of the current version of the pangenome pipeline, provided to document the pipeline outputs. They must not be used for any analysis or publication.
+
 > **Quick read for an overview of the analysis and key findings.**
 > For the methods, parameters, tables and figures, see the [full report](README.md).
 

@@ -1,0 +1,20 @@
+strain	ref	n_aln	n_query_pieces	clean_pieces	ref_covered_Mb	ref_covered_pct	aln_identity_pct	raw_reverse_pct	internal_inv_Mb	internal_inv_pct	transloc_bp	verdict
+7G8-2019	3D7	60	22	17	22.657	97.11	86.19	1.46	0.000	0.000	442155	1 scaffold(s) joining ≥2 ref chroms end-to-end
+7G8	3D7	56	17	16	22.611	96.92	85.95	1.25	0.043	0.187	475437	2 scaffold(s) joining ≥2 ref chroms end-to-end
+CD01	3D7	43	19	16	22.880	98.07	83.71	1.94	0.000	0.000	676250	3 scaffold(s) joining ≥2 ref chroms end-to-end
+Dd2	3D7	63	16	15	22.495	96.42	85.81	1.56	0.072	0.317	349531	1 scaffold(s) joining ≥2 ref chroms end-to-end
+GA01	3D7	54	20	15	22.697	97.29	83.99	3.02	0.117	0.498	787857	3 scaffold(s) joining ≥2 ref chroms end-to-end
+GB4	3D7	61	26	21	22.756	97.54	84.46	3.77	0.000	0.000	736493	1 scaffold(s) joining ≥2 ref chroms end-to-end
+GN01	3D7	49	19	16	23.167	99.30	83.10	1.97	0.123	0.518	512663	1 inversion block(s) ≥20kb (0.12 Mb); 1 scaffold(s) joining ≥2 ref chroms end-to-end
+HB3	3D7	75	28	25	22.532	96.58	85.30	2.14	0.000	0.000	443641	Collinear — 1:1, no rearrangements
+IT	3D7	77	27	22	22.543	96.63	84.12	3.05	0.026	0.112	689177	1 scaffold(s) joining ≥2 ref chroms end-to-end
+KE01	3D7	43	21	19	22.591	96.83	85.76	1.29	0.000	0.000	183025	Collinear — 1:1, no rearrangements
+KH01	3D7	58	22	16	22.818	97.81	84.41	2.28	0.072	0.308	613429	2 scaffold(s) joining ≥2 ref chroms end-to-end
+KH02	3D7	61	21	18	22.599	96.87	84.84	1.85	0.000	0.000	558874	2 scaffold(s) joining ≥2 ref chroms end-to-end
+ML01	3D7	215	114	75	23.011	98.63	79.55	8.35	0.000	0.000	654864	Collinear — 1:1, no rearrangements
+NF135C10	3D7	71	23	18	22.696	97.28	83.56	6.43	0.000	0.000	1668513	6 scaffold(s) joining ≥2 ref chroms end-to-end
+NF166	3D7	55	32	27	22.726	97.41	85.38	1.21	0.000	0.000	212764	Collinear — 1:1, no rearrangements
+NF54	3D7	34	30	29	23.247	99.64	95.34	0.77	0.000	0.000	54503	Collinear — 1:1, no rearrangements
+SD01	3D7	45	19	17	22.489	96.40	85.90	1.04	0.000	0.000	1338525	Collinear — 1:1, no rearrangements
+SN01	3D7	76	36	30	22.914	98.22	84.30	2.76	0.033	0.140	464848	Collinear — 1:1, no rearrangements
+TG01	3D7	145	79	53	23.137	99.17	78.27	5.81	0.000	0.000	1053883	1 scaffold(s) joining ≥2 ref chroms end-to-end

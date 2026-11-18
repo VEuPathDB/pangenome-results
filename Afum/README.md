@@ -1,5 +1,7 @@
 # *Aspergillus fumigatus* Pangenome Analysis
 
+> **⚠️ Draft results – do not use.** These are draft results of the current version of the pangenome pipeline, provided to document the pipeline outputs. They must not be used for any analysis or publication.
+
 This document tracks the execution, parameters, and results of the pangenome analysis for ***Aspergillus fumigatus***, following the steps from the [`pangenome_analysis`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/README.md) pipeline.
 
 > **Note:** this report was written while the pipeline was being developed. Some commands, folder names and links refer to earlier versions of the pipeline and may not match the current [pipeline repository](https://github.com/VEuPathDB/pangenome-pipeline).
