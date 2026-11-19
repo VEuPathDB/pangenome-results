@@ -15,7 +15,7 @@
 | [01 – Genome Selection & QC](README.md#01--genome-selection--qc) | Strain selection, species check, contig profiling, synteny, organelle and redundancy screens, contig removal | ✅ Complete |
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, candidate validation | ✅ Complete |
 | [03 – *de novo* Genome Annotation](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/03_denovo_Genome_Annotation/README.md) | Gene prediction on cleaned assemblies | ⏭️ Not needed |
-| [04 – Protein evidence (InterProScan and PSAURON)](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) | Functional domain annotation; PSAURON scores | ⏳ To do |
+| [04 – Protein evidence (InterProScan and PSAURON)](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md) | Merging and standardising annotations across strains | ⏳ To do |
 | [06 – GET_PANGENES](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/06_GET_PANGENES/README.md) | Synteny-based ortholog clustering (core / accessory) | ⏳ To do |
 | [07 – Post-GET_PANGENES Adjusting and Visualisation](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md) | Safe fix, curation and removal of false genes, final figures and explorer | ⏳ To do |
@@ -56,6 +56,12 @@
 ### 03 – *de novo* Genome Annotation
 
 Not needed: all genomes already have a genome annotation (GFF, from PlasmoDB).
+
+### 04 – Protein evidence (InterProScan and PSAURON)
+
+- **Even protein evidence across the 16 genomes** (5,094–5,356 proteins each). About 71% of the proteins have at
+  least one InterPro domain and about 62% at least one Pfam domain; about 10% have no hit in any InterProScan analysis.
+- **PSAURON** calls 94.2–95.0% of the proteins protein-coding in every genome.
 
 ---
 

@@ -31,6 +31,8 @@ This document tracks the execution, parameters, and results of the pangenome ana
 
 - [01 – Genome Selection & QC](#01--genome-selection--qc)
 - [02 – TE Annotation & Clean Up](#02--te-annotation--clean-up)
+- [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
+- [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 
 ---
 
@@ -378,3 +380,131 @@ Drop list: [`drop_contigs.txt`](01_Genome_Selection_QC/drop_contigs.txt). 43 con
 | `PfML01_00_87` | 5,891 | none |
 
 ML01 is excluded from the pangenome (see [genomes excluded](#genomes-excluded-from-the-pangenome)), so these contigs are removed with it.
+
+---
+
+## 03 – *de novo* Genome Annotation
+
+Not needed: all 16 genomes already have a genome annotation (GFF, from PlasmoDB).
+
+---
+
+## 04 – Protein evidence (InterProScan and PSAURON)
+
+### Protein extraction
+
+Run on the cluster, 2026-11-18. No TEs were found in step 02, so there was no TE filtering and no `gff_cleaned/`: the proteins were extracted from `gff_originals/` (after the contig removal of step 01).
+
+```bash
+# in extract_proteins.slurm.sh and update_interpro_in_gff.slurm.sh
+GFF_INDIR="gff_originals"
+```
+
+```bash
+sbatch 04_Protein_evidence/scripts/extract_proteins.slurm.sh
+```
+
+### Running InterProScan
+
+Run on the cluster, 2026-11-18/19. With `CHUNK_SIZE=1000`, the manifest has **96 chunks** (6 per genome).
+
+```bash
+sbatch 04_Protein_evidence/scripts/build_interpro_manifest.slurm.sh
+mkdir -p interpro/logs
+N=$(($(wc -l < interpro/interpro_manifest.tsv) - 1))
+sbatch --array=1-${N}%20 04_Protein_evidence/scripts/interproscan_array_job.slurm.sh
+```
+
+88 chunks finished in 10–25 min each. Eight chunks (3D7 6, 7G8 3, CD01 3 and 4, GA01 2, KH02 6, NF166 2 and 5) stalled
+for 10–15 h: on their nodes, only the Java process was left, at about 0% CPU, with no analysis program running under it.
+
+```bash
+ssh <node> "ps -u $USER -o etime,pcpu,args --sort=-etime | cut -c1-200"   # node: NODELIST column of squeue
+```
+
+A first rerun of the 8 chunks with the same script (output to `interpro/interproscan_rerun`) finished 4 of them (7G8 3,
+CD01 3, GA01 2, KH02 6); NF166 chunk 2 was split into 10 pieces of 100 proteins, of which 7 finished. The other 3
+chunks and 3 pieces stalled again, at different steps. What made all of them finish was InterProScan's temporary
+folder on the node's local disk (`-T`) instead of `temp/` in the project folder on the shared storage:
+
+1. One-off copy of `interproscan_array_job.slurm.sh` in the project folder, with
+   `OUT_DIR="interpro/interproscan_rerun"` and `-T` added to the `interproscan.sh` line:
+   ```bash
+   LOCAL_TMP="${TMPDIR:-/tmp}/ips_${SLURM_JOB_ID}"; mkdir -p "$LOCAL_TMP"
+   interproscan.sh -T "$LOCAL_TMP" \
+   ```
+2. The stuck tasks cancelled (`scancel`) and only those submitted again:
+   `sbatch --array=6,22,83 local_interproscan_rerun.slurm.sh`, and the same for the 3 NF166 pieces, whose results were
+   then joined into NF166 chunk 2.
+3. Each new `chunk_<N>_interproscan.tsv` copied into `interpro/interproscan_results/<genome>/` (`cp -n`); 96 non-empty
+   TSVs checked before the merge.
+4. `temp/` (4.1 GB, left by the stalled tasks), the rerun folders, the leftover `chunk_*.fasta` in the results folders
+   and the one-off scripts deleted.
+
+### Merging the chunk results
+
+```bash
+sbatch 04_Protein_evidence/scripts/merge_interpro_job.slurm.sh
+```
+
+All 16 genomes have their 6 chunk files (no `WARNING`). Proteins with no hit in any analysis (512–578 per genome) are
+reported as `NOTE`.
+
+| Genome | Proteins | With any hit (%) | With ≥ 1 InterPro ID (%) | With ≥ 1 Pfam ID (%) |
+| :--- | ---: | ---: | ---: | ---: |
+| **3D7** *(Ref)* | 5,356 | 90.1 | 71.2 | 62.1 |
+| 7G8 | 5,142 | 89.8 | 71.1 | 61.8 |
+| 7G8-2019 | 5,094 | 88.8 | 70.2 | 61.0 |
+| CD01 | 5,158 | 89.8 | 71.7 | 62.6 |
+| Dd2 | 5,176 | 90.1 | 71.3 | 62.0 |
+| GA01 | 5,189 | 90.0 | 71.6 | 62.4 |
+| GB4 | 5,301 | 89.9 | 71.5 | 62.3 |
+| GN01 | 5,265 | 90.0 | 71.9 | 62.7 |
+| HB3 | 5,150 | 90.0 | 71.1 | 61.8 |
+| IT | 5,217 | 90.0 | 71.2 | 62.0 |
+| KE01 | 5,200 | 90.1 | 71.3 | 62.0 |
+| KH01 | 5,231 | 89.8 | 71.5 | 62.6 |
+| KH02 | 5,232 | 90.0 | 71.4 | 62.2 |
+| NF166 | 5,123 | 89.0 | 70.5 | 61.4 |
+| NF54 | 5,241 | 89.0 | 70.4 | 61.5 |
+| SN01 | 5,312 | 90.2 | 71.7 | 62.5 |
+
+### Adding the domain evidence to the GFFs
+
+```bash
+sbatch 04_Protein_evidence/scripts/update_interpro_in_gff.slurm.sh
+```
+
+Reads `gff_originals/` and writes `gff_with_interpro/`, the input of step 05. In every genome, 72.7–73.5% of the CDS
+lines received InterPro/Pfam evidence. The PlasmoDB GFFs carried no earlier InterPro/Pfam evidence (0 lines stripped).
+
+### PSAURON on every protein
+
+Run on the cluster, 2026-11-18, one array task per genome, into `psauron/<genome>.csv`. Every protein was scored.
+
+```bash
+mkdir -p psauron/logs
+N=$(grep -v '^#' genome_order.txt | awk 'NF' | wc -l)
+sbatch --array=1-${N} 04_Protein_evidence/scripts/psauron_array_job.slurm.sh
+```
+
+| Genome | Proteins | PSAURON score (% of proteins called protein-coding) |
+| :--- | ---: | ---: |
+| **3D7** *(Ref)* | 5,356 | 94.8 |
+| 7G8 | 5,142 | 94.9 |
+| 7G8-2019 | 5,094 | 94.2 |
+| CD01 | 5,158 | 94.9 |
+| Dd2 | 5,176 | 94.8 |
+| GA01 | 5,189 | 94.9 |
+| GB4 | 5,301 | 94.9 |
+| GN01 | 5,265 | 94.9 |
+| HB3 | 5,150 | 94.7 |
+| IT | 5,217 | 94.9 |
+| KE01 | 5,200 | 94.8 |
+| KH01 | 5,231 | 95.0 |
+| KH02 | 5,232 | 94.8 |
+| NF166 | 5,123 | 94.3 |
+| NF54 | 5,241 | 94.2 |
+| SN01 | 5,312 | 94.7 |
+
+The PSAURON score is 94.2–95.0% in every genome.
