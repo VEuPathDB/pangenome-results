@@ -35,7 +35,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 - [06 – GET_PANGENES](#06--get_pangenes)
-- [New genes in the reference (3D7)](#new-genes-in-the-reference-3d7)
+- [07 – Post-GET_PANGENES Adjusting and Visualisation](#07--post-get_pangenes-adjusting-and-visualisation)
 - [Genes to fix at the end](#genes-to-fix-at-the-end)
 
 ---
@@ -691,7 +691,95 @@ sbatch --dependency=afterok:$jid --exclude=compute29 06_GET_PANGENES/scripts/run
 
 ---
 
-## New genes in the reference (3D7)
+## 07 – Post-GET_PANGENES Adjusting and Visualisation
+
+The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
+again ([step 07 README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 were run on the
+cluster on 2026-11-19, with the jobs' defaults:
+```bash
+mkdir -p pangenome_inspection/logs pangenome_fixed/logs pangenome_plots/logs pangenome_explorer/logs
+jid=$(sbatch --parsable --exclude=compute29 07_Post_GET_PANGENES_adjusting/scripts/inspect_pangenome_job.sh)
+sbatch --dependency=afterok:$jid --exclude=compute29 07_Post_GET_PANGENES_adjusting/scripts/fix_pangenome_safe_job.sh
+sbatch --exclude=compute29 --export=ALL,SET=preliminary,LABEL=Pfal 07_Post_GET_PANGENES_adjusting/scripts/plot_all_job.sh
+sbatch --exclude=compute29 --export=ALL,SET=preliminary,SPECIES="Plasmodium falciparum" 07_Post_GET_PANGENES_adjusting/scripts/build_explorer_job.sh
+```
+
+| | `get_pangenes` | After the safe fix (preliminary) |
+|---|---:|---:|
+| Pangenes | 8,086 | 7,838 |
+| Core (16) | 4,974 | 4,981 |
+| Soft-core (15) | | 73 |
+| Shell (3-14) | | 504 |
+| Cloud (1-2) | | 2,280 |
+
+### 1. Inspection
+
+Tables in `pangenome_inspection/`.
+
+**Absences** (a pangene with no gene in a genome): 42,829.
+
+| Code | Category | Absences |
+|---|---|---:|
+| 1a | same gene, in another pangene: can be moved | 403 |
+| 1b | same gene, in a pangene shared with the other genomes | 683 |
+| 1c | same gene, in no pangene | 2 |
+| 2a | another gene in the place, no transfer | 3,190 |
+| 2b | another gene in the place, over a transfer | 735 |
+| 3 | transfer not used by step 05 | 52 |
+| 4 | place much shorter: likely deletion | 334 |
+| 5 | empty place | 103 |
+| 6 | contig edge | 25,458 |
+| 7 | flanking genes split | 10,487 |
+| 8 | region absent | 1,382 |
+
+Most absences are at a contig edge or between flanking genes that are split: the subtelomeres, where the variant
+families (*var*, *rifin*, *stevor*) differ between strains and cannot be aligned.
+
+**Pangenes with more than one gene of a strain:** 33 (no reference 11, copy 13, fragment 3, split 3, other 2,
+unrelated 1).
+
+### 2. Safe fix
+
+**80 genes** were moved back to the pangene of their gene; 323 candidate moves were left alone. **76 baskets** that
+`get_pangenes` had split over several pangenes were joined (193 pangenes joined into another; `joins.tsv`); 504 split
+baskets were not joined (`basket_splits_not_joined.tsv`). 55 pangenes left empty disappeared. 8,086 → **7,838
+pangenes**.
+
+The 38,861 absences left, by verdict: absent 4,476, assembly 32,796, copy dropped by step 05 693, elsewhere 896.
+
+**Low-confidence pangenes** (`pangene_lists/pangene_quality.tsv`): 419 have an invalid ORF in more than 50% of their
+strains. 1 of them also has a PSAURON score below 0.5, and 225 have no InterPro domain. In 16 the same defect is in
+every invalid strain (2 or more), so it is shared (or the model is wrong). 111 more are reference pseudogenes. 286
+pangenes have a PSAURON score below 0.5. **Genes in no pangene:** 57, all with a CDS below 100 bp.
+
+### 3. Preliminary look
+
+Figures: `07_Post_GET_PANGENES_adjusting/plots_preliminary/`.
+
+![Pangenome and core genome size, preliminary](07_Post_GET_PANGENES_adjusting/plots_preliminary/Pfal_preliminary_pancore.png)
+
+The core settles at about 5,000 pangenes (Tettelin 5,011, Willenbrock 4,993).
+
+![Pangene occupancy, preliminary](07_Post_GET_PANGENES_adjusting/plots_preliminary/Pfal_preliminary_occupancy.png)
+
+![Singletons per genome, preliminary](07_Post_GET_PANGENES_adjusting/plots_preliminary/Pfal_preliminary_singletons.png)
+
+GN01 has the most singletons (190), then SN01 (174) and GB4 (173). The two near-identical pairs have the fewest: 3D7
+(41) and NF54 (48), 7G8-2019 (17) and 7G8 (16).
+
+![Soft-core pangenes missing per genome, preliminary](07_Post_GET_PANGENES_adjusting/plots_preliminary/Pfal_preliminary_softcore_missing.png)
+
+HB3 misses 16 of the 73 soft-core pangenes.
+
+![POCS heatmap](07_Post_GET_PANGENES_adjusting/plots_preliminary/Pfal_preliminary_POCS_heatmap.png)
+
+![InterPro enrichment, preliminary](07_Post_GET_PANGENES_adjusting/plots_preliminary/Pfal_preliminary_domain_enrichment.png)
+
+The cloud is enriched in the variant surface antigen families: *rifin* (1,072 of its 1,945 pangenes with a domain),
+PfEMP1 domains (acidic terminal segment 527, Duffy-binding-like 442, CIDR) and *stevor* (168). The core is enriched in
+P-loop NTPases, protein kinases and WD40 repeats.
+
+### Reference gene check: new genes in 3D7
 
 The 22 genes the pipeline added to 3D7 (`not_in_reference_annotation=True` in the step 05 GFF), checked one by one in
 JBrowse with the PlasmoDB RNA-seq tracks. Neighbours: the nearest 3D7 gene on each side ("–": none, the gene is in

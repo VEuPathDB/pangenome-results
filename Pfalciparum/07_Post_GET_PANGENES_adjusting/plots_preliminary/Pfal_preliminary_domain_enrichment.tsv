@@ -1,0 +1,437 @@
+category	interpro	name	clusters_with_entry_in_category	clusters_in_category	gene_ratio	clusters_with_entry_total	p	p_adjusted
+Cloud	IPR006373	Variant surface antigen Rifin	1072	1945	0.55116	1292	0	0
+Cloud	IPR029211	Plasmodium falciparum erythrocyte membrane protein 1, acidic terminal segment	527	1945	0.27095	644	2.16e-162	4.71e-160
+Cloud	IPR044932	Plasmodium falciparum erythrocyte membrane protein 1, acidic terminal segment superfamily	514	1945	0.26427	627	1.44e-158	2.09e-156
+Cloud	IPR008602	Duffy-antigen binding domain	471	1945	0.24216	577	2.14e-142	1.86e-140
+Cloud	IPR042202	Duffy-antigen binding superfamily	471	1945	0.24216	577	2.14e-142	1.86e-140
+Cloud	IPR004258	Duffy-binding-like domain	442	1945	0.22725	535	1.16e-136	8.4e-135
+Cloud	IPR029210	Plasmodium falciparum erythrocyte membrane protein-1, N-terminal segment	434	1945	0.22314	528	2.54e-132	1.58e-130
+Cloud	IPR041480	Cysteine-rich interdomain region 1 gamma	382	1945	0.19640	475	2.99e-109	1.63e-107
+Cloud	IPR006374	Variant surface antigen Stevor	168	1945	0.08638	225	8.55e-39	3.73e-37
+Cloud	IPR011992	EF-hand domain pair	206	1945	0.10591	327	3.56e-30	1.41e-28
+Cloud	IPR049158	PfEMP1, CIDRalpha1 domain	128	1945	0.06581	188	1.94e-23	7.06e-22
+Cloud	IPR026894	DNAJ-containing protein, X-domain	52	1945	0.02674	73	2.17e-11	3.15e-10
+Cloud	IPR006410	Conserved hypothetical protein CHP01519, plasmodium	36	1945	0.01851	50	1.77e-08	2.03e-07
+Cloud	IPR032761	Plasmodium falciparum erythrocyte membrane protein 1, N-terminal	9	1945	0.00463	11	0.00127	0.00542
+Cloud	IPR012598		11	1945	0.00566	15	0.00165	0.00666
+Cloud	IPR020602	GTP cyclohydrolase I domain	5	1945	0.00257	6	0.0171	0.0358
+Cloud	IPR043133	GTP cyclohydrolase I, C-terminal/NADPH-dependent 7-cyano-7-deazaguanine reductase	5	1945	0.00257	6	0.0171	0.0358
+Cloud	IPR001474	GTP cyclohydrolase I	5	1945	0.00257	6	0.0171	0.0358
+Cloud	IPR008217	Ccc1 family	4	1945	0.00206	5	0.0438	0.0652
+Cloud	IPR046428	mRNA-capping enzyme catalytic subunit, OB fold domain superfamily	5	1945	0.00257	9	0.14	0.169
+Cloud	IPR018253	DnaJ domain, conserved site	18	1945	0.00925	44	0.17	0.203
+Cloud	IPR003256	Large ribosomal subunit protein uL24	3	1945	0.00154	5	0.206	0.245
+Cloud	IPR041988	Large ribosomal subunit protein uL24, KOW domain	3	1945	0.00154	6	0.314	0.367
+Cloud	IPR011049	Serralysin-like metalloprotease, C-terminal	11	1945	0.00566	29	0.352	0.41
+Cloud	IPR024288	Schizont-infected cell agglutination, C-terminal domain	5	1945	0.00257	12	0.36	0.419
+Cloud	IPR005824	KOW	3	1945	0.00154	8	0.525	0.609
+Cloud	IPR020845	AMP-binding, conserved site	6	1945	0.00308	18	0.578	0.661
+Cloud	IPR000873	AMP-dependent synthetase/ligase domain	6	1945	0.00308	19	0.639	0.725
+Cloud	IPR023395	Mitochondrial carrier protein domain superfamily	6	1945	0.00308	19	0.639	0.725
+Cloud	IPR018108	Mitochondrial carrier protein, transmembrane region	6	1945	0.00308	19	0.639	0.725
+Cloud	IPR017964	DNA-directed DNA polymerase, family B, conserved site	3	1945	0.00154	10	0.694	0.78
+Cloud	IPR042099	ANL, N-terminal domain	6	1945	0.00308	20	0.694	0.78
+Cloud	IPR009056	Cytochrome c-like domain	2	1945	0.00103	7	0.732	0.82
+Cloud	IPR035984	Acyl-CoA binding protein superfamily	2	1945	0.00103	8	0.8	0.888
+Cloud	IPR000582	Acyl-CoA-binding protein, ACBP	2	1945	0.00103	8	0.8	0.888
+Cloud	IPR014352	FERM/acyl-CoA-binding protein superfamily	2	1945	0.00103	8	0.8	0.888
+Cloud	IPR001623	DnaJ domain	18	1945	0.00925	63	0.814	0.898
+Cloud	IPR005553	Cytoadherence-linked asexual protein	2	1945	0.00103	9	0.853	0.937
+Cloud	IPR036259	MFS transporter superfamily	14	1945	0.00720	53	0.882	0.966
+Cloud	IPR036869	Chaperone J-domain superfamily	18	1945	0.00925	68	0.903	0.98
+Cloud	IPR014722	Large ribosomal subunit protein uL2, domain 2	3	1945	0.00154	15	0.918	0.993
+Cloud	IPR013087	Zinc finger C2H2-type	1	1945	0.00051	13	0.995	1
+Cloud	IPR044885	Plasmodium RESA, N-terminal helical domain superfamily	14	1945	0.00720	86	1	1
+Cloud	IPR006526	Exported protein, PHISTa/b/c, conserved domain, Plasmodium	17	1945	0.00874	68	0.942	1
+Cloud	IPR019111	Plasmodium RESA, N-terminal	23	1945	0.01183	104	0.995	1
+Cloud	IPR036890	Histidine kinase/HSP90-like ATPase superfamily	1	1945	0.00051	11	0.988	1
+Cloud	IPR020568	Ribosomal protein uS5 domain 2-type superfamily	1	1945	0.00051	25	1	1
+Cloud	IPR014721	Small ribosomal subunit protein uS5 domain 2-type fold, subgroup	1	1945	0.00051	18	0.999	1
+Cloud	IPR008991	Translation protein SH3-like domain superfamily	3	1945	0.00154	16	0.938	1
+Cloud	IPR018247	EF-Hand 1, calcium-binding site	3	1945	0.00154	32	1	1
+Cloud	IPR022742	Alpha/beta hydrolase domain-containing protein 17C-like	1	1945	0.00051	20	1	1
+Cloud	IPR029058	Alpha/Beta hydrolase fold	1	1945	0.00051	42	1	1
+Core	IPR027417	P-loop containing nucleoside triphosphate hydrolase	293	3463	0.08461	294	2.08e-68	1.01e-66
+Core	IPR011009	Protein kinase-like domain superfamily	108	3463	0.03119	110	7.22e-23	2.42e-21
+Core	IPR015943	WD40/YVTN repeat-like-containing domain superfamily	90	3463	0.02599	90	1.16e-21	3.37e-20
+Core	IPR036322	WD40-repeat-containing domain superfamily	90	3463	0.02599	90	1.16e-21	3.37e-20
+Core	IPR000719	Protein kinase domain	96	3463	0.02772	98	3.85e-20	1.05e-18
+Core	IPR016024	Armadillo-type fold	80	3463	0.02310	80	2.58e-19	6.61e-18
+Core	IPR035979	RNA-binding domain superfamily	79	3463	0.02281	79	4.42e-19	1.07e-17
+Core	IPR012677	Nucleotide-binding alpha-beta plait domain superfamily	77	3463	0.02224	77	1.3e-18	2.99e-17
+Core	IPR001680	WD40 repeat	71	3463	0.02050	71	3.31e-17	7.21e-16
+Core	IPR000504	RNA recognition motif domain	69	3463	0.01992	69	9.71e-17	2.02e-15
+Core	IPR012340	Nucleic acid-binding, OB-fold	63	3463	0.01819	63	2.45e-15	4.86e-14
+Core	IPR008271	Serine/threonine-protein kinase, active site	61	3463	0.01761	61	7.19e-15	1.31e-13
+Core	IPR003593	AAA+ ATPase domain	61	3463	0.01761	61	7.19e-15	1.31e-13
+Core	IPR013083	Zinc finger, RING/FYVE/PHD-type	59	3463	0.01704	59	2.11e-14	3.67e-13
+Core	IPR029063	S-adenosyl-L-methionine-dependent methyltransferase superfamily	58	3463	0.01675	58	3.6e-14	6.04e-13
+Core	IPR014001	Helicase superfamily 1/2, ATP-binding domain	63	3463	0.01819	64	6.67e-14	1.08e-12
+Core	IPR001650	Helicase, C-terminal domain-like	62	3463	0.01790	63	1.13e-13	1.75e-12
+Core	IPR011989	Armadillo-like helical	53	3463	0.01530	53	5.28e-13	7.94e-12
+Core	IPR011545	DEAD/DEAH-box helicase domain	50	3463	0.01444	51	5.74e-11	8.08e-10
+Core	IPR036249	Thioredoxin-like superfamily	44	3463	0.01271	44	6.58e-11	8.96e-10
+Core	IPR017441	Protein kinase, ATP binding site	40	3463	0.01155	40	5.59e-10	7.39e-09
+Core	IPR011990	Tetratricopeptide-like helical domain superfamily	49	3463	0.01415	51	1.05e-09	1.34e-08
+Core	IPR038765	Papain-like cysteine peptidase superfamily	38	3463	0.01097	38	1.63e-09	1.97e-08
+Core	IPR001841	Zinc finger, RING-type	38	3463	0.01097	38	1.63e-09	1.97e-08
+Core	IPR003959	ATPase, AAA-type, core	35	3463	0.01011	35	8.11e-09	9.55e-08
+Core	IPR014729	Rossmann-like alpha/beta/alpha sandwich fold	33	3463	0.00953	33	2.36e-08	2.64e-07
+Core	IPR002048	EF-hand domain	32	3463	0.00924	32	4.03e-08	4.39e-07
+Core	IPR005225	Small GTP-binding domain	31	3463	0.00895	31	6.87e-08	7.3e-07
+Core	IPR019775	WD40 repeat, conserved site	29	3463	0.00837	29	2e-07	2.07e-06
+Core	IPR029071	Ubiquitin-like domain superfamily	28	3463	0.00809	28	3.41e-07	3.37e-06
+Core	IPR036291	NAD(P)-binding domain superfamily	28	3463	0.00809	28	3.41e-07	3.37e-06
+Core	IPR036412	HAD-like superfamily	27	3463	0.00780	27	5.81e-07	5.63e-06
+Core	IPR023214	HAD superfamily	26	3463	0.00751	26	9.9e-07	9.38e-06
+Core	IPR009000	Translation protein, beta-barrel domain superfamily	25	3463	0.00722	25	1.69e-06	1.53e-05
+Core	IPR000571	Zinc finger, CCCH-type	25	3463	0.00722	25	1.69e-06	1.53e-05
+Core	IPR045864	Class II Aminoacyl-tRNA synthetase/Biotinyl protein ligase (BPL) and lipoyl protein ligase (LPL)	24	3463	0.00693	24	2.88e-06	2.51e-05
+Core	IPR001471	AP2/ERF domain	24	3463	0.00693	24	2.88e-06	2.51e-05
+Core	IPR043129	ATPase, nucleotide binding domain	23	3463	0.00664	23	4.9e-06	4.11e-05
+Core	IPR036388	Winged helix-like DNA-binding domain superfamily	23	3463	0.00664	23	4.9e-06	4.11e-05
+Core	IPR029058	Alpha/Beta hydrolase fold	38	3463	0.01097	42	6.23e-06	5.13e-05
+Core	IPR006073	GTP binding domain	22	3463	0.00635	22	8.35e-06	6.74e-05
+Core	IPR036188	FAD/NAD(P)-binding domain superfamily	21	3463	0.00606	21	1.42e-05	0.000111
+Core	IPR013766	Thioredoxin domain	21	3463	0.00606	21	1.42e-05	0.000111
+Core	IPR013584	RAP domain	20	3463	0.00578	20	2.42e-05	0.000182
+Core	IPR036390	Winged helix DNA-binding domain superfamily	20	3463	0.00578	20	2.42e-05	0.000182
+Core	IPR020568	Ribosomal protein uS5 domain 2-type superfamily	24	3463	0.00693	25	3.14e-05	0.000232
+Core	IPR000795	Translational (tr)-type GTP-binding domain	19	3463	0.00549	19	4.13e-05	0.000286
+Core	IPR011993	PH-like domain superfamily	19	3463	0.00549	19	4.13e-05	0.000286
+Core	IPR011012	Longin-like domain superfamily	19	3463	0.00549	19	4.13e-05	0.000286
+Core	IPR013785	Aldolase-type TIM barrel	19	3463	0.00549	19	4.13e-05	0.000286
+Core	IPR029052	Metallo-dependent phosphatase-like	18	3463	0.00520	18	7.03e-05	0.000457
+Core	IPR029055	Nucleophile aminohydrolases, N-terminal	18	3463	0.00520	18	7.03e-05	0.000457
+Core	IPR010920	LSM domain superfamily	18	3463	0.00520	18	7.03e-05	0.000457
+Core	IPR000626	Ubiquitin-like domain	18	3463	0.00520	18	7.03e-05	0.000457
+Core	IPR016135	Ubiquitin-conjugating enzyme/RWD-like	17	3463	0.00491	17	0.00012	0.000767
+Core	IPR012337	Ribonuclease H-like superfamily	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR003439	ABC transporter-like, ATP-binding domain	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR000668	Peptidase C1A, papain C-terminal	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR013128	Peptidase C1A	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR003960	ATPase, AAA-type, conserved site	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR036770	Ankyrin repeat-containing domain superfamily	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR008978	HSP20-like chaperone	16	3463	0.00462	16	0.000204	0.00118
+Core	IPR032675	Leucine-rich repeat domain superfamily	20	3463	0.00578	21	0.000224	0.00129
+Core	IPR019734	Tetratricopeptide repeat	23	3463	0.00664	25	0.000282	0.0016
+Core	IPR006195	Aminoacyl-tRNA synthetase, class II	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR036397	Ribonuclease H superfamily	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR001353	Proteasome, subunit alpha/beta	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR016181	Acyl-CoA N-acyltransferase	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR036961	Kinesin motor domain superfamily	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR020103	Pseudouridine synthase, catalytic domain superfamily	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR001163	Sm domain, eukaryotic/archaea-type	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR047575	Sm domain	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR041569	AAA ATPase, AAA+ lid domain	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR002110	Ankyrin repeat	15	3463	0.00433	15	0.000347	0.00174
+Core	IPR023298	P-type ATPase, transmembrane domain superfamily	14	3463	0.00404	14	0.00059	0.00277
+Core	IPR001806	Small GTPase	14	3463	0.00404	14	0.00059	0.00277
+Core	IPR011004	Trimeric LpxA-like superfamily	14	3463	0.00404	14	0.00059	0.00277
+Core	IPR000608	Ubiquitin-conjugating (UBC), catalytic core domain	14	3463	0.00404	14	0.00059	0.00277
+Core	IPR021109	Aspartic peptidase domain superfamily	14	3463	0.00404	14	0.00059	0.00277
+Core	IPR004843	Calcineurin-like, phosphoesterase domain	14	3463	0.00404	14	0.00059	0.00277
+Core	IPR010884	6-Cysteine (6-Cys) domain	13	3463	0.00375	13	0.001	0.00434
+Core	IPR000727	Target SNARE coiled-coil homology domain	13	3463	0.00375	13	0.001	0.00434
+Core	IPR035952	Rhomboid-like superfamily	13	3463	0.00375	13	0.001	0.00434
+Core	IPR035969	Rab-GAP-TBC domain superfamily	13	3463	0.00375	13	0.001	0.00434
+Core	IPR036457	PPM-type phosphatase-like domain superfamily	13	3463	0.00375	13	0.001	0.00434
+Core	IPR014721	Small ribosomal subunit protein uS5 domain 2-type fold, subgroup	17	3463	0.00491	18	0.000959	0.00434
+Core	IPR036855	Zinc finger, CCCH-type superfamily	13	3463	0.00375	13	0.001	0.00434
+Core	IPR015915	Kelch-type beta-propeller	13	3463	0.00375	13	0.001	0.00434
+Core	IPR000629	ATP-dependent RNA helicase DEAD-box, conserved site	16	3463	0.00462	17	0.00155	0.00656
+Core	IPR008250	P-type ATPase, A domain superfamily	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR001594	Palmitoyltransferase, DHHC domain	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR020472	PAC1/LIS1-like, WD-40 repeat	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR007052	CS domain	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR036465	von Willebrand factor A-like domain superfamily	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR036866	Ribonuclease Z/Hydroxyacylglutathione hydrolase-like	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR001932	PPM-type phosphatase-like domain	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR009057	Homeodomain-like superfamily	12	3463	0.00347	12	0.00171	0.00666
+Core	IPR018247	EF-Hand 1, calcium-binding site	27	3463	0.00780	32	0.00185	0.00713
+Core	IPR004000	Actin family	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR003409	MORN repeat	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR038160	6-Cysteine (6-Cys) domain superfamily	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR017907	Zinc finger, RING-type, conserved site	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR027409	GroEL-like apical domain superfamily	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR038718	SNF2-like, N-terminal domain superfamily	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR000330	SNF2, N-terminal domain	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR001412	Aminoacyl-tRNA synthetase, class I, conserved site	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR009080	Aminoacyl-tRNA synthetase, class Ia, anticodon-binding	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR001461	Aspartic peptidase A1	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR033121	Peptidase family A1 domain	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR001279	Metallo-beta-lactamase	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR029000	Cyclophilin-like domain superfamily	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR002130	Cyclophilin-type peptidyl-prolyl cis-trans isomerase domain	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR046341	SET domain superfamily	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR035892	C2 domain superfamily	11	3463	0.00318	11	0.00291	0.00984
+Core	IPR018303	P-type ATPase, phosphorylation site	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR023299	P-type ATPase, cytoplasmic domain N	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR017871	ABC transporter-like, conserved site	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR015421	Pyridoxal phosphate-dependent transferase, major domain	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR015424	Pyridoxal phosphate-dependent transferase	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR036612	K Homology domain, type 1 superfamily	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR027413	GroEL-like equatorial domain superfamily	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR002423	Chaperonin Cpn60/GroEL/TCP-1 family	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR027410	TCP-1-like chaperonin intermediate domain superfamily	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR049730	SNF2/RAD5-like, C-terminal helicase domain	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR022086	Inner membrane complex protein	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR001965	Zinc finger, PHD-type	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR011011	Zinc finger, FYVE/PHD-type	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR009091	Regulator of chromosome condensation 1/beta-lactamase-inhibitor protein II	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR000408	Regulator of chromosome condensation, RCC1	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR000195	Rab-GAP-TBC domain	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR011047	Quinoprotein alcohol dehydrogenase-like superfamily	10	3463	0.00289	10	0.00495	0.0148
+Core	IPR008266	Tyrosine-protein kinase, active site	16	3463	0.00462	18	0.00627	0.0186
+Core	IPR001611	Leucine-rich repeat	13	3463	0.00375	14	0.00639	0.0188
+Core	IPR013320	Concanavalin A-like lectin/glucanase domain superfamily	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR028889	Ubiquitin specific protease USP, catalytic domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR036691	Endonuclease/exonuclease/phosphatase superfamily	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR036915	Cyclin-like superfamily	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR001752	Kinesin motor domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR011527	ABC transporter type 1, transmembrane domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR036640	ABC transporter type 1, transmembrane domain superfamily	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR003029	S1 domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR011701	Major facilitator superfamily	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR000169	Cysteine peptidase, cysteine active site	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR029064	Ribosomal protein eL30-like superfamily	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR034164	Pepsin-like domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR006186	Serine/threonine-specific protein phosphatase/bis(5-nucleosyl)-tetraphosphatase	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR023313	Ubiquitin-conjugating enzyme, active site	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR006387	CPW-WPC domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR028078	AP2-coincident, C-terminal domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR015655	Protein phosphatase 2C	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR006689	Small GTPase superfamily, ARF/SAR type	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR000717	Proteasome component (PCI) domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR035985	Ubiquitin-activating enzyme-like	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR001005	SANT/Myb domain	9	3463	0.00260	9	0.00842	0.0217
+Core	IPR014014	RNA helicase, DEAD-box type, Q motif	12	3463	0.00347	13	0.0102	0.0259
+Core	IPR013087	Zinc finger C2H2-type	12	3463	0.00347	13	0.0102	0.0259
+Core	IPR022742	Alpha/beta hydrolase domain-containing protein 17C-like	17	3463	0.00491	20	0.0122	0.0306
+Core	IPR036383	Thrombospondin type-1 repeat superfamily	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR001757	P-type ATPase	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR008979	Galactose-binding-like domain superfamily	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR000182	GNAT domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR015422	Pyridoxal phosphate-dependent transferase, small domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR000742	EGF-like domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR025660	Cysteine peptidase, histidine active site	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR011332	Zinc-binding ribosomal protein	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR017998	T-complex protein 1	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR029026	tRNA (guanine-N1-)-methyltransferase, N-terminal	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR029028	Alpha/beta knot methyltransferases	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR007125	Core Histone H2A/H2B/H3 domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR001394	Peptidase C19, ubiquitin carboxyl-terminal hydrolase	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR001214	SET domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR036236	Zinc finger C2H2 superfamily	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR043502	DNA/RNA polymerase superfamily	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR033762	MCM OB domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR001208	MCM domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR041562	MCM, AAA-lid domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR031327	Mini-chromosome maintenance protein	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR043519	Nucleotidyltransferase superfamily	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR029061	Thiamin diphosphate-binding fold	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR022764	Peptidase S54, rhomboid domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR012675	Beta-grasp domain superfamily	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR002553	Clathrin/coatomer adaptor, adaptin-like, N-terminal	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR004161	Translation elongation factor EFTu-like, domain 2	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR035647	EF-G domain III/V-like	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR000640	Elongation factor EFG, domain V-like	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR047187	Upf1-like, C-terminal helicase domain	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR041679	DNA2/NAM7 helicase-like, C-terminal	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR042228	Dynein heavy chain, linker, subdomain 3	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR024781	Merozoite surface protein, C-terminal	8	3463	0.00231	8	0.0143	0.0306
+Core	IPR009072	Histone-fold	11	3463	0.00318	12	0.0161	0.0343
+Core	IPR000884	Thrombospondin type-1 (TSP1) repeat	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR018200	Ubiquitin specific protease, conserved site	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR029044	Nucleotide-diphospho-sugar transferases	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR023333	Proteasome B-type subunit	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR036427	Bromodomain-like superfamily	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR001487	Bromodomain	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR027640	Kinesin-like protein	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR019821	Kinesin motor domain, conserved site	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR029060	PIN-like domain superfamily	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR001849	Pleckstrin homology domain	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR025661	Cysteine peptidase, asparagine active site	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR010989	SNARE	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR022775	AP complex, mu/sigma subunit	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR039421	Type 1 protein exporter	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR009060	UBA-like superfamily	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR002194	Chaperonin TCP-1, conserved site	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR001969	Aspartic peptidase, active site	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR002035	von Willebrand factor, type A	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR000426	Proteasome alpha-subunit, N-terminal domain	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR004088	K Homology domain, type 1	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR009053	Prefoldin	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR025875	Leucine rich repeat 4	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR036005	Creatinase/aminopeptidase-like	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR000994	Peptidase M24	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR006594	LIS1 homology motif	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR031157	Tr-type G domain, conserved site	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR041677	DNA2/NAM7 helicase, helicase domain	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR026983	Dynein heavy chain	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR042219	Dynein heavy chain, AAA lid domain superfamily	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR023753	FAD/NAD(P)-binding domain	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR045886	ThiF/MoeB/HesA family	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR000594	THIF-type NAD/FAD binding fold	7	3463	0.00202	7	0.0244	0.0443
+Core	IPR036890	Histidine kinase/HSP90-like ATPase superfamily	10	3463	0.00289	11	0.0254	0.0459
+Core	IPR006389	Early transcribed membrane protein, plasmodium	12	3463	0.00347	14	0.0329	0.0592
+Core	IPR004364	Aminoacyl-tRNA synthetase, class II (D/K/N)	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR002562	3'-5' exonuclease domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR016050	Proteasome beta-type subunit, conserved site	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR029033	Histidine phosphatase superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR001245	Serine-threonine/tyrosine-protein kinase, catalytic domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036986	RNA-binding S4 domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR004087	K Homology domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR011053	Single hybrid motif	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR004038	Ribosomal protein eL8/eL30/eS12/Gadd45	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR029045	ClpP/crotonase-like domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR029021	Protein-tyrosine phosphatase-like	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR013155	Methionyl/Valyl/Leucyl/Isoleucyl-tRNA synthetase, anticodon-binding	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR002300	Aminoacyl-tRNA synthetase, class Ia	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR015946	K homology domain-like, alpha/beta	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR029006	ADF-H/Gelsolin-like domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR015940	Ubiquitin-associated domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR013783	Immunoglobulin-like fold	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR008280	Tubulin/FtsZ, C-terminal	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036525	Tubulin/FtsZ, GTPase domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR003008	Tubulin/FtsZ, GTPase domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR000217	Tubulin	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR014756	Immunoglobulin E-set	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR001609	Myosin head, motor domain-like	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR037171	NagB/RpiA transferase-like	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR015947	PUA-like superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR000008	C2 domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR023332	Proteasome alpha-type subunit	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR019787	Zinc finger, PHD-finger	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036865	CRAL-TRIO lipid binding domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR001251	CRAL-TRIO lipid binding domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR029062	Class I glutamine amidotransferase-like	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR013126	Heat shock protein 70 family	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR029048	Heat shock protein 70kD, C-terminal domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR002314	Aminoacyl-tRNA synthetase, class II (G/ P/ S/T)	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR041658	Dynein heavy chain, AAA lid domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR043160	Dynein heavy chain, C-terminal domain, barrel region	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR042222	Dynein heavy chain, domain 2, N-terminal	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR041228	Dynein heavy chain, C-terminal domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR043157	Dynein heavy chain, AAA1 domain, small subdomain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR035699	Dynein heavy chain, hydrolytic ATP-binding dynein motor region	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR014710	PpnP-like, jelly roll fold	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR011709	DEAD-box helicase, OB fold	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR007502	Helicase-associated domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR001202	WW domain	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036282	Glutathione S-transferase, C-terminal domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036603	RNA polymerase, RBP11-like subunit	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036621	Anticodon-binding domain superfamily	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR011043	Galactose oxidase/kelch, beta-propeller	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR010784	Merozoite surface protein-type	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR000048	IQ motif, EF-hand binding site	6	3463	0.00173	6	0.0414	0.0619
+Core	IPR036869	Chaperone J-domain superfamily	47	3463	0.01357	68	0.0523	0.0776
+Core	IPR008991	Translation protein SH3-like domain superfamily	13	3463	0.00375	16	0.054	0.0798
+Core	IPR004365	OB-fold nucleic acid binding domain, AA-tRNA synthetase-type	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR023393	START-like domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR005135	Endonuclease/exonuclease/phosphatase	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036609	LCCL domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR004043	LCCL domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR047854	Replication factor C, lid domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036279	5'-3' exonuclease, C-terminal domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR006084	XPG/Rad2 endonuclease	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR016035	Acyl transferase/acyl hydrolase/lysophospholipase	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR027408	PNPase/RNase PH domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR008921	DNA polymerase III, clamp loader complex, gamma/delta/delta subunit, C-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR001357	BRCT domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR001494	Importin-beta, N-terminal domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR029067	CDC48 domain 2-like superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR000089	Biotin/lipoyl attachment	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR045063	Dynamin, N-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036872	CH domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR000403	Phosphatidylinositol 3-/4-kinase, catalytic domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR032630	P-type ATPase, C-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR042855	v-SNARE, coiled-coil homology domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR003107	HAT (Half-A-TPR) repeat	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR002067	Mitochondrial carrier protein	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR020864	Membrane attack complex component/perforin (MACPF) domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR000352	Peptide chain release factor class I	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR032501	Proteasomal ATPase, second OB domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR033133	Pumilio homology domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR023123	Tubulin, C-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR018316	Tubulin/FtsZ, 2-layer sandwich domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR017975	Tubulin, conserved site	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR035427	Tim10-like domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR004217	Tim10-like	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR005475	Transketolase-like, pyrimidine-binding domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR012295	TBP domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR002610	Peptidase S54, RHOMBOID-like	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR020094	Pseudouridine synthase TruA/RsuA/RluB/E/F, N-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR011249	Metalloenzyme, LuxS/M16 peptidase-like	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR011765	Peptidase M16, N-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR007197	Radical SAM	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR013041	Clathrin adaptor, appendage, Ig-like subdomain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR029035	DHS-like NAD/FAD-binding domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR003604	Matrin/U1-C-like, C2H2-type zinc finger	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR045055	DNA2/NAM7-like helicase	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR023267	RNA (C5-cytosine) methyltransferase	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR049560	SAM-dependent methyltransferase RsmB-F/NOP2-type, catalytic core	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR001678	SAM-dependent methyltransferase RsmB-F/NOP2-type domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR018525	Mini-chromosome maintenance, conserved site	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR004273	Dynein heavy chain, D6 P-loop domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR011641	Tyrosine-protein kinase ephrin type A/B receptor-like	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR016156	FAD/NAD-linked reductase, dimerisation domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR007109	Brix domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR010301	Ribosomal RNA processing protein 1	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036339	PUB-like domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036882	Alba-like domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR048333	Helicase associated domain (HA2), winged-helix domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036020	WW domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR000253	Forkhead-associated (FHA) domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR008984	SMAD/FHA domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR045877	RNA-binding protein ZFP36-like	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR028565	Mu homology domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036168	AP-2 complex subunit mu, C-terminal superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR009001	Translation elongation factor EF1A/initiation factor IF2gamma, C-terminal	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR008942	ENTH/VHS	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR003607	HD/PDEase domain	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR036974	PUA domain superfamily	5	3463	0.00144	5	0.0705	0.0856
+Core	IPR014722	Large ribosomal subunit protein uL2, domain 2	12	3463	0.00347	15	0.0765	0.0926
+Core	IPR001623	DnaJ domain	42	3463	0.01213	63	0.127	0.153
+Core	IPR002939	Chaperone DnaJ, C-terminal	6	3463	0.00173	7	0.144	0.172
+Core	IPR008971	HSP40/DnaJ peptide-binding	6	3463	0.00173	7	0.144	0.172
+Core	IPR006494	Plasmodium subtelomeric PST-A	7	3463	0.00202	9	0.21	0.25
+Core	IPR043057	Erythrocyte binding antigen 175, C-terminal domain superfamily	5	3463	0.00144	6	0.216	0.254
+Core	IPR021620	Erythrocyte binding antigen 175, C-terminal	5	3463	0.00144	6	0.216	0.254
+Core	IPR000073	Alpha/beta hydrolase fold-1	5	3463	0.00144	6	0.216	0.254
+Core	IPR023395	Mitochondrial carrier protein domain superfamily	13	3463	0.00375	19	0.272	0.319
+Core	IPR018108	Mitochondrial carrier protein, transmembrane region	13	3463	0.00375	19	0.272	0.319
+Core	IPR005824	KOW	5	3463	0.00144	8	0.567	0.651
+Core	IPR035984	Acyl-CoA binding protein superfamily	5	3463	0.00144	8	0.567	0.651
+Core	IPR000582	Acyl-CoA-binding protein, ACBP	5	3463	0.00144	8	0.567	0.651
+Core	IPR014352	FERM/acyl-CoA-binding protein superfamily	5	3463	0.00144	8	0.567	0.651
+Core	IPR006496	Conserved hypothetical protein CHP01609, Plasmodium spp	3	3463	0.00087	5	0.662	0.75
+Core	IPR018253	DnaJ domain, conserved site	25	3463	0.00722	44	0.668	0.755
+Core	IPR036259	MFS transporter superfamily	29	3463	0.00837	53	0.775	0.867
+Core	IPR041988	Large ribosomal subunit protein uL24, KOW domain	3	3463	0.00087	6	0.805	0.89
+Core	IPR042099	ANL, N-terminal domain	10	3463	0.00289	20	0.849	0.935
+Core	IPR000873	AMP-dependent synthetase/ligase domain	9	3463	0.00260	19	0.894	0.974
+Core	IPR009056	Cytochrome c-like domain	3	3463	0.00087	7	0.892	0.974
+Core	IPR003256	Large ribosomal subunit protein uL24	2	3463	0.00058	5	0.904	0.98
+Core	IPR006374	Variant surface antigen Stevor	4	3463	0.00116	225	1	1
+Core	IPR044885	Plasmodium RESA, N-terminal helical domain superfamily	42	3463	0.01213	86	0.977	1
+Core	IPR026894	DNAJ-containing protein, X-domain	15	3463	0.00433	73	1	1
+Core	IPR019111	Plasmodium RESA, N-terminal	45	3463	0.01299	104	1	1
+Core	IPR008602	Duffy-antigen binding domain	8	3463	0.00231	577	1	1
+Core	IPR042202	Duffy-antigen binding superfamily	8	3463	0.00231	577	1	1
+Core	IPR011992	EF-hand domain pair	43	3463	0.01242	327	1	1
+Core	IPR006410	Conserved hypothetical protein CHP01519, plasmodium	7	3463	0.00202	50	1	1
+Core	IPR006373	Variant surface antigen Rifin	4	3463	0.00116	1292	1	1
+Core	IPR011049	Serralysin-like metalloprotease, C-terminal	6	3463	0.00173	29	1	1
+Core	IPR020845	AMP-binding, conserved site	8	3463	0.00231	18	0.93	1
+Core	IPR006526	Exported protein, PHISTa/b/c, conserved domain, Plasmodium	26	3463	0.00751	68	1	1
+Core	IPR005553	Cytoadherence-linked asexual protein	2	3463	0.00058	9	0.995	1
+Core	IPR046428	mRNA-capping enzyme catalytic subunit, OB fold domain superfamily	2	3463	0.00058	9	0.995	1
+Core	IPR017964	DNA-directed DNA polymerase, family B, conserved site	4	3463	0.00116	10	0.936	1
+Core	IPR029211	Plasmodium falciparum erythrocyte membrane protein 1, acidic terminal segment	2	3463	0.00058	644	1	1
+Core	IPR044932	Plasmodium falciparum erythrocyte membrane protein 1, acidic terminal segment superfamily	1	3463	0.00029	627	1	1
+Core	IPR024288	Schizont-infected cell agglutination, C-terminal domain	3	3463	0.00087	12	0.996	1
+Core	IPR008217	Ccc1 family	1	3463	0.00029	5	0.988	1
+Core	IPR043133	GTP cyclohydrolase I, C-terminal/NADPH-dependent 7-cyano-7-deazaguanine reductase	1	3463	0.00029	6	0.995	1
+Core	IPR020602	GTP cyclohydrolase I domain	1	3463	0.00029	6	0.995	1
+Core	IPR001474	GTP cyclohydrolase I	1	3463	0.00029	6	0.995	1
