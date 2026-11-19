@@ -703,7 +703,7 @@ the subtelomere).
 | Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) | Delete. No RNA-seq expression. |
 | Pf1g02174 | Pf3D7_09_v3:53637..54497 (-) | PfGA01_140005900 (replaced) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0900700 (2666 bp) | PF3D7_0900900 (577 bp) | Wrong model. Lies over the pseudogene PF3D7_0900800 (PfEMP1 exon 2); RNA-seq only on the pseudogene. |
 | Pf1g02546 | Pf3D7_10_v3:23086..23675 (+) | PfNF166_000007400 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_1000100 (4815 bp) |  |
-| Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) |  |
+| Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) | Delete. No RNA-seq expression, no intron junction. |
 | Pf1g02937 | Pf3D7_10_v3:1581698..1582711 (-) | PfNF54_100043800 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1039200 (4707 bp) | PF3D7_1039400 (4441 bp) |  |
 | Pf1g02977 | Pf3D7_11_v3:96964..99609 (+) | PfNF54_110007300 (alternative) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1101900 (6090 bp) | PF3D7_1102100 (4691 bp) |  |
 | Pf1g03980 | Pf3D7_12_v3:2251737..2252449 (-) | Pf7G8-2_000048900 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1255200 (2775 bp) | – |  |
