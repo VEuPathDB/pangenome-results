@@ -34,6 +34,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
 - [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
+- [Genes to fix at the end](#genes-to-fix-at-the-end)
 
 ---
 
@@ -672,3 +673,13 @@ The rule "one place, one gene" keeps one model per place: both are 3D7 genes, so
 genomes (PBGS 15, SPP 14), and SPP was dropped. It will be added back to the final GFFs at the end.
 
 ![PF3D7_1440200 (SPP, top) and PF3D7_1440300 (PBGS, bottom) share their first two CDS exons](05_Basket_annotation_integration/basket_annotation/3D7_SPP_PBGS_shared_exons.png)
+
+---
+
+## Genes to fix at the end
+
+Genes to correct in the final GFFs ([step 08](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md)).
+
+| Genome | Gene | Problem | Fix | Found in |
+|---|---|---|---|---|
+| 3D7 | PF3D7_1440200 (SPP) | Missing from the final 3D7 GFF: shares its first two CDS exons with PF3D7_1440300 (PBGS), and only one gene is kept per place | Add back the 3D7 model | [Step 05, step 5](#step-5-basket-annotation) |
