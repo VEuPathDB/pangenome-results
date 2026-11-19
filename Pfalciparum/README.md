@@ -34,6 +34,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
 - [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
+- [New genes in the reference (3D7)](#new-genes-in-the-reference-3d7)
 - [Genes to fix at the end](#genes-to-fix-at-the-end)
 
 ---
@@ -673,6 +674,40 @@ The rule "one place, one gene" keeps one model per place: both are 3D7 genes, so
 genomes (PBGS 15, SPP 14), and SPP was dropped. It will be added back to the final GFFs at the end.
 
 ![PF3D7_1440200 (SPP, top) and PF3D7_1440300 (PBGS, bottom) share their first two CDS exons](05_Basket_annotation_integration/basket_annotation/3D7_SPP_PBGS_shared_exons.png)
+
+
+---
+
+## New genes in the reference (3D7)
+
+The 22 genes the pipeline added to 3D7 (`not_in_reference_annotation=True` in the step 05 GFF), checked one by one in
+JBrowse with the PlasmoDB RNA-seq tracks. Neighbours: the nearest 3D7 gene on each side ("–": none, the gene is in
+the subtelomere).
+
+| Gene | Location | Model from | ORF | Description | Left 3D7 gene | Right 3D7 gene | Verdict |
+|---|---|---|---|---|---|---|---|
+| Pf1g00001 | Pf3D7_01_v3:25038..25433 (+) | PfNF54_010005300 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0100100 (4077 bp) | Delete. No RNA-seq expression. |
+| Pf1g00002 | Pf3D7_01_v3:26114..26693 (+) | PfNF166_020005200 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_0100100 (2817 bp) | Delete. No RNA-seq expression. |
+| Pf1g00017 | Pf3D7_01_v3:76931..77266 (-) | PfNF166_000008900 (target_invalid_orf) | invalid | DnaJ domain containing protein, putative | PF3D7_0101400 (122 bp) | PF3D7_0101500 (975 bp) |  |
+| Pf1g00380 | Pf3D7_03_v3:33904..34314 (+) | PfNF54_030005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0300100 (2651 bp) |  |
+| Pf1g00874 | Pf3D7_04_v3:1183161..1183614 (-) | PfNF166_060036700 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0426000 (2935 bp) | – |  |
+| Pf1g01209 | Pf3D7_06_v3:60200..62845 (+) | PfNF54_060006300 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0601400 (7302 bp) | PF3D7_0601500 (2943 bp) |  |
+| Pf1g01368 | Pf3D7_06_v3:722865..723095 (-) | PfNF54_060022400 (filled) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0617300 (1553 bp) | PF3D7_0617400 (22 bp) |  |
+| Pf1g01505 | Pf3D7_06_v3:1302392..1302665 (-) | PfNF166_100043700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (3019 bp) | PF3D7_0631200 (11143 bp) |  |
+| Pf1g01506 | Pf3D7_06_v3:1303437..1305215 (-) | Pf7G8-2_000325700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (4064 bp) | PF3D7_0631200 (8593 bp) |  |
+| Pf1g01525 | Pf3D7_06_v3:1389363..1389871 (-) | PfNF166_090042800 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0632800 (6736 bp) | – |  |
+| Pf1g01834 | Pf3D7_07_v3:1429835..1430325 (-) | PfNF166_000020400 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0733000 (3601 bp) | – |  |
+| Pf1g01835 | Pf3D7_08_v3:9499..11575 (-) | Pf7G8-2_000006000 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0800100 (9786 bp) |  |
+| Pf1g02162 | Pf3D7_08_v3:1449577..1450158 (-) | PfNF166_000007000 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0833500 (6128 bp) | – |  |
+| Pf1g02163 | Pf3D7_09_v3:9188..10224 (-) | PfNF166_060037200 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0900100 (9856 bp) |  |
+| Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) |  |
+| Pf1g02174 | Pf3D7_09_v3:53637..54497 (-) | PfGA01_140005900 (replaced) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0900700 (2666 bp) | PF3D7_0900900 (577 bp) |  |
+| Pf1g02546 | Pf3D7_10_v3:23086..23675 (+) | PfNF166_000007400 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_1000100 (4815 bp) |  |
+| Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) |  |
+| Pf1g02937 | Pf3D7_10_v3:1581698..1582711 (-) | PfNF54_100043800 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1039200 (4707 bp) | PF3D7_1039400 (4441 bp) |  |
+| Pf1g02977 | Pf3D7_11_v3:96964..99609 (+) | PfNF54_110007300 (alternative) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1101900 (6090 bp) | PF3D7_1102100 (4691 bp) |  |
+| Pf1g03980 | Pf3D7_12_v3:2251737..2252449 (-) | Pf7G8-2_000048900 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1255200 (2775 bp) | – |  |
+| Pf1g04686 | Pf3D7_13_v3:2895368..2896245 (-) | Pf7G8-2_000248700 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1373500 (3028 bp) | – |  |
 
 ---
 
