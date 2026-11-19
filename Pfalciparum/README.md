@@ -691,7 +691,7 @@ the subtelomere).
 | Pf1g00017 | Pf3D7_01_v3:76931..77266 (-) | PfNF166_000008900 (target_invalid_orf) | invalid | DnaJ domain containing protein, putative | PF3D7_0101400 (122 bp) | PF3D7_0101500 (975 bp) |  |
 | Pf1g00380 | Pf3D7_03_v3:33904..34314 (+) | PfNF54_030005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0300100 (2651 bp) | Delete. No RNA-seq expression. |
 | Pf1g00874 | Pf3D7_04_v3:1183161..1183614 (-) | PfNF166_060036700 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0426000 (2935 bp) | – |  |
-| Pf1g01209 | Pf3D7_06_v3:60200..62845 (+) | PfNF54_060006300 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0601400 (7302 bp) | PF3D7_0601500 (2943 bp) | Keep, model to fix. Low RNA-seq; intron junctions inside the single-exon model. |
+| Pf1g01209 | Pf3D7_06_v3:60200..62845 (+) | PfNF54_060006300 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0601400 (7302 bp) | PF3D7_0601500 (2943 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
 | Pf1g01368 | Pf3D7_06_v3:722865..723095 (-) | PfNF54_060022400 (filled) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0617300 (1553 bp) | PF3D7_0617400 (22 bp) | Delete. 3′ UTR of PF3D7_0617400 (var). |
 | Pf1g01505 | Pf3D7_06_v3:1302392..1302665 (-) | PfNF166_100043700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (3019 bp) | PF3D7_0631200 (11143 bp) |  |
 | Pf1g01506 | Pf3D7_06_v3:1303437..1305215 (-) | Pf7G8-2_000325700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (4064 bp) | PF3D7_0631200 (8593 bp) |  |
@@ -704,10 +704,15 @@ the subtelomere).
 | Pf1g02174 | Pf3D7_09_v3:53637..54497 (-) | PfGA01_140005900 (replaced) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0900700 (2666 bp) | PF3D7_0900900 (577 bp) | Wrong model. Lies over the pseudogene PF3D7_0900800 (PfEMP1 exon 2); RNA-seq only on the pseudogene. |
 | Pf1g02546 | Pf3D7_10_v3:23086..23675 (+) | PfNF166_000007400 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_1000100 (4815 bp) |  |
 | Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) | Delete. No RNA-seq expression, no intron junction. |
-| Pf1g02937 | Pf3D7_10_v3:1581698..1582711 (-) | PfNF54_100043800 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1039200 (4707 bp) | PF3D7_1039400 (4441 bp) | Keep, model to fix. Low RNA-seq; intron junctions inside the single-exon model (as Pf1g01209). |
-| Pf1g02977 | Pf3D7_11_v3:96964..99609 (+) | PfNF54_110007300 (alternative) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1101900 (6090 bp) | PF3D7_1102100 (4691 bp) |  |
+| Pf1g02937 | Pf3D7_10_v3:1581698..1582711 (-) | PfNF54_100043800 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1039200 (4707 bp) | PF3D7_1039400 (4441 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
+| Pf1g02977 | Pf3D7_11_v3:96964..99609 (+) | PfNF54_110007300 (alternative) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1101900 (6090 bp) | PF3D7_1102100 (4691 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
 | Pf1g03980 | Pf3D7_12_v3:2251737..2252449 (-) | Pf7G8-2_000048900 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1255200 (2775 bp) | – |  |
 | Pf1g04686 | Pf3D7_13_v3:2895368..2896245 (-) | Pf7G8-2_000248700 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1373500 (3028 bp) | – |  |
+
+**Plasmodium repeat_MYXSPDY.** Three valid new genes (Pf1g01209, Pf1g02937, Pf1g02977, models from NF54) look like
+one gene family not annotated in 3D7: each is a single-exon model with low RNA-seq along it and intron junctions
+inside it, on the gene's strand. They need a closer look, as do the two MYXSPDY transfers with an invalid ORF
+(Pf1g01505, Pf1g01506).
 
 ---
 
