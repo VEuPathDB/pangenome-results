@@ -16,7 +16,7 @@
 | [02 – TE Annotation & Clean Up](README.md#02--te-annotation--clean-up) | Transposable element annotation, candidate validation | ✅ Complete |
 | [03 – *de novo* Genome Annotation](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/03_denovo_Genome_Annotation/README.md) | Gene prediction on cleaned assemblies | ⏭️ Not needed |
 | [04 – Protein evidence (InterProScan and PSAURON)](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) | Functional domain annotation; PSAURON scores | ✅ Complete |
-| [05 – Cross-genome Annotation Integration](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md) | Merging and standardising annotations across strains | ⏳ To do |
+| [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/06_GET_PANGENES/README.md) | Synteny-based ortholog clustering (core / accessory) | ⏳ To do |
 | [07 – Post-GET_PANGENES Adjusting and Visualisation](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md) | Safe fix, curation and removal of false genes, final figures and explorer | ⏳ To do |
 | [08 – Final GFF](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
@@ -62,6 +62,17 @@ Not needed: all genomes already have a genome annotation (GFF, from PlasmoDB).
 - **Even protein evidence across the 16 genomes** (5,094–5,356 proteins each). About 71% of the proteins have at
   least one InterPro domain and about 62% at least one Pfam domain; about 10% have no hit in any InterProScan analysis.
 - **PSAURON** calls 94.2–95.0% of the proteins protein-coding in every genome.
+
+### 05 – Cross-genome Annotation Integration
+
+- **8,392 panel genes:** the 5,443 3D7 genes and 2,949 genes not in the 3D7 annotation. 2 panel genes were removed
+  because they lost an opposite-strand overlap.
+- **5,342–5,495 genes per genome.** Every strain ends with more genes than in its own annotation: 171–379 genes per
+  genome were added where the genome had no gene; 3–69 per genome were eliminated by the quality rules, mostly
+  proteins shorter than 100 aa.
+- **96% of the genes have a valid ORF.** Most invalid ORFs are frameshifts.
+- **One 3D7 gene is missing from the final 3D7 GFF:** PF3D7_1440200 (SPP) shares its first two CDS exons with its
+  neighbour PF3D7_1440300 (PBGS), and only one gene is kept per place. It will be added back to the final GFF.
 
 ---
 
