@@ -697,7 +697,7 @@ the subtelomere).
 | Pf1g01506 | Pf3D7_06_v3:1303437..1305215 (-) | Pf7G8-2_000325700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (4064 bp) | PF3D7_0631200 (8593 bp) | To investigate. MYXSPDY family; split model, one gene with Pf1g01505 (intron junctions on its strand join the two). |
 | Pf1g01525 | Pf3D7_06_v3:1389363..1389871 (-) | PfNF166_090042800 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0632800 (6736 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
 | Pf1g01834 | Pf3D7_07_v3:1429835..1430325 (-) | PfNF166_000020400 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0733000 (3601 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
-| Pf1g01835 | Pf3D7_08_v3:9499..11575 (-) | Pf7G8-2_000006000 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0800100 (9786 bp) |  |
+| Pf1g01835 | Pf3D7_08_v3:9499..11575 (-) | Pf7G8-2_000006000 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0800100 (9786 bp) | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
 | Pf1g02162 | Pf3D7_08_v3:1449577..1450158 (-) | PfNF166_000007000 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0833500 (6128 bp) | – |  |
 | Pf1g02163 | Pf3D7_09_v3:9188..10224 (-) | PfNF166_060037200 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0900100 (9856 bp) |  |
 | Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) | Delete. No RNA-seq expression. |
