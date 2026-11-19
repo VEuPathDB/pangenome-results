@@ -700,7 +700,7 @@ the subtelomere).
 | Pf1g01835 | Pf3D7_08_v3:9499..11575 (-) | Pf7G8-2_000006000 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0800100 (9786 bp) |  |
 | Pf1g02162 | Pf3D7_08_v3:1449577..1450158 (-) | PfNF166_000007000 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0833500 (6128 bp) | – |  |
 | Pf1g02163 | Pf3D7_09_v3:9188..10224 (-) | PfNF166_060037200 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0900100 (9856 bp) |  |
-| Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) |  |
+| Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) | Delete. No RNA-seq expression. |
 | Pf1g02174 | Pf3D7_09_v3:53637..54497 (-) | PfGA01_140005900 (replaced) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0900700 (2666 bp) | PF3D7_0900900 (577 bp) |  |
 | Pf1g02546 | Pf3D7_10_v3:23086..23675 (+) | PfNF166_000007400 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_1000100 (4815 bp) |  |
 | Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) |  |
