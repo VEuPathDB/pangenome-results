@@ -3,3 +3,6 @@
 # GFFs copied for JBrowse
 *.gff
 *.gff3
+
+# working list for the JBrowse check (its contents are in the report)
+Pfalciparum/05_Basket_annotation_integration/basket_annotation/3D7_new_genes.tsv
