@@ -684,30 +684,32 @@ The 22 genes the pipeline added to 3D7 (`not_in_reference_annotation=True` in th
 JBrowse with the PlasmoDB RNA-seq tracks. Neighbours: the nearest 3D7 gene on each side ("–": none, the gene is in
 the subtelomere).
 
-| Gene | Location | Model from | ORF | Description | Left 3D7 gene | Right 3D7 gene | Verdict |
-|---|---|---|---|---|---|---|---|
-| Pf1g00001 | Pf3D7_01_v3:25038..25433 (+) | PfNF54_010005300 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0100100 (4077 bp) | Delete. No RNA-seq expression. |
-| Pf1g00002 | Pf3D7_01_v3:26114..26693 (+) | PfNF166_020005200 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_0100100 (2817 bp) | Delete. No RNA-seq expression. |
-| Pf1g00017 | Pf3D7_01_v3:76931..77266 (-) | PfNF166_000008900 (target_invalid_orf) | invalid | DnaJ domain containing protein, putative | PF3D7_0101400 (122 bp) | PF3D7_0101500 (975 bp) | Delete. Invalid ORF in 3D7; RNA-seq from the 3′ UTR of PF3D7_0101400; no junction for its intron. |
-| Pf1g00380 | Pf3D7_03_v3:33904..34314 (+) | PfNF54_030005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0300100 (2651 bp) | Delete. No RNA-seq expression. |
-| Pf1g00874 | Pf3D7_04_v3:1183161..1183614 (-) | PfNF166_060036700 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0426000 (2935 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
-| Pf1g01209 | Pf3D7_06_v3:60200..62845 (+) | PfNF54_060006300 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0601400 (7302 bp) | PF3D7_0601500 (2943 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
-| Pf1g01368 | Pf3D7_06_v3:722865..723095 (-) | PfNF54_060022400 (filled) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0617300 (1553 bp) | PF3D7_0617400 (22 bp) | Delete. 3′ UTR of PF3D7_0617400 (var). |
-| Pf1g01505 | Pf3D7_06_v3:1302392..1302665 (-) | PfNF166_100043700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (3019 bp) | PF3D7_0631200 (11143 bp) | To investigate. MYXSPDY family; split model, one gene with Pf1g01506 (intron junctions on its strand join the two). |
-| Pf1g01506 | Pf3D7_06_v3:1303437..1305215 (-) | Pf7G8-2_000325700 (target_invalid_orf) | invalid | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (4064 bp) | PF3D7_0631200 (8593 bp) | To investigate. MYXSPDY family; split model, one gene with Pf1g01505 (intron junctions on its strand join the two). |
-| Pf1g01525 | Pf3D7_06_v3:1389363..1389871 (-) | PfNF166_090042800 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0632800 (6736 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
-| Pf1g01834 | Pf3D7_07_v3:1429835..1430325 (-) | PfNF166_000020400 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0733000 (3601 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
-| Pf1g01835 | Pf3D7_08_v3:9499..11575 (-) | Pf7G8-2_000006000 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0800100 (9786 bp) | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
-| Pf1g02162 | Pf3D7_08_v3:1449577..1450158 (-) | PfNF166_000007000 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_0833500 (6128 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
-| Pf1g02163 | Pf3D7_09_v3:9188..10224 (-) | PfNF166_060037200 (target_invalid_orf) | invalid | hypothetical protein | – | PF3D7_0900100 (9856 bp) |  |
-| Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) | Delete. No RNA-seq expression. |
-| Pf1g02174 | Pf3D7_09_v3:53637..54497 (-) | PfGA01_140005900 (replaced) | valid | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0900700 (2666 bp) | PF3D7_0900900 (577 bp) | Wrong model. Lies over the pseudogene PF3D7_0900800 (PfEMP1 exon 2); RNA-seq only on the pseudogene. |
-| Pf1g02546 | Pf3D7_10_v3:23086..23675 (+) | PfNF166_000007400 (target_invalid_orf) | invalid | hypothetical protein, conserved | – | PF3D7_1000100 (4815 bp) | Delete. Invalid ORF in 3D7; no RNA-seq expression, no intron junction. |
-| Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) | Delete. No RNA-seq expression, no intron junction. |
-| Pf1g02937 | Pf3D7_10_v3:1581698..1582711 (-) | PfNF54_100043800 (filled) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1039200 (4707 bp) | PF3D7_1039400 (4441 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
-| Pf1g02977 | Pf3D7_11_v3:96964..99609 (+) | PfNF54_110007300 (alternative) | valid | Plasmodium repeat_MYXSPDY, putative | PF3D7_1101900 (6090 bp) | PF3D7_1102100 (4691 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
-| Pf1g03980 | Pf3D7_12_v3:2251737..2252449 (-) | Pf7G8-2_000048900 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1255200 (2775 bp) | – |  |
-| Pf1g04686 | Pf3D7_13_v3:2895368..2896245 (-) | Pf7G8-2_000248700 (target_invalid_orf) | invalid | hypothetical protein, conserved | PF3D7_1373500 (3028 bp) | – |  |
+| Gene | Location | Model from | ORF | Domain | Description | Left 3D7 gene | Right 3D7 gene | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| Pf1g00001 | Pf3D7_01_v3:25038..25433 (+) | PfNF54_010005300 (filled) | valid | no | hypothetical protein, conserved | – | PF3D7_0100100 (4077 bp) | Delete. No RNA-seq expression. |
+| Pf1g00002 | Pf3D7_01_v3:26114..26693 (+) | PfNF166_020005200 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | – | PF3D7_0100100 (2817 bp) | Delete. No RNA-seq expression. |
+| Pf1g00017 | Pf3D7_01_v3:76931..77266 (-) | PfNF166_000008900 (target_invalid_orf) | invalid | yes | DnaJ domain containing protein, putative | PF3D7_0101400 (122 bp) | PF3D7_0101500 (975 bp) | Delete. Invalid ORF in 3D7; RNA-seq from the 3′ UTR of PF3D7_0101400; no junction for its intron. |
+| Pf1g00380 | Pf3D7_03_v3:33904..34314 (+) | PfNF54_030005200 (filled) | valid | no | hypothetical protein, conserved | – | PF3D7_0300100 (2651 bp) | Delete. No RNA-seq expression. |
+| Pf1g00874 | Pf3D7_04_v3:1183161..1183614 (-) | PfNF166_060036700 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_0426000 (2935 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
+| Pf1g01209 | Pf3D7_06_v3:60200..62845 (+) | PfNF54_060006300 (filled) | valid | yes | Plasmodium repeat_MYXSPDY, putative | PF3D7_0601400 (7302 bp) | PF3D7_0601500 (2943 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
+| Pf1g01368 | Pf3D7_06_v3:722865..723095 (-) | PfNF54_060022400 (filled) | valid | yes | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0617300 (1553 bp) | PF3D7_0617400 (22 bp) | Delete. 3′ UTR of PF3D7_0617400 (var). |
+| Pf1g01505 | Pf3D7_06_v3:1302392..1302665 (-) | PfNF166_100043700 (target_invalid_orf) | invalid | yes | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (3019 bp) | PF3D7_0631200 (11143 bp) | To investigate. MYXSPDY family; split model, one gene with Pf1g01506 (intron junctions on its strand join the two). |
+| Pf1g01506 | Pf3D7_06_v3:1303437..1305215 (-) | Pf7G8-2_000325700 (target_invalid_orf) | invalid | yes | Plasmodium repeat_MYXSPDY, putative | PF3D7_0631100 (4064 bp) | PF3D7_0631200 (8593 bp) | To investigate. MYXSPDY family; split model, one gene with Pf1g01505 (intron junctions on its strand join the two). |
+| Pf1g01525 | Pf3D7_06_v3:1389363..1389871 (-) | PfNF166_090042800 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_0632800 (6736 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
+| Pf1g01834 | Pf3D7_07_v3:1429835..1430325 (-) | PfNF166_000020400 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_0733000 (3601 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
+| Pf1g01835 | Pf3D7_08_v3:9499..11575 (-) | Pf7G8-2_000006000 (target_invalid_orf) | invalid | no | hypothetical protein | – | PF3D7_0800100 (9786 bp) | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
+| Pf1g02162 | Pf3D7_08_v3:1449577..1450158 (-) | PfNF166_000007000 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_0833500 (6128 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression. |
+| Pf1g02163 | Pf3D7_09_v3:9188..10224 (-) | PfNF166_060037200 (target_invalid_orf) | invalid | no | hypothetical protein | – | PF3D7_0900100 (9856 bp) | Delete. Invalid ORF in 3D7; no RNA-seq expression, no intron junction. |
+| Pf1g02164 | Pf3D7_09_v3:16390..16848 (+) | PfNF54_090005200 (filled) | valid | no | hypothetical protein, conserved | – | PF3D7_0900100 (3232 bp) | Delete. No RNA-seq expression. |
+| Pf1g02174 | Pf3D7_09_v3:53637..54497 (-) | PfGA01_140005900 (replaced) | valid | yes | acidic terminal segments, variant surface antigen of PfEMP1 | PF3D7_0900700 (2666 bp) | PF3D7_0900900 (577 bp) | Wrong model. Lies over the pseudogene PF3D7_0900800 (PfEMP1 exon 2); RNA-seq only on the pseudogene. |
+| Pf1g02546 | Pf3D7_10_v3:23086..23675 (+) | PfNF166_000007400 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | – | PF3D7_1000100 (4815 bp) | Delete. Invalid ORF in 3D7; no RNA-seq expression, no intron junction. |
+| Pf1g02933 | Pf3D7_10_v3:1565259..1566537 (-) | PfNF166_100043400 (filled) | valid | no | hypothetical protein | PF3D7_1038900 (1371 bp) | PF3D7_1039000 (2172 bp) | Delete. No RNA-seq expression, no intron junction. |
+| Pf1g02937 | Pf3D7_10_v3:1581698..1582711 (-) | PfNF54_100043800 (filled) | valid | yes | Plasmodium repeat_MYXSPDY, putative | PF3D7_1039200 (4707 bp) | PF3D7_1039400 (4441 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
+| Pf1g02977 | Pf3D7_11_v3:96964..99609 (+) | PfNF54_110007300 (alternative) | valid | yes | Plasmodium repeat_MYXSPDY, putative | PF3D7_1101900 (6090 bp) | PF3D7_1102100 (4691 bp) | To investigate. MYXSPDY family, not annotated in 3D7; low RNA-seq, intron junctions inside the single-exon model. |
+| Pf1g03980 | Pf3D7_12_v3:2251737..2252449 (-) | Pf7G8-2_000048900 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_1255200 (2775 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression, no intron junction. |
+| Pf1g04686 | Pf3D7_13_v3:2895368..2896245 (-) | Pf7G8-2_000248700 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_1373500 (3028 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression, no intron junction. |
+
+**Result:** 16 to delete (no RNA-seq support, or the UTR of a 3D7 gene), 1 wrong model, 5 MYXSPDY genes to investigate.
 
 **Plasmodium repeat_MYXSPDY.** Three valid new genes (Pf1g01209, Pf1g02937, Pf1g02977, models from NF54) look like
 one gene family not annotated in 3D7: each is a single-exon model with low RNA-seq along it and intron junctions
