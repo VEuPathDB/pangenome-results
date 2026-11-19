@@ -1,1 +1,5 @@
 .DS_Store
+
+# GFFs copied for JBrowse
+*.gff
+*.gff3
