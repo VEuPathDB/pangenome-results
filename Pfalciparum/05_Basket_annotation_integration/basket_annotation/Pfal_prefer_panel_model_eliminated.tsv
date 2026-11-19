@@ -1,0 +1,270 @@
+genome	gene	location	fate	reason	signs	protein_aa	psauron	overlapped_by
+7G8-2019	Pf7G8-2_000006100	VBRD01000016.1:26-414(-)	not eligible	protein shorter than 100 aa	low_psauron,short	41	0.455	-
+7G8-2019	Pf7G8-2_000006200	VBRD01000016.1:464-697(+)	not eligible	protein shorter than 100 aa	low_psauron,short	77	0.176	-
+7G8-2019	Pf7G8-2_000035100	VBRD01000001.1:7659-8332(+)	not eligible	PSAURON 0.079 < 0.9 (sequence in the reference)	low_psauron	121	0.079	-
+7G8-2019	Pf7G8-2_000035200	VBRD01000001.1:30110-30447(-)	not eligible	protein shorter than 100 aa	low_psauron,short	75	0.031	-
+7G8-2019	Pf7G8-2_000046200	VBRD01000001.1:468356-468580(-)	not eligible	protein shorter than 100 aa	low_psauron,short	74	0.331	-
+7G8-2019	Pf7G8-2_000046300	VBRD01000001.1:468808-469317(+)	not eligible	protein shorter than 100 aa	short	78	0.947	-
+7G8-2019	Pf7G8-2_000048600	VBRD01000003.1:13210-13600(+)	not eligible	protein shorter than 100 aa	low_psauron,short	87	0.647	-
+7G8-2019	Pf7G8-2_000048700	VBRD01000003.1:16379-16645(+)	not eligible	protein shorter than 100 aa	low_psauron,short	88	0.382	-
+7G8-2019	Pf7G8-2_000048800	VBRD01000003.1:19186-19392(-)	not eligible	protein shorter than 100 aa	low_psauron,short	68	0.018	-
+7G8-2019	Pf7G8-2_000086600	VBRD01000004.1:693194-693421(+)	not eligible	protein shorter than 100 aa	low_psauron,short	75	0.425	-
+7G8-2019	Pf7G8-2_000093900	VBRD01000005.1:20766-21062(-)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.004	-
+7G8-2019	Pf7G8-2_000094400	VBRD01000005.1:47816-48028(-)	not eligible	protein shorter than 100 aa	short	70	0.999	-
+7G8-2019	Pf7G8-2_000118700	VBRD01000005.1:1098492-1098758(+)	not eligible	protein shorter than 100 aa	low_psauron,short	88	0.002	-
+7G8-2019	Pf7G8-2_000118800	VBRD01000005.1:1104595-1105604(-)	not eligible	PSAURON 0.844 < 0.9 (sequence in the reference)	low_psauron	245	0.844	-
+7G8-2019	Pf7G8-2_000119000	VBRD01000006.1:17563-18474(-)	not eligible	protein shorter than 100 aa	low_psauron,short	88	0.773	-
+7G8-2019	Pf7G8-2_000152600	VBRD01000006.1:1414520-1414753(-)	not eligible	protein shorter than 100 aa	low_psauron,short	77	0.176	-
+7G8-2019	Pf7G8-2_000152700	VBRD01000006.1:1425523-1425777(-)	not eligible	protein shorter than 100 aa	low_psauron,short	84	0.798	-
+7G8-2019	Pf7G8-2_000152800	VBRD01000006.1:1435755-1436102(-)	not eligible	PSAURON 0.013 < 0.9 (sequence in the reference)	low_psauron	115	0.013	-
+7G8-2019	Pf7G8-2_000153600	VBRD01000008.1:1980-2252(+)	not eligible	protein shorter than 100 aa	short,overlap	90	0.994	Pf2g01172 (PF3D7_0601200)
+7G8-2019	Pf7G8-2_000153800	VBRD01000008.1:6624-6848(+)	not eligible	protein shorter than 100 aa	short,overlap	74	0.991	Pf2g01176 (PF3D7_1101900)
+7G8-2019	Pf7G8-2_000154300	VBRD01000008.1:31731-32148(-)	not eligible	protein shorter than 100 aa	short	67	0.918	-
+7G8-2019	Pf7G8-2_000183100	VBRD01000002.1:6309-6548(+)	not eligible	protein shorter than 100 aa	low_psauron,short	79	0.257	-
+7G8-2019	Pf7G8-2_000183200	VBRD01000002.1:13343-13717(-)	not eligible	protein shorter than 100 aa	low_psauron,short	75	0.001	-
+7G8-2019	Pf7G8-2_000183300	VBRD01000002.1:19401-19604(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.991	Pf2g00131 (PF3D7_0201100)
+7G8-2019	Pf7G8-2_000183400	VBRD01000002.1:22493-22567(+)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	24	0.171	Pf2g00132 (PfKH01_140005800)
+7G8-2019	Pf7G8-2_000184000	VBRD01000002.1:47542-47625(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	27	0.116	Pf2g00136 (PF3D7_0101000)
+7G8-2019	Pf7G8-2_000184100	VBRD01000010.1:4982-5390(-)	not eligible	no valid ORF in any genome	low_psauron,short,no_valid_orf	74	0.842	-
+7G8-2019	Pf7G8-2_000184500	VBRD01000010.1:40934-41146(-)	not eligible	protein shorter than 100 aa	short	70	0.999	-
+7G8-2019	Pf7G8-2_000215800	VBRD01000011.1:7100-7536(+)	not eligible	protein shorter than 100 aa	low_psauron,short	72	0.758	-
+7G8-2019	Pf7G8-2_000215900	VBRD01000011.1:17931-18351(-)	not eligible	protein shorter than 100 aa	low_psauron,short	99	0.030	-
+7G8-2019	Pf7G8-2_000216500	VBRD01000011.1:56332-56427(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	31	0.746	Pf2g01776 (PfSN01_000006900)
+7G8-2019	Pf7G8-2_000245000	VBRD01000011.1:1284201-1284497(-)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.076	-
+7G8-2019	Pf7G8-2_000248400	VBRD01000011.1:1449105-1449745(+)	not eligible	PSAURON 0.081 < 0.9 (sequence in the reference)	low_psauron	105	0.081	-
+7G8-2019	Pf7G8-2_000248500	VBRD01000012.1:6086-6859(+)	not eligible	PSAURON 0.002 < 0.9 (sequence in the reference)	low_psauron	172	0.002	-
+7G8-2019	Pf7G8-2_000248600	VBRD01000012.1:24311-24574(+)	not eligible	no valid ORF in any genome	low_psauron,short,no_valid_orf	87	0.862	-
+7G8-2019	Pf7G8-2_000248800	VBRD01000012.1:46055-46288(+)	not eligible	protein shorter than 100 aa	low_psauron,short	77	0.416	-
+7G8-2019	Pf7G8-2_000279100	VBRD01000012.1:1253288-1253919(+)	not eligible	protein shorter than 100 aa	short	75	0.940	-
+7G8-2019	Pf7G8-2_000285900	VBRD01000012.1:1501570-1501956(-)	not eligible	PSAURON 0.430 < 0.9 (sequence in the reference)	low_psauron	128	0.430	-
+7G8-2019	Pf7G8-2_000286000	VBRD01000012.1:1511608-1511931(-)	not eligible	PSAURON 0.398 < 0.9 (sequence in the reference)	low_psauron,overlap	107	0.398	Pf2g02473 (PfNF54_030005200)
+7G8-2019	Pf7G8-2_000286100	VBRD01000012.1:1511964-1512504(-)	not eligible	PSAURON 0.667 < 0.9 (sequence in the reference)	low_psauron,overlap	144	0.667	Pf2g02473 (PfNF54_030005200)
+7G8-2019	Pf7G8-2_000286200	VBRD01000012.1:1523948-1524292(+)	not eligible	no valid ORF in any genome	low_psauron,short,no_valid_orf	82	0.762	-
+7G8-2019	Pf7G8-2_000351700	VBRD01000015.1:1056699-1056956(-)	not eligible	protein shorter than 100 aa	short	85	0.969	-
+7G8-2019	Pf7G8-2_000372400	VBRD01000014.1:101350-101412(+)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	20	0.242	Pf2g02877 (PF3D7_1100500)
+7G8-2019	Pf7G8-2_000403500	VBRD01000017.1:1336252-1336485(-)	not eligible	protein shorter than 100 aa	low_psauron,short	77	0.176	-
+7G8-2019	Pf7G8-2_000403600	VBRD01000017.1:1342545-1342904(+)	not eligible	protein shorter than 100 aa	low_psauron,short	91	0.004	-
+7G8-2019	Pf7G8-2_000403700	VBRD01000017.1:1342944-1343231(+)	not eligible	protein shorter than 100 aa	low_psauron,short	95	0.002	-
+7G8-2019	Pf7G8-2_000403800	VBRD01000019.1:2335-2424(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	29	0.311	Pf2g03887 (PfNF166_000020600)
+7G8-2019	Pf7G8-2_000404000	VBRD01000019.1:5967-6056(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	29	0.311	Pf2g03888 (PF3D7_0833400)
+7G8-2019	Pf7G8-2_000404100	VBRD01000019.1:7722-7934(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.990	Pf2g03889 (PF3D7_1253900)
+7G8-2019	Pf7G8-2_000413400	VBRD01000019.1:401973-402338(-)	not eligible	protein shorter than 100 aa	low_psauron,short	84	0.694	-
+7G8-2019	Pf7G8-2_000457500	VBRD01000019.1:2132195-2132491(+)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.478	-
+7G8-2019	Pf7G8-2_000472900	VBRD01000019.1:2753469-2754154(-)	not eligible	PSAURON 0.155 < 0.9 (sequence in the reference)	low_psauron	135	0.155	-
+7G8-2019	Pf7G8-2_000474700	VBRD01000018.1:76423-76635(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.990	Pf2g03884 (PF3D7_0901200)
+7G8-2019	Pf7G8-2_000493800	VBRD01000020.1:787234-787434(-)	not eligible	protein shorter than 100 aa	low_psauron,short	66	0.828	-
+7G8-2019	Pf7G8-2_000553000	VBRD01000020.1:3291972-3292283(-)	not eligible	PSAURON 0.522 < 0.9 (sequence in the reference)	low_psauron,overlap	103	0.522	Pf2g05343 (PfNF166_000007000)
+7G8-2019	Pf7G8-2_000553100	VBRD01000020.1:3297818-3298411(+)	not eligible	PSAURON 0.122 < 0.9 (sequence in the reference)	low_psauron	108	0.122	-
+7G8	Pf7G8_040006000	Pf7G8_04:48067-48279(-)	not eligible	protein shorter than 100 aa	short	70	0.999	-
+7G8	Pf7G8_070005500	Pf7G8_07:40984-41196(-)	not eligible	protein shorter than 100 aa	short	70	0.999	-
+7G8	Pf7G8_120028900	Pf7G8_12:981601-981944(+)	not eligible	protein shorter than 100 aa	low_psauron,short	67	0.730	-
+7G8	Pf7G8_120029100	Pf7G8_12:997798-1002682(-)	not eligible	PSAURON 0.564 < 0.7	low_psauron,overlap	1566	0.564	Pf3g03572 (PF3D7_1223600)
+7G8	Pf7G8_120046300	Pf7G8_12:1765490-1765690(-)	not eligible	protein shorter than 100 aa	low_psauron,short	66	0.236	-
+7G8	Pf7G8_130076800	Pf7G8_13:2819907-2820270(+)	not eligible	protein shorter than 100 aa	short	84	0.927	-
+7G8	Pf7G8_130076900	Pf7G8_13:2820644-2820856(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.990	Pf3g04568 (PF3D7_0901200)
+7G8	Pf7G8_140084100	Pf7G8_14:3269512-3269879(+)	not eligible	protein shorter than 100 aa	short,overlap	84	0.951	Pf3g05344 (PF3D7_1479300)
+7G8	Pf7G8_140084200	Pf7G8_14:3270253-3270465(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.990	Pf3g05344 (PF3D7_1479300)
+CD01	PfCD01_000006200	PfCD01_00_1:37895-38107(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.991	Pf4g00013 (PF3D7_1254900)
+CD01	PfCD01_000007700	PfCD01_00_2:31812-31931(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	39	0.785	Pf4g00022 (PF3D7_0900350)
+CD01	PfCD01_000009100	PfCD01_00_3:3613-4218(+)	not eligible	PSAURON 0.239 < 0.9 (sequence in the reference)	low_psauron	201	0.239	-
+CD01	PfCD01_000009200	PfCD01_00_3:7428-7646(-)	not eligible	protein shorter than 100 aa	low_psauron,short	72	0.427	-
+CD01	PfCD01_000009300	PfCD01_00_3:15814-16068(+)	not eligible	protein shorter than 100 aa	low_psauron,short	84	0.533	-
+CD01	PfCD01_040005800	PfCD01_04:40601-40813(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.991	Pf4g00642 (PF3D7_0401100)
+CD01	PfCD01_060006700	PfCD01_06:73166-73396(+)	not eligible	protein shorter than 100 aa	short,overlap	76	0.973	Pf4g01234 (PF3D7_1039400)
+CD01	PfCD01_090039300	PfCD01_09:1353701-1353958(-)	not eligible	protein shorter than 100 aa	short	85	0.983	-
+CD01	PfCD01_100044300	PfCD01_10:1599269-1599493(-)	not eligible	protein shorter than 100 aa	short,overlap	74	0.982	Pf4g02926 (PF3D7_0601400)
+CD01	PfCD01_110007400	PfCD01_11:89582-89806(+)	not eligible	protein shorter than 100 aa	short,overlap	74	0.982	Pf4g02955 (PF3D7_1101900)
+Dd2	PfDd2_040030700	PfDd2_04:1094720-1094932(+)	not eligible	protein shorter than 100 aa	short	70	0.998	-
+Dd2	PfDd2_050037900	PfDd2_05:1362550-1362807(-)	not eligible	protein shorter than 100 aa	short	85	0.981	-
+Dd2	PfDd2_060005000	PfDd2_06:3290-3493(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.991	Pf5g01177 (PF3D7_0632250)
+GA01	PfGA01_000006200	PfGA01_00_2:34612-34815(+)	not eligible	protein shorter than 100 aa	short,overlap	67	0.991	Pf6g00009 (PF3D7_0900350)
+GA01	PfGA01_010019700	PfGA01_01:582674-582886(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf6g00178 (PF3D7_0401100)
+GA01	PfGA01_030007000	PfGA01_03:82687-82890(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.968	Pf6g00403 (PF3D7_0300600)
+GA01	PfGA01_090005800	PfGA01_09:67262-67474(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.998	Pf6g02151 (PF3D7_0201100)
+GA01	PfGA01_110033000	PfGA01_11:1093611-1093868(-)	not eligible	protein shorter than 100 aa	short	85	0.969	-
+GA01	PfGA01_140006200	PfGA01_14:40255-40458(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.991	Pf6g04649 (PF3D7_0632250)
+GB4	PfGB4_000016900	PfGB4_00_5:36178-36390(-)	not eligible	protein shorter than 100 aa	short	70	0.999	-
+GB4	PfGB4_010018500	PfGB4_01:547934-548376(+)	not eligible	PSAURON 0.022 < 0.9 (sequence in the reference)	low_psauron,overlap	121	0.022	Pf7g00251 (PF3D7_0114900)
+GB4	PfGB4_030006300	PfGB4_03:61559-61681(-)	not eligible	protein shorter than 100 aa	short,overlap	40	0.939	Pf7g00464 (PF3D7_0201100)
+GB4	PfGB4_040030600	PfGB4_04:1109390-1109602(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf7g00948 (PF3D7_0401100)
+GB4	PfGB4_050015200	PfGB4_05:427001-427228(+)	not eligible	protein shorter than 100 aa	short	75	0.972	-
+GB4	PfGB4_110007400	PfGB4_11:99133-99345(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf7g02963 (PF3D7_1373200)
+GB4	PfGB4_110007900	PfGB4_11:114811-115023(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.995	Pf7g02968 (PF3D7_0300600)
+GB4	PfGB4_120005300	PfGB4_12:11197-11421(+)	not eligible	protein shorter than 100 aa	short,overlap	74	0.996	Pf7g03454 (PF3D7_1039400)
+GB4	PfGB4_140006100	PfGB4_14:40619-40831(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf7g04706 (PF3D7_1254900)
+GB4	PfGB4_140006600	PfGB4_14:56326-56538(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.993	Pf7g04711 (PF3D7_0632250)
+GN01	PfGN01_020006200	PfGN01_02:57620-57760(-)	not eligible	protein shorter than 100 aa	short,overlap	46	0.981	Pf8g00167 (PF3D7_0300600)
+GN01	PfGN01_030005800	PfGN01_03:40091-40231(-)	not eligible	protein shorter than 100 aa	short,overlap	46	0.981	Pf8g00390 (PF3D7_1373200)
+GN01	PfGN01_040006100	PfGN01_04:59378-59500(-)	not eligible	protein shorter than 100 aa	short,overlap	40	0.939	Pf8g00648 (PF3D7_0201100)
+GN01	PfGN01_060037500	PfGN01_06:1337703-1337927(-)	not eligible	protein shorter than 100 aa	short,overlap	74	0.991	Pf8g01531 (PF3D7_1101900)
+GN01	PfGN01_110054300	PfGN01_11:1990629-1990832(+)	not eligible	protein shorter than 100 aa	short,overlap	67	0.992	Pf8g03434 (PF3D7_0100700)
+GN01	PfGN01_130006400	PfGN01_13:76931-77134(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.991	Pf8g04002 (PF3D7_0632250)
+HB3	PfHB3_050038000	PfHB3_05:1363151-1363408(+)	not eligible	protein shorter than 100 aa	short,overlap	85	0.981	Pf9g01179 (PF3D7_1149700)
+HB3	PfHB3_060009000	PfHB3_06:166332-166604(+)	not eligible	protein shorter than 100 aa	low_psauron,short	90	0.012	-
+HB3	PfHB3_060036700	PfHB3_06:1297489-1297692(+)	not eligible	protein shorter than 100 aa	short,overlap	67	0.987	Pf9g01499 (PF3D7_0632250)
+HB3	PfHB3_100005200	PfHB3_10:6364-6591(-)	not eligible	protein shorter than 100 aa	short,overlap	75	0.999	Pf9g02467 (PF3D7_1000700)
+HB3	PfHB3_110032200	PfHB3_11:1036227-1036484(-)	not eligible	protein shorter than 100 aa	short	85	0.969	-
+HB3	PfHB3_130078400	PfHB3_13:2920119-2920346(+)	not eligible	protein shorter than 100 aa	short,overlap	75	0.999	Pf9g04545 (Pf7G8-2_000249500)
+HB3	PfHB3_130078900	PfHB3_13:2936305-2936517(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf9g04550 (PF3D7_0401100)
+IT	PfIT_000011700	PfIT_00_9:15370-15510(-)	not eligible	protein shorter than 100 aa	short,overlap	46	0.981	Pf10g00035 (PF3D7_0100700)
+IT	PfIT_000012400	PfIT_00_9:34725-34943(-)	not eligible	protein shorter than 100 aa	short	72	0.993	-
+IT	PfIT_030005400	PfIT_03:35859-36062(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.968	Pf10g00398 (PF3D7_0632250)
+IT	PfIT_070036200	PfIT_07:1376877-1377089(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.993	Pf10g01824 (PF3D7_0201100)
+IT	PfIT_130005700	PfIT_13:53344-53556(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.996	Pf10g03919 (PF3D7_1254900)
+IT	PfIT_140007100	PfIT_14:92962-93174(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.993	Pf10g04625 (PF3D7_1373200)
+KE01	PfKE01_000005600	PfKE01_00_1:20185-20253(+)	not eligible	protein shorter than 100 aa	low_psauron,short	22	0.439	-
+KE01	PfKE01_040006000	PfKE01_04:45062-45274(-)	not eligible	protein shorter than 100 aa	short	70	0.999	-
+KE01	PfKE01_040007500	PfKE01_04:90059-90271(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.995	Pf11g00610 (PF3D7_0201100)
+KE01	PfKE01_050037400	PfKE01_05:1332543-1332755(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.991	Pf11g01174 (PF3D7_0300600)
+KE01	PfKE01_100021600	PfKE01_10:660562-660883(-)	not eligible	protein shorter than 100 aa	short	70	0.958	-
+KE01	PfKE01_140005600	PfKE01_14:35931-36143(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf11g04591 (PF3D7_0401100)
+KH01	PfKH01_000028400	PfKH01_00_26:15062-15461(+)	not eligible	protein shorter than 100 aa	short,overlap	78	0.881	Pf12g00012 (PF3D7_0617500)
+KH01	PfKH01_000029100	PfKH01_00_27:42754-43047(-)	not eligible	protein shorter than 100 aa	short,overlap	97	1.000	Pf12g00018 (PF3D7_0732100)
+KH01	PfKH01_000032800	PfKH01_00_3:73271-73552(-)	not eligible	protein shorter than 100 aa	short	93	1.000	-
+KH01	PfKH01_010020800	PfKH01_01:599512-599724(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf12g00191 (PF3D7_0300600)
+KH01	PfKH01_010021100	PfKH01_01:608983-609195(+)	not eligible	protein shorter than 100 aa	short	70	0.997	-
+KH01	PfKH01_040027300	PfKH01_04:992135-992347(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf12g00879 (PF3D7_0732600)
+KH01	PfKH01_050038100	PfKH01_05:1397193-1397315(+)	not eligible	protein shorter than 100 aa	short,overlap	40	0.939	Pf12g01254 (PF3D7_0201100)
+KH01	PfKH01_090005500	PfKH01_09:35894-36034(-)	not eligible	protein shorter than 100 aa	short,overlap	46	0.981	Pf12g02201 (PF3D7_0632250)
+KH01	PfKH01_090042000	PfKH01_09:1452229-1452441(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf12g02566 (PF3D7_1373200)
+KH01	PfKH01_100043600	PfKH01_10:1554460-1554684(-)	not eligible	protein shorter than 100 aa	short,overlap	74	0.996	Pf12g02963 (PF3D7_0631200)
+KH01	PfKH01_120006100	PfKH01_12:53875-54087(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf12g03442 (PF3D7_0900350)
+KH01	PfKH01_120006500	PfKH01_12:67143-67355(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf12g03446 (PF3D7_0401100)
+KH01	PfKH01_140006000	PfKH01_14:47403-47525(-)	not eligible	protein shorter than 100 aa	short	40	0.939	-
+KH01	PfKH01_140085000	PfKH01_14:3302209-3302421(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf12g05449 (PF3D7_1254900)
+KH02	PfKH02_040031100	PfKH02_04:1131648-1132048(+)	not eligible	protein shorter than 100 aa	short	78	0.985	-
+KH02	PfKH02_050037700	PfKH02_05:1342265-1351305(-)	not eligible	PSAURON 0.604 < 0.7	low_psauron	2921	0.604	-
+KH02	PfKH02_060038000	PfKH02_06:1373627-1373851(-)	not eligible	protein shorter than 100 aa	short,overlap	74	0.991	Pf13g01511 (PF3D7_1101900)
+KH02	PfKH02_080005800	PfKH02_08:60162-60284(-)	not eligible	protein shorter than 100 aa	short,overlap	40	0.939	Pf13g01816 (PF3D7_0833150)
+KH02	PfKH02_090005800	PfKH02_09:42362-42574(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf13g02147 (PF3D7_1254900)
+KH02	PfKH02_100005400	PfKH02_10:28225-28437(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf13g02523 (PF3D7_0401100)
+KH02	PfKH02_110006400	PfKH02_11:67031-67153(-)	not eligible	protein shorter than 100 aa	short,overlap	40	0.939	Pf13g02935 (PF3D7_0201100)
+NF166	PfNF166_000007100	VBRE01000022.1:110124-110631(+)	not eligible	PSAURON 0.069 < 0.9 (sequence in the reference)	low_psauron	114	0.069	-
+NF166	PfNF166_000007200	VBRE01000022.1:121674-122047(+)	not eligible	protein shorter than 100 aa	low_psauron,short	71	0.129	-
+NF166	PfNF166_000007300	VBRE01000002.1:17496-17702(+)	not eligible	protein shorter than 100 aa	low_psauron,short	68	0.894	-
+NF166	PfNF166_000007500	VBRE01000002.1:18264-18773(+)	not eligible	PSAURON 0.559 < 0.9 (sequence in the reference)	low_psauron	112	0.559	-
+NF166	PfNF166_000017600	VBRE01000013.1:19270-20206(+)	not eligible	PSAURON 0.613 < 0.9 (sequence in the reference)	low_psauron	210	0.613	-
+NF166	PfNF166_000018700	VBRE01000013.1:76537-77562(-)	not eligible	no valid ORF in any genome	no_valid_orf	341	1.000	-
+NF166	PfNF166_000019900	VBRE01000020.1:16258-16658(-)	not eligible	protein shorter than 100 aa	low_psauron,short	72	0.033	-
+NF166	PfNF166_000020000	VBRE01000020.1:17082-17818(+)	not eligible	PSAURON 0.717 < 0.9 (sequence in the reference)	low_psauron	165	0.717	-
+NF166	PfNF166_000020100	VBRE01000020.1:20161-20609(-)	not eligible	protein shorter than 100 aa	low_psauron,short	94	0.001	-
+NF166	PfNF166_000020200	VBRE01000020.1:20848-21261(+)	not eligible	protein shorter than 100 aa	low_psauron,short	99	0.635	-
+NF166	PfNF166_000020300	VBRE01000020.1:26138-26386(-)	not eligible	protein shorter than 100 aa	low_psauron,short	82	0.011	-
+NF166	PfNF166_000022500	VBRE01000020.1:100628-100693(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	21	0.326	Pf14g03376 (PF3D7_0701200)
+NF166	PfNF166_010006000	VBRE01000001.1:16641-16715(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	24	0.268	Pf14g00004 (PF3D7_0300500)
+NF166	PfNF166_010016100	VBRE01000001.1:406287-406511(-)	not eligible	protein shorter than 100 aa	low_psauron,short	74	0.331	-
+NF166	PfNF166_010016200	VBRE01000001.1:406739-407246(+)	not eligible	protein shorter than 100 aa	short	78	0.947	-
+NF166	PfNF166_010018200	VBRE01000001.1:498940-499382(+)	not eligible	PSAURON 0.022 < 0.9 (sequence in the reference)	low_psauron,overlap	121	0.022	Pf14g00124 (PF3D7_0114900)
+NF166	PfNF166_020005000	VBRE01000003.1:14854-15266(-)	not eligible	protein shorter than 100 aa	low_psauron,short	68	0.017	-
+NF166	PfNF166_020005100	VBRE01000003.1:16139-16675(-)	not eligible	PSAURON 0.002 < 0.9 (sequence in the reference)	low_psauron	146	0.002	-
+NF166	PfNF166_020005300	VBRE01000003.1:25959-26276(+)	not eligible	PSAURON 0.408 < 0.9 (sequence in the reference)	low_psauron	105	0.408	-
+NF166	PfNF166_020005400	VBRE01000003.1:26446-26992(+)	not eligible	protein shorter than 100 aa	low_psauron,short	76	0.234	-
+NF166	PfNF166_020006100	VBRE01000003.1:68522-68734(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf14g00159 (PF3D7_1254900)
+NF166	PfNF166_020025800	VBRE01000003.1:881066-881308(-)	not eligible	protein shorter than 100 aa	short,overlap	80	0.994	Pf14g00359 (PF3D7_0221500)
+NF166	PfNF166_030020500	VBRE01000004.1:572998-573288(+)	not eligible	protein shorter than 100 aa	low_psauron,short	96	0.342	-
+NF166	PfNF166_040007100	VBRE01000006.1:3923-4586(-)	not eligible	protein shorter than 100 aa	short	78	0.999	-
+NF166	PfNF166_040007500	VBRE01000006.1:42762-42836(+)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	24	0.171	Pf14g00595 (PF3D7_0401200)
+NF166	PfNF166_040031300	VBRE01000006.1:1083721-1083933(+)	not eligible	protein shorter than 100 aa	short	70	0.998	-
+NF166	PfNF166_040032000	VBRE01000006.1:1115607-1116075(+)	not eligible	PSAURON 0.002 < 0.9 (sequence in the reference)	low_psauron	121	0.002	-
+NF166	PfNF166_040032500	VBRE01000027.1:32523-32922(+)	not eligible	PSAURON 0.002 < 0.9 (sequence in the reference)	low_psauron	103	0.002	-
+NF166	PfNF166_040032600	VBRE01000027.1:42408-42729(+)	not eligible	no valid ORF in any genome	low_psauron,short,no_valid_orf	75	0.235	-
+NF166	PfNF166_050038000	VBRE01000007.1:1371366-1371578(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf14g01159 (PF3D7_1373200)
+NF166	PfNF166_050038300	VBRE01000007.1:1391122-1391481(+)	not eligible	protein shorter than 100 aa	low_psauron,short	86	0.035	-
+NF166	PfNF166_060006500	VBRE01000009.1:30194-30612(-)	not eligible	protein shorter than 100 aa	short	67	0.918	-
+NF166	PfNF166_060009500	VBRE01000009.1:161289-161561(+)	not eligible	protein shorter than 100 aa	low_psauron,short	90	0.012	-
+NF166	PfNF166_060036800	VBRE01000029.1:41007-41411(-)	not eligible	protein shorter than 100 aa	short	82	0.988	-
+NF166	PfNF166_060036900	VBRE01000029.1:41436-41897(-)	not eligible	no valid ORF in any genome	no_valid_orf	101	0.911	-
+NF166	PfNF166_060037000	VBRE01000029.1:41973-42339(+)	not eligible	protein shorter than 100 aa	low_psauron,short	95	0.011	-
+NF166	PfNF166_060037100	VBRE01000029.1:42612-42824(-)	not eligible	protein shorter than 100 aa	low_psauron,short	70	0.355	-
+NF166	PfNF166_060037300	VBRE01000029.1:56711-57148(+)	not eligible	protein shorter than 100 aa	short	69	0.991	-
+NF166	PfNF166_080033500	VBRE01000012.1:1229886-1230182(-)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.076	-
+NF166	PfNF166_080036400	VBRE01000012.1:1394339-1394551(-)	not eligible	protein shorter than 100 aa	low_psauron,short	70	0.610	-
+NF166	PfNF166_090005600	VBRE01000014.1:33411-33623(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.991	Pf14g02109 (PF3D7_0300600)
+NF166	PfNF166_090035100	VBRE01000014.1:1210906-1211540(+)	not eligible	protein shorter than 100 aa	short	75	0.940	-
+NF166	PfNF166_090038900	VBRE01000014.1:1318769-1319002(-)	not eligible	protein shorter than 100 aa	short	77	0.980	-
+NF166	PfNF166_090041900	VBRE01000014.1:1447982-1448194(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf14g02472 (PF3D7_0900350)
+NF166	PfNF166_090042700	VBRE01000014.1:1490001-1490258(-)	not eligible	protein shorter than 100 aa	low_psauron,short	85	0.139	-
+NF166	PfNF166_100043900	VBRE01000016.1:1607715-1607969(+)	not eligible	protein shorter than 100 aa	low_psauron,short	84	0.720	-
+NF166	PfNF166_110032200	VBRE01000018.1:1005206-1005463(-)	not eligible	protein shorter than 100 aa	short	85	0.969	-
+NF166	PfNF166_110051200	VBRE01000017.1:12567-12975(-)	not eligible	protein shorter than 100 aa	low_psauron,short	81	0.081	-
+NF166	PfNF166_130005000	VBRE01000023.1:3259-3729(-)	not eligible	no valid ORF in any genome	low_psauron,short,no_valid_orf	74	0.546	-
+NF166	PfNF166_130005100	VBRE01000023.1:25212-25439(+)	not eligible	protein shorter than 100 aa	short	75	0.963	-
+NF166	PfNF166_130005600	VBRE01000023.1:55686-55775(-)	not eligible	protein shorter than 100 aa	low_psauron,short,overlap	29	0.303	Pf14g03936 (PfKE01_080005800)
+NF166	PfNF166_130006000	VBRE01000023.1:67557-67769(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf14g03940 (PF3D7_0401100)
+NF166	PfNF166_130015800	VBRE01000023.1:483312-483728(-)	not eligible	PSAURON 0.465 < 0.9 (sequence in the reference)	low_psauron	101	0.465	-
+NF166	PfNF166_130060000	VBRE01000023.1:2214250-2214546(+)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.478	-
+NF54	PfNF54_010005000	VBRF01000001.1:13746-13952(+)	not eligible	protein shorter than 100 aa	short	68	0.923	-
+NF54	PfNF54_010005100	VBRF01000001.1:17843-18055(-)	not eligible	protein shorter than 100 aa	low_psauron,short	70	0.002	-
+NF54	PfNF54_010005200	VBRF01000001.1:20581-20847(-)	not eligible	protein shorter than 100 aa	low_psauron,short	88	0.006	-
+NF54	PfNF54_010005400	VBRF01000001.1:26555-26836(+)	not eligible	protein shorter than 100 aa	low_psauron,short	93	0.867	-
+NF54	PfNF54_010005500	VBRF01000001.1:26952-27494(+)	left out	PSAURON 0.808 < 0.9 (sequence in the reference)	low_psauron	180	0.808	-
+NF54	PfNF54_010006100	VBRF01000001.1:57681-57884(-)	not eligible	protein shorter than 100 aa	short,overlap	67	0.995	Pf15g00008 (PF3D7_0100700)
+NF54	PfNF54_010017200	VBRF01000003.1:406964-407188(-)	not eligible	protein shorter than 100 aa	low_psauron,short	74	0.331	-
+NF54	PfNF54_010017300	VBRF01000003.1:407416-407923(+)	not eligible	protein shorter than 100 aa	short	78	0.947	-
+NF54	PfNF54_010019400	VBRF01000003.1:508163-508426(+)	not eligible	protein shorter than 100 aa	short	87	0.999	-
+NF54	PfNF54_010019500	VBRF01000005.1:2-739(+)	not eligible	no valid ORF in any genome	no_valid_orf,overlap	245	1.000	Pf15g00157 (PfNF166_080005100)
+NF54	PfNF54_020005000	VBRF01000006.1:15346-15552(-)	not eligible	protein shorter than 100 aa	low_psauron,short	68	0.035	-
+NF54	PfNF54_020006100	VBRF01000006.1:60559-60771(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.984	Pf15g00176 (PF3D7_0201100)
+NF54	PfNF54_020025600	VBRF01000006.1:863469-863711(-)	not eligible	protein shorter than 100 aa	short,overlap	80	0.994	Pf15g00373 (PF3D7_0221500)
+NF54	PfNF54_020027600	VBRF01000006.1:927354-927916(+)	not eligible	PSAURON 0.005 < 0.9 (sequence in the reference)	low_psauron	122	0.005	-
+NF54	PfNF54_020027700	VBRF01000006.1:927995-928383(+)	not eligible	protein shorter than 100 aa	low_psauron,short	72	0.004	-
+NF54	PfNF54_030005000	VBRF01000007.1:29668-30105(-)	not eligible	PSAURON 0.011 < 0.9 (sequence in the reference)	low_psauron	106	0.011	-
+NF54	PfNF54_030005100	VBRF01000007.1:31371-31658(+)	not eligible	protein shorter than 100 aa	short	95	0.944	-
+NF54	PfNF54_030005800	VBRF01000007.1:56086-56298(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf15g00401 (PF3D7_0300600)
+NF54	PfNF54_030022200	VBRF01000007.1:693507-693776(+)	not eligible	protein shorter than 100 aa	low_psauron,short	89	0.401	-
+NF54	PfNF54_030030400	VBRF01000008.1:40976-41251(+)	not eligible	protein shorter than 100 aa	low_psauron,short	91	0.006	-
+NF54	PfNF54_040005000	VBRF01000009.1:3792-4394(+)	not eligible	PSAURON 0.052 < 0.9 (sequence in the reference)	low_psauron	200	0.052	-
+NF54	PfNF54_040005100	VBRF01000009.1:16924-17145(+)	not eligible	protein shorter than 100 aa	low_psauron,short	73	0.535	-
+NF54	PfNF54_040005200	VBRF01000009.1:19733-20074(-)	not eligible	protein shorter than 100 aa	low_psauron,short	76	0.132	-
+NF54	PfNF54_040005300	VBRF01000009.1:22524-23051(-)	not eligible	PSAURON 0.000 < 0.9 (sequence in the reference)	low_psauron	101	0.000	-
+NF54	PfNF54_040005400	VBRF01000009.1:23092-23427(-)	not eligible	protein shorter than 100 aa	short	90	0.954	-
+NF54	PfNF54_040005500	VBRF01000009.1:24404-24708(-)	not eligible	protein shorter than 100 aa	low_psauron,short	68	0.664	-
+NF54	PfNF54_040006500	VBRF01000009.1:76621-76833(-)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf15g00654 (PF3D7_0401100)
+NF54	PfNF54_040031500	VBRF01000009.1:1187474-1187707(-)	not eligible	protein shorter than 100 aa	low_psauron,short	77	0.208	-
+NF54	PfNF54_060006800	VBRF01000012.1:31594-32011(-)	not eligible	protein shorter than 100 aa	short	67	0.918	-
+NF54	PfNF54_060036200	VBRF01000012.1:1264473-1264697(-)	not eligible	protein shorter than 100 aa	short,overlap	74	0.996	Pf15g01525 (PF3D7_0631200)
+NF54	PfNF54_060038200	VBRF01000013.1:70567-70791(+)	not eligible	protein shorter than 100 aa	low_psauron,short	74	0.011	-
+NF54	PfNF54_060038300	VBRF01000013.1:97421-98023(-)	not eligible	PSAURON 0.052 < 0.9 (sequence in the reference)	low_psauron	200	0.052	-
+NF54	PfNF54_070005000	VBRF01000014.1:2695-4091(+)	not eligible	PSAURON 0.255 < 0.9 (sequence in the reference)	low_psauron	247	0.255	-
+NF54	PfNF54_070005100	VBRF01000014.1:4155-4561(-)	not eligible	no valid ORF in any genome	short,no_valid_orf	74	0.901	-
+NF54	PfNF54_070005200	VBRF01000014.1:12944-13210(-)	not eligible	protein shorter than 100 aa	low_psauron,short	88	0.006	-
+NF54	PfNF54_070005300	VBRF01000014.1:15390-15656(+)	not eligible	protein shorter than 100 aa	low_psauron,short	88	0.896	-
+NF54	PfNF54_070005400	VBRF01000014.1:15730-16115(+)	not eligible	protein shorter than 100 aa	low_psauron,short	89	0.828	-
+NF54	PfNF54_070006100	VBRF01000014.1:45397-45881(+)	not eligible	protein shorter than 100 aa	short,overlap	99	0.956	Pf15g01553 (PF3D7_0700700)
+NF54	PfNF54_070006500	VBRF01000015.1:30-668(+)	not eligible	no valid ORF in any genome	no_valid_orf	212	1.000	-
+NF54	PfNF54_070036400	VBRF01000015.1:1335169-1335381(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.994	Pf15g01843 (PF3D7_0732600)
+NF54	PfNF54_080033400	VBRF01000016.1:1217410-1217740(+)	not eligible	protein shorter than 100 aa	short	69	0.954	-
+NF54	PfNF54_080033600	VBRF01000016.1:1229351-1229647(-)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.076	-
+NF54	PfNF54_080037000	VBRF01000016.1:1407184-1407423(-)	not eligible	protein shorter than 100 aa	low_psauron,short	79	0.172	-
+NF54	PfNF54_090005000	VBRF01000017.1:4979-5218(+)	not eligible	protein shorter than 100 aa	low_psauron,short	79	0.127	-
+NF54	PfNF54_090005100	VBRF01000017.1:11497-11697(-)	not eligible	protein shorter than 100 aa	low_psauron,short	66	0.008	-
+NF54	PfNF54_090005600	VBRF01000017.1:37597-37821(-)	not eligible	no valid ORF in any genome	short,no_valid_orf,overlap	74	0.985	Pf15g02175 (PF3D7_0900350)
+NF54	PfNF54_090036200	VBRF01000017.1:1248840-1249448(+)	not eligible	protein shorter than 100 aa	short	75	0.940	-
+NF54	PfNF54_090043200	VBRF01000017.1:1512671-1513191(+)	not eligible	PSAURON 0.011 < 0.9 (sequence in the reference)	low_psauron	138	0.011	-
+NF54	PfNF54_090043300	VBRF01000017.1:1513273-1513518(-)	not eligible	protein shorter than 100 aa	low_psauron,short	81	0.685	-
+NF54	PfNF54_090043400	VBRF01000017.1:1525230-1525562(+)	not eligible	protein shorter than 100 aa	low_psauron,short	79	0.019	-
+NF54	PfNF54_100005000	VBRF01000018.1:11209-11563(-)	not eligible	protein shorter than 100 aa	low_psauron,short	90	0.762	-
+NF54	PfNF54_100005100	VBRF01000018.1:24455-24820(+)	not eligible	PSAURON 0.203 < 0.9 (sequence in the reference)	low_psauron	121	0.203	-
+NF54	PfNF54_100005200	VBRF01000018.1:24998-25258(+)	not eligible	protein shorter than 100 aa	low_psauron,short	86	0.167	-
+NF54	PfNF54_100043900	VBRF01000019.1:1354462-1354686(-)	not eligible	protein shorter than 100 aa	short,overlap	74	0.991	Pf15g02945 (PF3D7_1039400)
+NF54	PfNF54_100045500	VBRF01000020.1:51475-51687(-)	not eligible	protein shorter than 100 aa	low_psauron,short	70	0.480	-
+NF54	PfNF54_100045600	VBRF01000020.1:51751-52152(+)	not eligible	PSAURON 0.566 < 0.9 (sequence in the reference)	low_psauron	111	0.566	-
+NF54	PfNF54_110005000	VBRF01000021.1:4234-4797(+)	not eligible	PSAURON 0.568 < 0.9 (sequence in the reference)	low_psauron	187	0.568	-
+NF54	PfNF54_110005100	VBRF01000021.1:11588-11833(+)	not eligible	protein shorter than 100 aa	low_psauron,short	81	0.037	-
+NF54	PfNF54_110005200	VBRF01000021.1:16102-16335(-)	not eligible	protein shorter than 100 aa	low_psauron,short	77	0.024	-
+NF54	PfNF54_110033100	VBRF01000022.1:1029709-1029966(-)	not eligible	protein shorter than 100 aa	short	85	0.969	-
+NF54	PfNF54_120005000	VBRF01000024.1:14535-14753(+)	not eligible	protein shorter than 100 aa	low_psauron,short	72	0.411	-
+NF54	PfNF54_120005100	VBRF01000024.1:14867-15172(+)	not eligible	PSAURON 0.106 < 0.9 (sequence in the reference)	low_psauron	101	0.106	-
+NF54	PfNF54_120058600	VBRF01000024.1:2237081-2237293(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.997	Pf15g03974 (PF3D7_1254900)
+NF54	PfNF54_130005000	VBRF01000025.1:6079-6318(+)	not eligible	protein shorter than 100 aa	low_psauron,short	79	0.091	-
+NF54	PfNF54_130005100	VBRF01000025.1:14997-15305(+)	not eligible	PSAURON 0.007 < 0.9 (sequence in the reference)	low_psauron	102	0.007	-
+NF54	PfNF54_130015500	VBRF01000025.1:455967-456326(-)	not eligible	protein shorter than 100 aa	low_psauron,short	82	0.728	-
+NF54	PfNF54_130059700	VBRF01000025.1:2188093-2188389(+)	not eligible	protein shorter than 100 aa	low_psauron,short	98	0.478	-
+NF54	PfNF54_140005000	VBRF01000027.1:31717-32001(-)	not eligible	protein shorter than 100 aa	low_psauron,short	94	0.008	-
+NF54	PfNF54_140082300	VBRF01000027.1:3308930-3309142(+)	not eligible	protein shorter than 100 aa	short	70	0.990	-
+SN01	PfSN01_000013300	PfSN01_00_4:59-539(-)	not eligible	no valid ORF in any genome	no_valid_orf	145	0.994	-
+SN01	PfSN01_010017300	PfSN01_01:478455-478897(+)	not eligible	PSAURON 0.022 < 0.9 (sequence in the reference)	low_psauron,overlap	121	0.022	Pf16g00228 (PF3D7_0114900)
+SN01	PfSN01_070036400	PfSN01_07:1377153-1377356(+)	not eligible	protein shorter than 100 aa	short,overlap	67	0.991	Pf16g01890 (PF3D7_0632250)
+SN01	PfSN01_110031900	PfSN01_11:1032332-1032589(-)	not eligible	protein shorter than 100 aa	short	85	0.969	-
+SN01	PfSN01_130013200	PfSN01_13:339086-339460(-)	not eligible	protein shorter than 100 aa	low_psauron,short	87	0.640	-
+SN01	PfSN01_140088300	PfSN01_14:3450350-3450562(+)	not eligible	protein shorter than 100 aa	short,overlap	70	0.993	Pf16g05468 (PF3D7_0201100)

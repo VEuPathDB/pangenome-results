@@ -33,6 +33,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [02 – TE Annotation & Clean Up](#02--te-annotation--clean-up)
 - [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
 - [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
+- [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
 
 ---
 
@@ -508,3 +509,166 @@ sbatch --array=1-${N} 04_Protein_evidence/scripts/psauron_array_job.slurm.sh
 | SN01 | 5,312 | 94.7 |
 
 The PSAURON score is 94.2–95.0% in every genome.
+
+---
+
+## 05 – Cross-genome Annotation Integration
+
+### Step 1: Native annotation check
+
+Run on the cluster, 2026-11-19, on `gff_with_interpro/` (the GFFs with the domain evidence of step 04), into
+`annotation_check/`.
+
+```bash
+sbatch 05_Basket_annotation_integration/scripts/analyze_input_gffs_job.sh
+```
+
+**Genes per genome.** 5,094–5,312 protein-coding genes per genome; 70–72% carry InterPro/Pfam evidence in every genome.
+3D7 has 5,285 genes for 5,356 proteins because some 3D7 genes have more than one transcript.
+
+![Protein-coding genes per genome, with and without domain evidence](05_Basket_annotation_integration/annotation_check/01_gene_counts_protein_coding.png)
+
+**Gene types.** No gene is unclassified. PlasmoDB files its non-coding genes under `ncRNA_other` (no tRNA or rRNA
+category): 95–168 per genome, but only 67–69 in 7G8-2019, NF166 and NF54. Pseudogenes range from 96 (KE01) to 312
+(NF166).
+
+| Genome | Protein-coding | With domain | Pseudogene | ncRNA_other | Total genes |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **3D7** *(Ref)* | 5,285 | 3,767 | 158 | 168 | 5,611 |
+| 7G8 | 5,142 | 3,664 | 160 | 97 | 5,399 |
+| 7G8-2019 | 5,094 | 3,580 | 243 | 69 | 5,406 |
+| CD01 | 5,158 | 3,702 | 228 | 97 | 5,483 |
+| Dd2 | 5,176 | 3,697 | 118 | 96 | 5,390 |
+| GA01 | 5,189 | 3,721 | 163 | 95 | 5,447 |
+| GB4 | 5,301 | 3,796 | 138 | 97 | 5,536 |
+| GN01 | 5,265 | 3,790 | 164 | 96 | 5,525 |
+| HB3 | 5,150 | 3,666 | 140 | 96 | 5,386 |
+| IT | 5,217 | 3,718 | 133 | 116 | 5,466 |
+| KE01 | 5,200 | 3,715 | 96 | 97 | 5,393 |
+| KH01 | 5,231 | 3,747 | 169 | 99 | 5,499 |
+| KH02 | 5,232 | 3,741 | 117 | 97 | 5,446 |
+| NF166 | 5,123 | 3,619 | 312 | 67 | 5,502 |
+| NF54 | 5,241 | 3,695 | 225 | 68 | 5,534 |
+| SN01 | 5,312 | 3,813 | 101 | 98 | 5,511 |
+
+![Gene categories per genome](05_Basket_annotation_integration/annotation_check/02_gene_biotype_breakdown.png)
+
+**Whole-gene overlaps** (UTR included). 3D7 has 789 overlapping pairs (787 on opposite strands); every other genome
+has 0–4. In 3D7 these are genes whose UTRs touch: with the UTRs left out (CDS/exon extent), 3D7 has 7 pairs. In the
+other genomes the count is the same with or without UTRs.
+
+![Overlapping gene pairs per genome, UTR included](05_Basket_annotation_integration/annotation_check/03_gene_overlap_counts.png)
+
+**CDS-to-CDS overlaps.** 0–7 pairs per genome: 3D7 has 7 (6 on opposite strands), IT 4, the others 0–2. Every pair is
+minor (< 20% of the smaller gene's CDS); there is no substantial or contained overlap.
+
+![CDS-overlapping gene pairs per genome, by strand](05_Basket_annotation_integration/annotation_check/05_cds_overlap_counts.png)
+
+![CDS overlap severity per genome](05_Basket_annotation_integration/annotation_check/06_cds_overlap_severity.png)
+
+### Step 2: Remove specific genes (skipped)
+
+No manual kill list for this species: no gene was removed before Liftoff, and step 3 reads `gff_with_interpro/`.
+
+### Step 3: Prepare the GFFs for Liftoff
+
+Run on the cluster, 2026-11-19, with `GFF_DIR="gff_with_interpro"`.
+
+```bash
+sbatch 05_Basket_annotation_integration/scripts/prepare_for_liftoff_job.sh
+```
+
+- **Non-coding genes removed:** all `ncRNA_gene` (67–168 per genome).
+- **Pseudogenes** (96–312 per genome) retyped `protein_coding_gene`, so that Liftoff transfers them with the
+  protein-coding genes.
+- **UTRs removed:** 3D7 is the only genome with UTRs annotated; 8,985 UTR lines were deleted and 4,494 genes shrunk to
+  their CDS (4.9 Mb). In the other genomes, 0–4 genes changed by 1–7 bp in total.
+
+### Step 4: Liftoff, all against all
+
+Run on the cluster, 2026-11-19, one array task per source genome: 16 × 15 = **240 pairs**, all complete, no pair failed
+(`liftoff_output/tmp/` empty).
+
+```bash
+mkdir -p liftoff_output/logs
+N=$(grep -c . genome_order.txt)
+sbatch --array=1-${N} --exclude=compute29 05_Basket_annotation_integration/scripts/liftoff_all_vs_all.sh
+```
+
+Each pair works on its own copy of the two genome FASTAs: Liftoff writes the genome index (`.mmi`) next to the FASTA,
+and parallel jobs sharing the files in `genomes/` failed with `OSError: truncated file`. Node `compute29` was excluded:
+every job sent there failed at start, with no log (`RaisedSignal:53`).
+
+### Step 5: Basket annotation
+
+[`basket_annotation_job.sh`](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/05_Basket_annotation_integration/README.md#step-5-basket-annotation) groups the genes of all genomes that lie at the same
+place into baskets, picks each basket's winner (the panel gene), and writes each genome's models. The reference is
+3D7. Run on the cluster on 19 November 2026, mode `prefer_panel_model`, with the step 04 PSAURON scores and the step 01
+list of removed contigs:
+```bash
+mkdir -p basket_annotation/logs
+sbatch --export=ALL,ID_PREFIX=Pf,PLOT_LABEL=Pfal,REMOVED_CONTIGS=01_Genome_Selection_QC/drop_contigs.txt:organelle_or_redundant_contig,ORIGINAL_GFF_DIR=original_files_copy/gff \
+  05_Basket_annotation_integration/scripts/basket_annotation_job.sh
+```
+
+No duplicated IDs, and every gene of every genome's own annotation has a final model or a written reason (gene fate:
+0 genes without a record). One 3D7 gene is missing from the final 3D7 GFF (see below). The final GFFs
+(`basket_annotation/gff_prefer_panel_model_final/`) go to get_pangenes.
+
+**Panel genes.** 8,392 panel genes: the 5,443 3D7 genes (158 of them pseudogenes) and 2,949 genes not in the 3D7
+annotation. 236 baskets have no winner: none of their members passed the filter (228 proteins shorter than 100 aa, 42
+low PSAURON, 12 with no valid ORF in any genome). 2 panel genes were removed because they lost an opposite-strand
+overlap: PfNF166_110006200 (no domain, valid ORF only in NF166) and PfNF166_120059400 (only in NF166, no domain).
+
+![Panel genes kept and removed](05_Basket_annotation_integration/basket_annotation/Pfal_panel_genes.png)
+
+**Genes per genome.** 5,342 (7G8-2019) to 5,495 (GN01) genes per genome. 3D7 has 5,464: 5,442 of its own genes and 22
+genes not in its annotation.
+
+![Genes per genome: own annotation and final](05_Basket_annotation_integration/basket_annotation/Pfal_gene_counts.png)
+
+**From each genome's own annotation to the final GFF.** Every strain ends with more genes than in its own annotation:
+171 to 379 genes per genome were added where the genome had no gene. The losses are small: 0 to 41 genes per genome on
+contigs removed in step 01 (organelle and redundant contigs), 2 to 12 genes annotated in pieces replaced by one model,
+3 to 69 eliminated by the quality rules, and 0 to 10 removed at the end of step 05.
+
+![Each genome from its own annotation to the final GFF](05_Basket_annotation_integration/basket_annotation/Pfal_prefer_panel_model_gene_balance.png)
+
+**Genes eliminated by the quality rules.** 269 genes in the 15 genomes besides 3D7; 218 of them are proteins shorter than
+100 aa.
+
+![Genes eliminated by the quality rules, by their signs](05_Basket_annotation_integration/basket_annotation/Pfal_prefer_panel_model_eliminated_reasons.png)
+
+![PSAURON of the eliminated genes](05_Basket_annotation_integration/basket_annotation/Pfal_prefer_panel_model_eliminated_psauron.png)
+
+![PSAURON of the genes eliminated by PSAURON only](05_Basket_annotation_integration/basket_annotation/Pfal_prefer_panel_model_eliminated_psauron_only.png)
+
+**Where each model comes from.** 4,674 to 4,995 genes per genome take the panel model in place of the genome's own; 23
+to 147 fill a place where the genome had no gene; 89 to 239 take another valid model closer to the panel model; 68 to
+201 keep their own model as the panel gene's winner, and 1 to 67 keep a divergent own model.
+
+![Origin of each genome's models](05_Basket_annotation_integration/basket_annotation/Pfal_model_origin.png)
+
+**ORF quality.** 83,553 of the 86,659 genes (96%) have a valid ORF. 50 have an ORF broken by the assembly (an N in the
+CDS or near a contig end). 2,835 have an invalid ORF not explained by the assembly, 13 of them in 3D7; most are
+frameshifts. miniprot repaired 3.
+
+![ORF quality per genome](05_Basket_annotation_integration/basket_annotation/Pfal_orf_quality.png)
+
+![Genes with an invalid ORF, by miniprot result](05_Basket_annotation_integration/basket_annotation/Pfal_miniprot.png)
+
+**Tandem arrays.** 3 baskets hold a tandem array.
+
+**A 3D7 gene missing from the final 3D7 GFF.** The check of the reference genes found one missing:
+```bash
+grep "reference genes written" basket_annotation/logs/*.out
+# reference genes written in 3D7: 5442 of 5443; removed on purpose: 0; missing: 1 ['PF3D7_1440200']
+```
+
+In the 3D7 annotation, **PF3D7_1440200** (SPP, stromal-processing peptidase) and its neighbour **PF3D7_1440300** (PBGS,
+porphobilinogen synthase) share their first two CDS exons (1639477–1639593 and 1639681–1639728); the other four PBGS
+exons lie inside an SPP intron. The PBGS CDS span therefore lies entirely inside the SPP CDS span, on the same strand.
+The rule "one place, one gene" keeps one model per place: both are 3D7 genes, so the tie was broken by the number of
+genomes (PBGS 15, SPP 14), and SPP was dropped. It will be added back to the final GFFs at the end.
+
+![PF3D7_1440200 (SPP, top) and PF3D7_1440300 (PBGS, bottom) share their first two CDS exons](05_Basket_annotation_integration/basket_annotation/3D7_SPP_PBGS_shared_exons.png)
