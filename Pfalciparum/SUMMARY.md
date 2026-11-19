@@ -17,7 +17,7 @@
 | [03 – *de novo* Genome Annotation](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/03_denovo_Genome_Annotation/README.md) | Gene prediction on cleaned assemblies | ⏭️ Not needed |
 | [04 – Protein evidence (InterProScan and PSAURON)](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
-| [06 – GET_PANGENES](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/06_GET_PANGENES/README.md) | Synteny-based ortholog clustering (core / accessory) | ⏳ To do |
+| [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
 | [07 – Post-GET_PANGENES Adjusting and Visualisation](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md) | Safe fix, curation and removal of false genes, final figures and explorer | ⏳ To do |
 | [08 – Final GFF](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
 
@@ -73,6 +73,10 @@ Not needed: all genomes already have a genome annotation (GFF, from PlasmoDB).
 - **96% of the genes have a valid ORF.** Most invalid ORFs are frameshifts.
 - **One 3D7 gene is missing from the final 3D7 GFF:** PF3D7_1440200 (SPP) shares its first two CDS exons with its
   neighbour PF3D7_1440300 (PBGS), and only one gene is kept per place. It will be added back to the final GFF.
+
+### 06 – GET_PANGENES
+
+- **8,086 pangenes**, 4,974 of them in all 16 genomes.
 
 ---
 

@@ -34,6 +34,7 @@ This document tracks the execution, parameters, and results of the pangenome ana
 - [03 – *de novo* Genome Annotation](#03--de-novo-genome-annotation)
 - [04 – Protein evidence (InterProScan and PSAURON)](#04--protein-evidence-interproscan-and-psauron)
 - [05 – Cross-genome Annotation Integration](#05--cross-genome-annotation-integration)
+- [06 – GET_PANGENES](#06--get_pangenes)
 - [New genes in the reference (3D7)](#new-genes-in-the-reference-3d7)
 - [Genes to fix at the end](#genes-to-fix-at-the-end)
 
@@ -675,6 +676,18 @@ genomes (PBGS 15, SPP 14), and SPP was dropped. It will be added back to the fin
 
 ![PF3D7_1440200 (SPP, top) and PF3D7_1440300 (PBGS, bottom) share their first two CDS exons](05_Basket_annotation_integration/basket_annotation/3D7_SPP_PBGS_shared_exons.png)
 
+
+---
+
+## 06 – GET_PANGENES
+
+`get_pangenes` on the final GFFs of step 05 (`prefer_panel_model`, `basket_annotation/gff_prefer_panel_model_final/`),
+on the cluster on 2026-11-19, with the jobs' defaults (16 genomes, 86,659 genes, 120 pairwise genome alignments):
+```bash
+jid=$(sbatch --parsable --exclude=compute29 06_GET_PANGENES/scripts/link_for_get_pangenes_basket.slurm.sh)
+sbatch --dependency=afterok:$jid --exclude=compute29 06_GET_PANGENES/scripts/run_get_pangenes_basket_job.sh
+```
+**8,086 pangenes**, 4,974 of them in all 16 genomes (`for_get_pangenes_basket_prefer_panel_model_pangenes/`).
 
 ---
 
