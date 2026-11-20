@@ -18,7 +18,7 @@
 | [04 – Protein evidence (InterProScan and PSAURON)](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/04_Protein_evidence/README.md) | Functional domain annotation; PSAURON scores | ✅ Complete |
 | [05 – Cross-genome Annotation Integration](README.md#05--cross-genome-annotation-integration) | Merging and standardising annotations across strains | ✅ Complete |
 | [06 – GET_PANGENES](README.md#06--get_pangenes) | Synteny-based ortholog clustering (core / accessory) | ✅ Complete |
-| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, curation and removal of false genes, final figures and explorer | 🔄 In progress |
+| [07 – Post-GET_PANGENES Adjusting and Visualisation](README.md#07--post-get_pangenes-adjusting-and-visualisation) | Safe fix, curation and removal of false genes, final figures and explorer | ✅ Complete |
 | [08 – Final GFF](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md) | Final annotation: model of genes with a broken ORF, UTRs, other transcripts and non-coding genes put back, gene IDs, InterProScan on the final proteins | ⏳ To do |
 
 ---
@@ -78,11 +78,21 @@ Not needed: all genomes already have a genome annotation (GFF, from PlasmoDB).
 
 - **8,086 pangenes**, 4,974 of them in all 16 genomes.
 
+### 07 – Post-GET_PANGENES Adjusting and Visualisation
+
+- **7,771 final pangenes:** 4,979 core (all 16 genomes), 71 soft-core, 497 shell and 2,224 cloud (1–2 genomes).
+- **The core genome levels off at about 5,000 pangenes.**
+- **The cloud is the variant antigen families** (*rifin*, PfEMP1/*var*, *stevor*), as expected: they sit in the
+  subtelomeres, which are highly variable between strains, so each strain carries its own repertoire.
+- **22 genes the pipeline added to 3D7 were checked one by one** against PlasmoDB RNA-seq and intron junctions: 14
+  without support were removed from every strain; 8 are kept for review, among them 5 genes of a
+  *Plasmodium* repeat_MYXSPDY family that look real but are not annotated in 3D7.
+
 ---
 
 ## Important caveats
 
-- **Subtelomeric gene families will dominate the accessory genome.** The large variant antigen families (*var*,
+- **Subtelomeric gene families dominate the accessory genome.** The large variant antigen families (*var*,
   *rifin*, *stevor*) sit in subtelomeres that cannot be aligned between isolates. A synteny-based method resolves
   the core well, but some accessory genes and singletons in these families may come from the poor alignment.
 - **Closely related genomes in the panel.** NF54 and 3D7 are nearly identical, and the panel holds two assemblies of

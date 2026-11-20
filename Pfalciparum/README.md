@@ -695,7 +695,7 @@ sbatch --dependency=afterok:$jid --exclude=compute29 06_GET_PANGENES/scripts/run
 
 The pangenome is fixed where it is safe, looked at, cleaned of the genes found false during curation, and looked at
 again ([step 07 README](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/07_Post_GET_PANGENES_adjusting/README.md)). Parts 1–3 were run on the
-cluster on 2026-11-19, with the jobs' defaults:
+cluster on 2026-11-19, parts 4–5 on 2026-11-20, with the jobs' defaults:
 ```bash
 mkdir -p pangenome_inspection/logs pangenome_fixed/logs pangenome_plots/logs pangenome_explorer/logs
 jid=$(sbatch --parsable --exclude=compute29 07_Post_GET_PANGENES_adjusting/scripts/inspect_pangenome_job.sh)
@@ -704,13 +704,13 @@ sbatch --exclude=compute29 --export=ALL,SET=preliminary,LABEL=Pfal 07_Post_GET_P
 sbatch --exclude=compute29 --export=ALL,SET=preliminary,SPECIES="Plasmodium falciparum" 07_Post_GET_PANGENES_adjusting/scripts/build_explorer_job.sh
 ```
 
-| | `get_pangenes` | After the safe fix (preliminary) |
-|---|---:|---:|
-| Pangenes | 8,086 | 7,838 |
-| Core (16) | 4,974 | 4,981 |
-| Soft-core (15) | | 73 |
-| Shell (3-14) | | 504 |
-| Cloud (1-2) | | 2,280 |
+| | `get_pangenes` | After the safe fix (preliminary) | Final |
+|---|---:|---:|---:|
+| Pangenes | 8,086 | 7,838 | 7,771 |
+| Core (16) | 4,974 | 4,981 | 4,979 |
+| Soft-core (15) | | 73 | 71 |
+| Shell (3-14) | | 504 | 497 |
+| Cloud (1-2) | | 2,280 | 2,224 |
 
 ### 1. Inspection
 
@@ -811,18 +811,74 @@ the subtelomere).
 | Pf1g04686 | Pf3D7_13_v3:2895368..2896245 (-) | Pf7G8-2_000248700 (target_invalid_orf) | invalid | no | hypothetical protein, conserved | PF3D7_1373500 (3028 bp) | – | Delete. Invalid ORF in 3D7; no RNA-seq expression, no intron junction. |
 
 **Result:** 16 to delete (no RNA-seq support, or the UTR of a 3D7 gene), 1 wrong model, 5 MYXSPDY genes to investigate.
+The 14 genes to delete without a domain are removed from every strain (their whole panel gene,
+`genes_to_remove.tsv`); the 2 with a domain, the wrong model and the MYXSPDY genes are kept for now and listed in
+[Genes to fix at the end](#genes-to-fix-at-the-end).
 
 **Plasmodium repeat_MYXSPDY.** Three valid new genes (Pf1g01209, Pf1g02937, Pf1g02977, models from NF54) look like
 one gene family not annotated in 3D7: each is a single-exon model with low RNA-seq along it and intron junctions
 inside it, on the gene's strand. They need a closer look, as do the two MYXSPDY transfers with an invalid ORF
 (Pf1g01505, Pf1g01506).
 
+### 4. Removal after curation
+
+The 14 panel genes in `07_Post_GET_PANGENES_adjusting/genes_to_remove.tsv` (the new 3D7 genes to delete without a
+domain, see the [reference gene check](#reference-gene-check-new-genes-in-3d7)) were removed from every strain; the
+other two lists are empty (header only). The final pangenes are named `Pf_pan_00001`, `Pf_pan_00002`...
+```bash
+printf 'gene\treason\n' > 07_Post_GET_PANGENES_adjusting/strain_genes_to_remove.tsv
+printf 'panel_gene\treason\n' > 07_Post_GET_PANGENES_adjusting/genes_to_exclude_from_pangenome.tsv
+mkdir -p pangenome_final/logs
+sbatch --exclude=compute29 --export=ALL,PANGENE_PREFIX=Pf,ACTIONS= 07_Post_GET_PANGENES_adjusting/scripts/remove_panel_genes_job.sh
+```
+
+**196 genes** removed (10–14 per strain). 7,838 → **7,771 pangenes**: 67 pangenes left empty disappeared, as the 14
+panel genes were spread over several pangenes. The final pangenome holds 86,326 genes; 57 genes with a CDS below
+100 bp are in no pangene. Of the 1,795 pangenes present in one strain, 865 are unique to it and 930 are split from the
+rest of their panel gene by `get_pangenes` (`pangenome_final/singletons.tsv`).
+
+### 5. Final look
+
+```bash
+sbatch --exclude=compute29 --export=ALL,LABEL=Pfal 07_Post_GET_PANGENES_adjusting/scripts/plot_all_job.sh
+sbatch --exclude=compute29 --export=ALL,SPECIES="Plasmodium falciparum" 07_Post_GET_PANGENES_adjusting/scripts/build_explorer_job.sh
+```
+
+Figures: `07_Post_GET_PANGENES_adjusting/plots_final/`; explorer: `pangenome_explorer/final/explorer_standalone.html`.
+
+![Pangenome and core genome size, final](07_Post_GET_PANGENES_adjusting/plots_final/Pfal_final_pancore.png)
+
+The core settles at about 5,000 pangenes (Tettelin 5,008, Willenbrock 4,991).
+
+![Pangene occupancy, final](07_Post_GET_PANGENES_adjusting/plots_final/Pfal_final_occupancy.png)
+
+![Singletons per genome, final](07_Post_GET_PANGENES_adjusting/plots_final/Pfal_final_singletons.png)
+
+GN01 has the most singletons (186), then SN01 (171) and GB4 (169); 3D7 (38), NF54 (47) and the two 7G8 assemblies
+(15 each) have the fewest.
+
+![Soft-core pangenes missing per genome, final](07_Post_GET_PANGENES_adjusting/plots_final/Pfal_final_softcore_missing.png)
+
+HB3 misses 16 of the 71 soft-core pangenes.
+
+![InterPro enrichment, final](07_Post_GET_PANGENES_adjusting/plots_final/Pfal_final_domain_enrichment.png)
+
+As in the preliminary look, the cloud is enriched in *rifin*, PfEMP1 and *stevor* domains, and the core in P-loop
+NTPases, protein kinases and WD40 repeats.
+
 ---
 
 ## Genes to fix at the end
 
-Genes to correct in the final GFFs ([step 08](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md)).
+Genes to correct or review in the final GFFs ([step 08](https://github.com/VEuPathDB/pangenome-pipeline/blob/main/08_Final_GFF/README.md)).
 
 | Genome | Gene | Problem | Fix | Found in |
 |---|---|---|---|---|
 | 3D7 | PF3D7_1440200 (SPP) | Missing from the final 3D7 GFF: shares its first two CDS exons with PF3D7_1440300 (PBGS), and only one gene is kept per place | Add back the 3D7 model | [Step 05, step 5](#step-5-basket-annotation) |
+| 3D7 | Pf1g01209 (from PfNF54_060006300) | Plasmodium repeat_MYXSPDY; possible gene family not annotated in 3D7; single-exon model with intron junctions inside | Kept for now; review the family and its model | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |
+| 3D7 | Pf1g02937 (from PfNF54_100043800) | Plasmodium repeat_MYXSPDY; as Pf1g01209 | Kept for now; review with the family | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |
+| 3D7 | Pf1g02977 (from PfNF54_110007300) | Plasmodium repeat_MYXSPDY; as Pf1g01209 | Kept for now; review with the family | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |
+| 3D7 | Pf1g01505 + Pf1g01506 (from PfNF166_100043700, Pf7G8-2_000325700) | Plasmodium repeat_MYXSPDY; split model, one gene in two pieces with an invalid ORF | Kept for now; review with the family | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |
+| 3D7 | Pf1g02174 (from PfGA01_140005900) | Wrong model over the pseudogene PF3D7_0900800 (PfEMP1 exon 2) | Kept for now; review the model | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |
+| 3D7 | Pf1g00017 (from PfNF166_000008900) | DnaJ domain; invalid ORF in 3D7; RNA-seq from the 3′ UTR of PF3D7_0101400 | Kept for now (has a domain); delete at the end | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |
+| 3D7 | Pf1g01368 (from PfNF54_060022400) | PfEMP1 acidic terminal segment; on the 3′ UTR of PF3D7_0617400 (var) | Kept for now (has a domain); delete at the end | [Reference gene check](#reference-gene-check-new-genes-in-3d7) |

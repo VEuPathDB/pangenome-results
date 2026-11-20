@@ -6,3 +6,7 @@
 
 # working list for the JBrowse check (its contents are in the report)
 Pfalciparum/05_Basket_annotation_integration/basket_annotation/3D7_new_genes.tsv
+
+# explorer pages (about 55 MB each) and the final step 07 tables stay local
+*/07_Post_GET_PANGENES_adjusting/explorer_*.html
+*/07_Post_GET_PANGENES_adjusting/pangenome_final/
